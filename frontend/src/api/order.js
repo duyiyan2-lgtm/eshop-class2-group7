@@ -12,7 +12,7 @@ const USE_MOCK = true
  * - items: [{ id, productId, productName, skuSpecs, productImage, price, quantity, subtotal }]
  * - logs: [{ id, fromStatus, toStatus, remark, operatorName, createdAt }]
  */
-const mockOrders = [
+const initialMockOrders = [
   {
     id: 1,
     orderNo: 'ORD20260724001',
@@ -111,6 +111,42 @@ const mockOrders = [
   },
 ]
 
+/**
+ * 持久化层：mock 数据存到 localStorage，刷新 / HMR 后状态不丢失。
+ * 这样 payOrder / cancelOrder / confirmOrder 修改后的状态可以持久化。
+ * 切换真实后端联调时（USE_MOCK = false），本层不生效。
+ */
+const MOCK_STORAGE_KEY = 'eshop-mock-orders-v1'
+
+function loadMockOrders() {
+  if (typeof window === 'undefined') return JSON.parse(JSON.stringify(initialMockOrders))
+  try {
+    const stored = window.localStorage.getItem(MOCK_STORAGE_KEY)
+    if (stored) return JSON.parse(stored)
+  } catch (error) {
+    console.warn('[mock] load from localStorage failed:', error)
+  }
+  const initial = JSON.parse(JSON.stringify(initialMockOrders))
+  saveMockOrders(initial)
+  return initial
+}
+
+function saveMockOrders(orders) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(orders))
+  } catch (error) {
+    console.warn('[mock] save to localStorage failed:', error)
+  }
+}
+
+// 业务代码用 mockOrders 名称访问底层数组，底层数组是从 localStorage 加载的
+const mockOrders = loadMockOrders()
+
+function persist() {
+  saveMockOrders(mockOrders)
+}
+
 const http = axios.create({
   baseURL: 'http://localhost:8080/api',
   timeout: 10000,
@@ -196,6 +232,7 @@ export async function payOrder(id) {
       operatorName: '当前用户',
       createdAt: order.paidAt,
     })
+    persist()
     return {
       orderId: order.id,
       paymentNo: `PAY${Date.now()}`,
@@ -228,6 +265,7 @@ export async function cancelOrder(id) {
       operatorName: '当前用户',
       createdAt: order.canceledAt,
     })
+    persist()
     return { orderId: order.id, status: 'CANCELED', canceledAt: order.canceledAt }
   }
   const { data } = await http.post(`/orders/${id}/cancel`)
@@ -255,6 +293,7 @@ export async function confirmOrder(id) {
       operatorName: '当前用户',
       createdAt: order.completedAt,
     })
+    persist()
     return { orderId: order.id, status: 'COMPLETED', completedAt: order.completedAt }
   }
   const { data } = await http.post(`/orders/${id}/confirm`)
