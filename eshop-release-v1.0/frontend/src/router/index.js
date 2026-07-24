@@ -127,7 +127,7 @@ const routes = [
       {
         path: 'orders',
         name: 'mobile-orders',
-        component: MobilePlaceholderView,
+        component: () => import('../views/mobile/MobileOrdersView.vue'),
         meta: {
           title: '我的订单',
           mobileTabbar: true,
@@ -139,7 +139,7 @@ const routes = [
       {
         path: 'orders/:id/pay',
         name: 'mobile-order-payment',
-        component: MobilePlaceholderView,
+        component: () => import('../views/mobile/MobileOrderPaymentView.vue'),
         meta: {
           title: '模拟支付',
           requiresAuth: true,
@@ -150,7 +150,7 @@ const routes = [
       {
         path: 'orders/:id',
         name: 'mobile-order-detail',
-        component: MobilePlaceholderView,
+        component: () => import('../views/mobile/MobileOrderDetailView.vue'),
         meta: {
           title: '订单详情',
           requiresAuth: true,
