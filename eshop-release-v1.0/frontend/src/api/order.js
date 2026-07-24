@@ -1,7 +1,8 @@
-import axios from 'axios'
+import http from './http'
 
 // 等待组长后端 v1.0 接口正式对接后改成 false（联调环境已就绪，但 C 端联调走 docker compose）
-const USE_MOCK = true
+// 2026-07-24：后端已成功启动在 3307 MySQL + 8080 Spring Boot，切换到真实 API 联调
+const USE_MOCK = false
 
 /**
  * Mock 数据
@@ -146,16 +147,6 @@ const mockOrders = loadMockOrders()
 function persist() {
   saveMockOrders(mockOrders)
 }
-
-const http = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  timeout: 10000,
-})
-
-http.interceptors.request.use((config) => {
-  config.headers.Authorization = 'Bearer mock-jwt-token-for-eshop-c-module'
-  return config
-})
 
 const wait = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms))
 
