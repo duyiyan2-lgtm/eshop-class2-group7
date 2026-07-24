@@ -5,6 +5,15 @@ import http from './http'
 const USE_MOCK = false
 
 /**
+ * 解包后端 ApiResponse 格式 {code, message, data}
+ * - 真实后端：{code:0, message:'success', data:{...}}
+ * - 解包后直接返回 data 字段（订单数据 / 操作结果）
+ */
+function unwrap(res) {
+  return res?.data?.data ?? res?.data ?? res
+}
+
+/**
  * Mock 数据
  *
  * 字段名严格对齐组长后端 OrderResponse（参考 eshop-release-v1.0/backend/src/main/java/com/eshop/backend/order/dto/OrderResponse.java）：
@@ -168,8 +177,8 @@ export async function getOrders(params = {}) {
     const records = list.slice(start, start + size)
     return { records, total, current, size }
   }
-  const { data } = await http.get('/orders', { params })
-  return data
+  const res = await http.get('/orders', { params })
+  return unwrap(res)
 }
 
 /**
@@ -183,8 +192,8 @@ export async function getOrder(id) {
     if (!order) throw new Error('订单不存在')
     return { ...order, items: [...order.items], logs: [...order.logs] }
   }
-  const { data } = await http.get(`/orders/${id}`)
-  return data
+  const res = await http.get(`/orders/${id}`)
+  return unwrap(res)
 }
 
 /**
@@ -198,8 +207,8 @@ export async function getOrderLogs(id) {
     if (!order) throw new Error('订单不存在')
     return [...order.logs]
   }
-  const { data } = await http.get(`/orders/${id}/logs`)
-  return data
+  const res = await http.get(`/orders/${id}/logs`)
+  return unwrap(res)
 }
 
 /**
@@ -231,8 +240,8 @@ export async function payOrder(id) {
       paidAt: order.paidAt,
     }
   }
-  const { data } = await http.post(`/orders/${id}/pay`)
-  return data
+  const res = await http.post(`/orders/${id}/pay`)
+  return unwrap(res)
 }
 
 /**
@@ -259,8 +268,8 @@ export async function cancelOrder(id) {
     persist()
     return { orderId: order.id, status: 'CANCELED', canceledAt: order.canceledAt }
   }
-  const { data } = await http.post(`/orders/${id}/cancel`)
-  return data
+  const res = await http.post(`/orders/${id}/cancel`)
+  return unwrap(res)
 }
 
 /**
@@ -287,6 +296,6 @@ export async function confirmOrder(id) {
     persist()
     return { orderId: order.id, status: 'COMPLETED', completedAt: order.completedAt }
   }
-  const { data } = await http.post(`/orders/${id}/confirm`)
-  return data
+  const res = await http.post(`/orders/${id}/confirm`)
+  return unwrap(res)
 }
