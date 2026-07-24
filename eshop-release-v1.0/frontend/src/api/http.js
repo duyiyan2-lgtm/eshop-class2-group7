@@ -1,24 +1,53 @@
 import axios from 'axios'
 
-/**
- * 公共 axios 实例
- * - baseURL 指向后端 Spring Boot（context-path=/api）
- * - 启动时自动从 localStorage 读取 JWT 加到 Authorization header
- */
+const TOKEN_KEY = 'eshop_token'
+const USER_KEY = 'eshop_user'
+
 const http = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 10000,
 })
 
 http.interceptors.request.use((config) => {
-  // 从 localStorage 取真实 JWT（登录后由 autoLogin 写入）
-  const token = typeof window !== 'undefined'
-    ? window.localStorage?.getItem('eshop-jwt-token')
-    : null
+  const token = localStorage.getItem(TOKEN_KEY)
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
+
+const redirectToLogin = () => {
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(USER_KEY)
+
+  const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`
+  const isAdmin = window.location.pathname.startsWith('/admin')
+  const isMobile = window.location.pathname.startsWith('/m')
+  const loginPath = isAdmin ? '/admin/login' : isMobile ? '/m/login' : '/pc/login'
+
+  if (window.location.pathname === loginPath) return
+  const redirect = isAdmin ? '' : `?redirect=${encodeURIComponent(currentPath)}`
+  window.location.replace(`${loginPath}${redirect}`)
+}
+
+http.interceptors.response.use(
+  (response) => {
+    const body = response.data
+    if (body?.code !== 0) {
+      return Promise.reject(new Error(body?.message || '请求失败'))
+    }
+    return body.data
+  },
+  (error) => {
+    const requestUrl = error.config?.url || ''
+    const isAuthenticationRequest = requestUrl.includes('/auth/login')
+      || requestUrl.includes('/auth/logout')
+    if (error.response?.status === 401 && !isAuthenticationRequest) {
+      redirectToLogin()
+    }
+    const message = error.response?.data?.message || error.message || '网络异常，请稍后重试'
+    return Promise.reject(new Error(message))
+  },
+)
 
 export default http

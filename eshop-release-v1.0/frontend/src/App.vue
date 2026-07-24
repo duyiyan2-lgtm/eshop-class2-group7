@@ -1,16 +1,9 @@
-<template>
-  <router-view />
-</template>
-
 <script setup>
-// 根组件，所有页面通过 router-view 渲染
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 </script>
 
-<style>
-html, body, #app {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-}
-</style>
+<template>
+  <el-config-provider :locale="zhCn">
+    <RouterView />
+  </el-config-provider>
+</template>

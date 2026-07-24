@@ -1,8 +1,3 @@
-/**
- * 通用工具函数（仿照组长 eshop-release-v1.0/frontend/src/utils/shop.js）
- * 用于订单模块订单状态展示、金额格式化、日期格式化、商品规格解析。
- */
-
 export const ORDER_STATUS = {
   PENDING_PAYMENT: { label: '待支付', type: 'warning' },
   PAID: { label: '待发货', type: 'primary' },
@@ -14,6 +9,22 @@ export const ORDER_STATUS = {
 export const formatMoney = (value) => {
   const number = Number(value)
   return Number.isFinite(number) ? `¥${number.toFixed(2)}` : '¥0.00'
+}
+
+const moneyToCents = (value) => {
+  const normalized = String(value ?? 0).trim()
+  const match = normalized.match(/^(-?)(\d+)(?:\.(\d{0,2}))?$/)
+  if (!match) return 0n
+  const fraction = (match[3] || '').padEnd(2, '0')
+  const cents = (BigInt(match[2]) * 100n) + BigInt(fraction || '0')
+  return match[1] ? -cents : cents
+}
+
+export const sumMoney = (values) => {
+  const cents = values.reduce((total, value) => total + moneyToCents(value), 0n)
+  const sign = cents < 0n ? '-' : ''
+  const absolute = cents < 0n ? -cents : cents
+  return `${sign}${absolute / 100n}.${String(absolute % 100n).padStart(2, '0')}`
 }
 
 export const formatDateTime = (value) => {

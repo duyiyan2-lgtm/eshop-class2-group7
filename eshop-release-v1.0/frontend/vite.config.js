@@ -1,13 +1,25 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver, VantResolver } from 'unplugin-vue-components/resolvers'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+  plugins: [
+    vue(),
+    Components({
+      resolvers: [
+        ElementPlusResolver({ importStyle: 'css' }),
+        VantResolver(),
+      ],
+    }),
+  ],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
 })
