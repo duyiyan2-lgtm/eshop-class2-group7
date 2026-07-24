@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#dbeafe"/>
+      <stop offset="1" stop-color="#bfdbfe"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" rx="36" fill="url(#bg)"/>
+  <rect x="272" y="70" width="256" height="460" rx="38" fill="#172554"/>
+  <rect x="292" y="106" width="216" height="368" rx="22" fill="url(#screen)"/>
+  <circle cx="400" cy="501" r="12" fill="#93c5fd"/>
+  <circle cx="400" cy="89" r="6" fill="#93c5fd"/>
+  <path d="M330 344c46-94 102-134 170-121-35 17-59 45-72 84-16 47-49 76-98 87z" fill="#fff" opacity=".82"/>
+  <text x="400" y="568" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#1e3a8a">E-Shop Mobile</text>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e0e7ff"/>
+      <stop offset="1" stop-color="#c7d2fe"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#3730a3"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" rx="36" fill="url(#bg)"/>
+  <rect x="142" y="92" width="516" height="332" rx="24" fill="#1e293b"/>
+  <rect x="166" y="116" width="468" height="276" rx="10" fill="url(#screen)"/>
+  <circle cx="400" cy="408" r="7" fill="#a5b4fc"/>
+  <path d="M320 424h160l28 72H292z" fill="#64748b"/>
+  <rect x="250" y="490" width="300" height="24" rx="12" fill="#475569"/>
+  <path d="M248 278l95-92 63 62 70-66 80 96z" fill="#818cf8" opacity=".85"/>
+  <text x="400" y="566" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#312e81">E-Shop Digital</text>
+</svg>
