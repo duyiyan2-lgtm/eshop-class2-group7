@@ -1,0 +1,24 @@
+# E-Shop 后端配置文件占位
+# 等架构出来后再补充实际配置
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: eshop-backend
+  profiles:
+    active: dev
+
+# MyBatis-Plus 配置（占位）
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 日志
+logging:
+  level:
+    com.eshop: debug
