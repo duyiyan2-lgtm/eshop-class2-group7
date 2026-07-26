@@ -13,7 +13,10 @@ const total = ref(0)
 const statusFilter = ref('')
 const finished = ref(false)
 const loading = ref(false)
+const refreshing = ref(false)
 const errorMessage = ref('')
+const failedPage = ref(null)
+let requestSequence = 0
 
 const statusOptions = [
   { value: '', label: '全部' },
@@ -32,42 +35,57 @@ const summary = computed(() => {
   return map
 })
 
-const loadOrders = async ({ reset = false } = {}) => {
-  if (loading.value) return
+const loadOrders = async ({ reset = false, page = reset ? 1 : current.value } = {}) => {
+  const requestId = ++requestSequence
+  const requestedStatus = statusFilter.value
   loading.value = true
   errorMessage.value = ''
   try {
     const data = await getOrders({
-      current: current.value,
+      current: page,
       size,
-      status: statusFilter.value || undefined,
+      status: requestedStatus || undefined,
     })
+    if (requestId !== requestSequence) return false
+
     const records = data.records || []
     if (reset) {
       orders.value = records
     } else {
       orders.value = orders.value.concat(records)
     }
+    current.value = page
     total.value = data.total ?? orders.value.length
-    finished.value = orders.value.length >= total.value
+    finished.value = records.length < size || orders.value.length >= total.value
+    failedPage.value = null
+    return true
   } catch (error) {
+    if (requestId !== requestSequence) return false
     errorMessage.value = error.message || '订单加载失败'
+    failedPage.value = page
+    return false
   } finally {
-    loading.value = false
+    if (requestId === requestSequence) loading.value = false
   }
 }
 
 const changeStatus = (value) => {
   statusFilter.value = value
   current.value = 1
+  orders.value = []
+  total.value = 0
   finished.value = false
-  loadOrders({ reset: true })
+  loadOrders({ reset: true, page: 1 })
 }
 
 const loadMore = () => {
   if (finished.value || loading.value) return
-  current.value += 1
-  loadOrders()
+  loadOrders({ page: current.value + 1 })
+}
+
+const retryLoad = () => {
+  const page = failedPage.value || 1
+  loadOrders({ reset: page === 1, page })
 }
 
 const cancel = async (order) => {
@@ -113,21 +131,20 @@ const goDetail = (order) => {
 }
 
 const onRefresh = async () => {
-  current.value = 1
   finished.value = false
-  await loadOrders({ reset: true })
-  showToast('已刷新')
+  const succeeded = await loadOrders({ reset: true, page: 1 })
+  refreshing.value = false
+  if (succeeded) showToast('已刷新')
 }
 
 onMounted(() => {
-  loadOrders({ reset: true })
+  loadOrders({ reset: true, page: 1 })
 })
 
 onActivated(() => {
   // 从详情/支付页返回时刷新列表
   if (orders.value.length) {
-    current.value = 1
-    loadOrders({ reset: true })
+    loadOrders({ reset: true, page: 1 })
   }
 })
 </script>
@@ -153,15 +170,16 @@ onActivated(() => {
       共 {{ total }} 单 · 当前展示 {{ summary.total }} 条
     </div>
 
-    <van-pull-refresh v-model="loading" @refresh="onRefresh" disabled>
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-list
         v-model:loading="loading"
         :finished="finished"
+        :immediate-check="false"
         :finished-text="orders.length ? '没有更多了' : ''"
         :error="Boolean(errorMessage)"
         :error-text="errorMessage || '请求失败，点击重试'"
         @load="loadMore"
-        @click-error-text="() => { errorMessage = ''; loadOrders({ reset: true }) }"
+        @click-error-text="retryLoad"
         class="orders-list"
       >
         <van-empty v-if="!loading && !orders.length" description="该分类下还没有订单">
@@ -182,11 +200,11 @@ onActivated(() => {
             <span class="order-amount">实付 {{ formatMoney(order.totalAmount) }}</span>
           </template>
           <template #num>
-            共 {{ order.items.reduce((count, item) => count + item.quantity, 0) }} 件
+            共 {{ (order.items || []).reduce((count, item) => count + item.quantity, 0) }} 件
           </template>
           <template #thumb>
             <div class="thumb">
-              <img v-if="order.items[0]?.productImage" :src="order.items[0].productImage" :alt="order.items[0].productName" />
+              <img v-if="order.items?.[0]?.productImage" :src="order.items[0].productImage" :alt="order.items[0].productName" />
               <span v-else>E-Shop</span>
             </div>
           </template>
@@ -194,7 +212,7 @@ onActivated(() => {
             <van-tag plain :type="orderStatusInfo(order.status).type" class="status-tag">
               {{ orderStatusInfo(order.status).label }}
             </van-tag>
-            <p v-if="order.items.length > 1" class="more-items">
+            <p v-if="order.items?.length > 1" class="more-items">
               还有 {{ order.items.length - 1 }} 种商品
             </p>
           </template>
