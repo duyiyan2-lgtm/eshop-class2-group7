@@ -12,23 +12,32 @@ const payment = ref(null)
 const loading = ref(false)
 const paying = ref(false)
 const errorMessage = ref('')
+let requestSequence = 0
 
 const status = computed(() => orderStatusInfo(order.value?.status))
 const isPending = computed(() => order.value?.status === 'PENDING_PAYMENT')
-const isPaid = computed(() => order.value?.status === 'PAID')
+const hasPaid = computed(() => Boolean(order.value?.paidAt)
+  || ['PAID', 'SHIPPED', 'COMPLETED'].includes(order.value?.status))
 
 const loadOrder = async () => {
+  const requestId = ++requestSequence
   loading.value = true
   errorMessage.value = ''
   payment.value = null
+  order.value = null
   try {
     const id = Number(route.params.id)
     if (!Number.isInteger(id) || id <= 0) throw new Error('订单编号不正确')
-    order.value = await getOrder(id)
+    const data = await getOrder(id)
+    if (requestId !== requestSequence) return false
+    order.value = data
+    return true
   } catch (error) {
+    if (requestId !== requestSequence) return false
     errorMessage.value = error.message || '订单加载失败'
+    return false
   } finally {
-    loading.value = false
+    if (requestId === requestSequence) loading.value = false
   }
 }
 
@@ -59,14 +68,14 @@ watch(() => route.params.id, loadOrder, { immediate: true })
     <div v-if="errorMessage" class="error-banner">{{ errorMessage }}</div>
 
     <template v-if="order">
-      <div class="payment-card" :class="{ success: isPaid }">
-        <div class="payment-icon">{{ isPaid ? '✓' : '¥' }}</div>
-        <p>{{ isPaid ? 'PAYMENT SUCCESS' : 'SIMULATED PAYMENT' }}</p>
-        <h1>{{ isPaid ? '支付成功' : '订单已创建，请完成支付' }}</h1>
+      <div class="payment-card" :class="{ success: hasPaid }">
+        <div class="payment-icon">{{ hasPaid ? '✓' : '¥' }}</div>
+        <p>{{ hasPaid ? 'PAYMENT SUCCESS' : 'SIMULATED PAYMENT' }}</p>
+        <h1>{{ hasPaid ? '支付成功' : '订单已创建，请完成支付' }}</h1>
         <span class="order-number">订单号：{{ order.orderNo }}</span>
 
         <div class="payment-amount">
-          <span>{{ isPaid ? '实付金额' : '待支付金额' }}</span>
+          <span>{{ hasPaid ? '实付金额' : '待支付金额' }}</span>
           <strong>{{ formatMoney(order.totalAmount) }}</strong>
         </div>
 
@@ -87,7 +96,7 @@ watch(() => route.params.id, loadOrder, { immediate: true })
           background="#eff6ff"
         />
         <van-notice-bar
-          v-else-if="!isPaid"
+          v-else-if="!hasPaid"
           :text="`当前订单状态为「${status.label}」，不能继续支付。`"
           left-icon="warning-o"
           color="#b45309"
@@ -114,7 +123,7 @@ watch(() => route.params.id, loadOrder, { immediate: true })
           确认模拟支付
         </van-button>
         <van-button
-          v-if="isPaid"
+          v-if="hasPaid"
           type="primary"
           block
           round
@@ -132,6 +141,9 @@ watch(() => route.params.id, loadOrder, { immediate: true })
       </div>
     </template>
 
+    <van-empty v-else-if="!loading && !order" description="订单数据加载失败">
+      <van-button round type="primary" size="small" @click="loadOrder">重新加载</van-button>
+    </van-empty>
     <van-loading v-if="loading" size="24" class="loading" />
   </section>
 </template>

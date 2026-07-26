@@ -12,6 +12,8 @@ const logs = ref([])
 const loading = ref(false)
 const operating = ref(false)
 const errorMessage = ref('')
+const logErrorMessage = ref('')
+let requestSequence = 0
 
 const status = computed(() => orderStatusInfo(order.value?.status))
 const totalQuantity = computed(() =>
@@ -19,18 +21,30 @@ const totalQuantity = computed(() =>
 )
 
 const loadDetail = async () => {
+  const requestId = ++requestSequence
   loading.value = true
   errorMessage.value = ''
+  logErrorMessage.value = ''
+  order.value = null
+  logs.value = []
   try {
     const id = Number(route.params.id)
     if (!Number.isInteger(id) || id <= 0) throw new Error('订单编号不正确')
-    const [orderData, logData] = await Promise.all([getOrder(id), getOrderLogs(id)])
-    order.value = orderData
-    logs.value = logData
+    const [orderResult, logResult] = await Promise.allSettled([getOrder(id), getOrderLogs(id)])
+    if (requestId !== requestSequence) return
+    if (orderResult.status === 'rejected') throw orderResult.reason
+
+    order.value = orderResult.value
+    if (logResult.status === 'fulfilled') {
+      logs.value = logResult.value || []
+    } else {
+      logErrorMessage.value = logResult.reason?.message || '订单进度加载失败'
+    }
   } catch (error) {
+    if (requestId !== requestSequence) return
     errorMessage.value = error.message || '订单详情加载失败'
   } finally {
-    loading.value = false
+    if (requestId === requestSequence) loading.value = false
   }
 }
 
@@ -108,7 +122,7 @@ watch(() => route.params.id, loadDetail, { immediate: true })
 
       <van-cell-group inset title="商品列表" class="block">
         <van-cell
-          v-for="item in order.items"
+          v-for="item in (order.items || [])"
           :key="item.id"
           :title="item.productName"
           :label="specsText(item.skuSpecs) || '默认规格'"
@@ -136,8 +150,15 @@ watch(() => route.params.id, loadDetail, { immediate: true })
       </van-cell-group>
 
       <van-cell-group inset title="订单进度" class="block">
+        <van-notice-bar
+          v-if="logErrorMessage"
+          left-icon="warning-o"
+          :text="logErrorMessage"
+          color="#b45309"
+          background="#fef3c7"
+        />
         <van-steps v-if="logs.length" direction="vertical" :active="logs.length - 1" active-color="#1d4ed8">
-          <van-step v-for="(log, index) in [...logs].reverse()" :key="log.id">
+          <van-step v-for="log in logs" :key="log.id">
             <h3>{{ orderStatusInfo(log.toStatus).label }}</h3>
             <p>{{ log.remark }}</p>
             <span v-if="log.operatorName">操作人：{{ log.operatorName }}</span>
@@ -190,7 +211,9 @@ watch(() => route.params.id, loadDetail, { immediate: true })
       </div>
     </template>
 
-    <van-empty v-else-if="!loading" description="订单数据加载失败" />
+    <van-empty v-else-if="!loading" description="订单数据加载失败">
+      <van-button round type="primary" size="small" @click="loadDetail">重新加载</van-button>
+    </van-empty>
     <van-loading v-if="loading" size="24" class="loading" />
   </section>
 </template>

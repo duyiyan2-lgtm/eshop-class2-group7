@@ -133,7 +133,6 @@ const routes = [
           mobileTabbar: true,
           requiresAuth: true,
           moduleOwner: '订单与支付模块',
-          placeholderDescription: '手机订单列表页面待接入',
         },
       },
       {
@@ -144,7 +143,6 @@ const routes = [
           title: '模拟支付',
           requiresAuth: true,
           moduleOwner: '订单与支付模块',
-          placeholderDescription: '手机模拟支付页面待接入',
         },
       },
       {
@@ -155,7 +153,6 @@ const routes = [
           title: '订单详情',
           requiresAuth: true,
           moduleOwner: '订单与支付模块',
-          placeholderDescription: '手机订单详情页面待接入',
         },
       },
       {
