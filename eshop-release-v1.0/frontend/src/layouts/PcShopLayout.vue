@@ -20,6 +20,7 @@ const logout = async () => {
         <RouterLink to="/pc/cart">购物车</RouterLink>
         <RouterLink to="/pc/addresses">收货地址</RouterLink>
         <RouterLink to="/pc/orders">我的订单</RouterLink>
+        <RouterLink to="/pc/profile">个人资料</RouterLink>
       </nav>
       <div class="pc-user-actions">
         <RouterLink v-if="!auth.isLoggedIn" to="/pc/login">登录 / 注册</RouterLink>

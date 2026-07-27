@@ -1,0 +1,419 @@
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { showConfirmDialog, showToast } from 'vant'
+import { useRouter } from 'vue-router'
+import { getCart, removeCartItem, updateCartItem } from '../../api/cart'
+import { formatMoney, specsText, sumMoney } from '../../utils/shop'
+
+const router = useRouter()
+const items = ref([])
+const loading = ref(false)
+const refreshing = ref(false)
+const bulkUpdating = ref(false)
+const errorMessage = ref('')
+const updatingIds = ref(new Set())
+const failedImages = ref(new Set())
+
+const availableItems = computed(() => items.value.filter((item) => item.available))
+const selectedItems = computed(() => (
+  items.value.filter((item) => item.selected && item.available)
+))
+const allSelected = computed(() => (
+  availableItems.value.length > 0
+  && availableItems.value.every((item) => item.selected)
+))
+const selectedCount = computed(() => (
+  selectedItems.value.reduce((count, item) => count + item.quantity, 0)
+))
+const totalAmount = computed(() => (
+  sumMoney(selectedItems.value.map((item) => item.subtotal))
+))
+const hasPendingUpdate = computed(() => updatingIds.value.size > 0 || bulkUpdating.value)
+const canCheckout = computed(() => (
+  selectedItems.value.length > 0
+  && !loading.value
+  && !hasPendingUpdate.value
+  && !errorMessage.value
+))
+
+const setItemUpdating = (itemId, updating) => {
+  const next = new Set(updatingIds.value)
+  if (updating) next.add(itemId)
+  else next.delete(itemId)
+  updatingIds.value = next
+}
+
+const isItemUpdating = (itemId) => updatingIds.value.has(itemId)
+
+const markImageFailed = (itemId) => {
+  failedImages.value = new Set([...failedImages.value, itemId])
+}
+
+const loadCart = async () => {
+  if (loading.value) return false
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    items.value = await getCart()
+    failedImages.value = new Set()
+    return true
+  } catch (error) {
+    errorMessage.value = error.message || '购物车加载失败'
+    return false
+  } finally {
+    loading.value = false
+  }
+}
+
+const onRefresh = async () => {
+  refreshing.value = true
+  const succeeded = await loadCart()
+  refreshing.value = false
+  showToast(succeeded ? '已刷新' : { type: 'fail', message: '刷新失败，请重试' })
+}
+
+const updateItem = async (item, payload) => {
+  if (isItemUpdating(item.id) || bulkUpdating.value) return
+  setItemUpdating(item.id, true)
+  try {
+    const updated = await updateCartItem(item.id, payload)
+    const index = items.value.findIndex((entry) => entry.id === item.id)
+    if (index >= 0) items.value[index] = updated
+  } catch (error) {
+    showToast({ type: 'fail', message: error.message || '更新失败' })
+    await loadCart()
+  } finally {
+    setItemUpdating(item.id, false)
+  }
+}
+
+const changeQuantity = (item, quantity) => {
+  if (quantity === item.quantity || isItemUpdating(item.id)) return
+  updateItem(item, { quantity })
+}
+
+const changeSelected = (item) => {
+  if (isItemUpdating(item.id) || bulkUpdating.value) return
+  updateItem(item, { selected: !item.selected })
+}
+
+const toggleAll = async () => {
+  if (hasPendingUpdate.value) return
+  const selected = !allSelected.value
+  const targets = availableItems.value.filter((item) => item.selected !== selected)
+  if (!targets.length) return
+  bulkUpdating.value = true
+  try {
+    await Promise.all(targets.map((item) => updateCartItem(item.id, { selected })))
+    await loadCart()
+  } catch (error) {
+    showToast({ type: 'fail', message: error.message || '全选状态更新失败' })
+    await loadCart()
+  } finally {
+    bulkUpdating.value = false
+  }
+}
+
+const removeItem = async (item) => {
+  if (isItemUpdating(item.id) || bulkUpdating.value) return
+  try {
+    await showConfirmDialog({
+      title: '删除商品',
+      message: `确定从购物车删除「${item.productName}」吗？`,
+      confirmButtonText: '删除',
+      cancelButtonText: '保留',
+    })
+    setItemUpdating(item.id, true)
+    await removeCartItem(item.id)
+    items.value = items.value.filter((entry) => entry.id !== item.id)
+    showToast('已移除')
+  } catch (error) {
+    if (error !== 'cancel' && error !== 'close') {
+      showToast({ type: 'fail', message: error.message || '删除失败' })
+    }
+  } finally {
+    setItemUpdating(item.id, false)
+  }
+}
+
+const checkout = () => {
+  if (!canCheckout.value) {
+    showToast({
+      type: 'fail',
+      message: selectedCount.value ? '请等待购物车更新完成' : '请至少选择一件商品',
+    })
+    return
+  }
+  router.push({ name: 'mobile-checkout' })
+}
+
+onMounted(loadCart)
+</script>
+
+<template>
+  <section class="mobile-cart">
+    <van-notice-bar
+      v-if="errorMessage"
+      color="#dc2626"
+      background="#fef2f2"
+      left-icon="warning-o"
+    >
+      <span>{{ errorMessage }}</span>
+      <button class="notice-action" type="button" @click="loadCart">重试</button>
+    </van-notice-bar>
+
+    <div v-if="loading && !items.length" class="cart-loading">
+      <van-loading size="24px">加载中...</van-loading>
+    </div>
+
+    <van-empty v-else-if="!items.length && !loading" description="购物车还是空的">
+      <van-button round type="primary" size="small" @click="router.push({ name: 'mobile-products' })">
+        去商城逛逛
+      </van-button>
+    </van-empty>
+
+    <template v-else>
+      <button
+        class="cart-addr-bar"
+        type="button"
+        @click="router.push({ name: 'mobile-addresses' })"
+      >
+        <van-icon name="location-o" />
+        <span>管理收货地址</span>
+        <van-icon name="arrow" />
+      </button>
+
+      <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+        <div class="cart-list">
+          <article
+            v-for="item in items"
+            :key="item.id"
+            class="cart-item"
+            :class="{ invalid: !item.available }"
+          >
+            <van-checkbox
+              :model-value="item.selected"
+              :disabled="(!item.available && !item.selected) || isItemUpdating(item.id) || bulkUpdating"
+              class="item-check"
+              @click="changeSelected(item)"
+            />
+
+            <div class="item-content">
+              <div class="item-top">
+                <div class="item-img">
+                  <img
+                    v-if="item.productImage && !failedImages.has(item.id)"
+                    :src="item.productImage"
+                    :alt="item.productName"
+                    @error="markImageFailed(item.id)"
+                  />
+                  <span v-else>暂无图片</span>
+                </div>
+                <div class="item-info">
+                  <div class="item-name">{{ item.productName }}</div>
+                  <div class="item-specs">{{ specsText(item.specsJson) || '默认规格' }}</div>
+                  <div v-if="!item.available" class="item-warn">
+                    <van-tag type="danger" size="mini">
+                      {{ item.stock < item.quantity ? `库存仅剩 ${item.stock} 件` : '商品已失效' }}
+                    </van-tag>
+                  </div>
+                </div>
+              </div>
+
+              <div class="item-bottom">
+                <div class="item-price">{{ formatMoney(item.price) }}</div>
+                <van-stepper
+                  :model-value="item.quantity"
+                  :min="1"
+                  :max="Math.max(Math.min(item.stock, 99), 1)"
+                  :disabled="!item.available || isItemUpdating(item.id) || bulkUpdating"
+                  button-size="24"
+                  input-width="36"
+                  @change="changeQuantity(item, $event)"
+                />
+                <van-button
+                  icon="delete"
+                  size="small"
+                  plain
+                  hairline
+                  class="del-btn"
+                  :loading="isItemUpdating(item.id)"
+                  :disabled="bulkUpdating"
+                  aria-label="删除商品"
+                  @click="removeItem(item)"
+                />
+              </div>
+            </div>
+          </article>
+        </div>
+      </van-pull-refresh>
+    </template>
+
+    <van-submit-bar
+      v-if="items.length"
+      :price="Math.round(Number(totalAmount) * 100)"
+      button-text="去结算"
+      :disabled="!canCheckout"
+      :loading="loading || bulkUpdating"
+      label="合计"
+      safe-area-inset-bottom
+      @submit="checkout"
+    >
+      <van-checkbox
+        :model-value="allSelected"
+        :disabled="hasPendingUpdate"
+        @click="toggleAll"
+      >
+        全选
+      </van-checkbox>
+    </van-submit-bar>
+  </section>
+</template>
+
+<style scoped>
+.mobile-cart {
+  min-height: 100%;
+  padding-bottom: 60px;
+  background: #f7f8fa;
+}
+
+.notice-action {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  color: #2563eb;
+  background: transparent;
+}
+
+.cart-loading {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.cart-list {
+  padding: 12px 12px 0;
+}
+
+.cart-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 14px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.cart-item.invalid {
+  background: #fffafa;
+  opacity: 0.7;
+}
+
+.item-check {
+  flex-shrink: 0;
+  margin-top: 24px;
+}
+
+.item-content,
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-top {
+  display: flex;
+  gap: 12px;
+}
+
+.item-img {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  color: #969799;
+  font-size: 11px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.item-name {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #323233;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.item-specs {
+  margin-top: 4px;
+  color: #969799;
+  font-size: 12px;
+}
+
+.item-warn {
+  margin-top: 6px;
+}
+
+.item-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f5f5f5;
+}
+
+.item-price {
+  color: #dc2626;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.del-btn {
+  padding: 4px;
+  color: #999;
+  font-size: 18px;
+  border: none;
+}
+
+.cart-addr-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: calc(100% - 24px);
+  margin: 0 12px 8px;
+  padding: 12px 16px;
+  color: #323233;
+  font-size: 13px;
+  text-align: left;
+  background: #fff;
+  border: 0;
+  border-radius: 10px;
+}
+
+.cart-addr-bar :last-child {
+  margin-left: auto;
+  color: #c8c9cc;
+}
+
+:deep(.van-submit-bar) {
+  bottom: 50px;
+}
+
+:deep(.van-submit-bar__checkbox) {
+  flex: 1;
+}
+</style>

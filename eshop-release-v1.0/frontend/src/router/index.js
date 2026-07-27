@@ -2,8 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { pinia } from '../pinia'
 import { useAuthStore } from '../stores/auth'
 
-const MobilePlaceholderView = () => import('../views/mobile/MobilePlaceholderView.vue')
-
 const routes = [
   { path: '/', redirect: '/pc' },
   {
@@ -62,6 +60,12 @@ const routes = [
         component: () => import('../views/pc/PcPaymentView.vue'),
         meta: { requiresAuth: true },
       },
+      {
+        path: 'profile',
+        name: 'pc-profile',
+        component: () => import('../views/pc/PcProfileView.vue'),
+        meta: { title: '个人资料', requiresAuth: true },
+      },
     ],
   },
   {
@@ -77,51 +81,47 @@ const routes = [
       {
         path: 'products',
         name: 'mobile-products',
-        component: () => import('../views/mobile/MobileHomeView.vue'),
+        component: () => import('../views/mobile/MobileProductListView.vue'),
         meta: { title: '手机商城', mobileTabbar: true },
       },
       {
         path: 'products/:id',
         name: 'mobile-product-detail',
-        component: MobilePlaceholderView,
+        component: () => import('../views/mobile/MobileProductDetailView.vue'),
         meta: {
           title: '商品详情',
           moduleOwner: '商品模块',
-          placeholderDescription: '手机商品详情页面待接入',
         },
       },
       {
         path: 'cart',
         name: 'mobile-cart',
-        component: MobilePlaceholderView,
+        component: () => import('../views/mobile/MobileCartView.vue'),
         meta: {
           title: '购物车',
           mobileTabbar: true,
           requiresAuth: true,
           moduleOwner: '用户与购物车模块',
-          placeholderDescription: '手机购物车页面待接入',
         },
       },
       {
         path: 'addresses',
         name: 'mobile-addresses',
-        component: MobilePlaceholderView,
+        component: () => import('../views/mobile/MobileAddressView.vue'),
         meta: {
           title: '收货地址',
           requiresAuth: true,
           moduleOwner: '用户与购物车模块',
-          placeholderDescription: '手机收货地址页面待接入',
         },
       },
       {
         path: 'checkout',
         name: 'mobile-checkout',
-        component: MobilePlaceholderView,
+        component: () => import('../views/mobile/MobileCheckoutView.vue'),
         meta: {
           title: '确认订单',
           requiresAuth: true,
           moduleOwner: '订单与支付模块',
-          placeholderDescription: '手机订单确认页面待接入',
         },
       },
       {
@@ -158,13 +158,12 @@ const routes = [
       {
         path: 'profile',
         name: 'mobile-profile',
-        component: MobilePlaceholderView,
+        component: () => import('../views/mobile/MobileProfileView.vue'),
         meta: {
           title: '个人中心',
           mobileTabbar: true,
           requiresAuth: true,
           moduleOwner: '用户与购物车模块',
-          placeholderDescription: '手机个人中心页面待接入',
         },
       },
     ],
@@ -183,6 +182,7 @@ const routes = [
       { path: 'categories', name: 'admin-categories', component: () => import('../views/admin/AdminCategoriesView.vue') },
       { path: 'products', name: 'admin-products', component: () => import('../views/admin/AdminProductsView.vue') },
       { path: 'orders', name: 'admin-orders', component: () => import('../views/admin/AdminOrdersView.vue') },
+      { path: 'users', name: 'admin-users', component: () => import('../views/admin/AdminUsersView.vue') },
       { path: 'logs', name: 'admin-operation-logs', component: () => import('../views/admin/OperationLogsView.vue') },
     ],
   },
