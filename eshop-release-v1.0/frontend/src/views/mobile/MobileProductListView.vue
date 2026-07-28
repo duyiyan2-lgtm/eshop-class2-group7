@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { getCategories, getProducts } from '../../api/catalog'
 import { formatMoney } from '../../utils/shop'
+import HotProductRanking from '../../components/catalog/HotProductRanking.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -199,6 +200,8 @@ onActivated(() => {
         {{ category.displayName }}
       </button>
     </div>
+
+    <HotProductRanking mobile />
 
     <div v-if="keyword || categoryId" class="result-heading">
       <div>

@@ -1,8 +1,9 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { showConfirmDialog, showToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { cancelOrder, confirmOrder, getOrder, getOrderLogs } from '../../api/order'
+import { createReview, getReviewedOrderItemIds } from '../../api/review'
 import { formatDateTime, formatMoney, orderStatusInfo, specsText } from '../../utils/shop'
 
 const route = useRoute()
@@ -13,12 +14,43 @@ const loading = ref(false)
 const operating = ref(false)
 const errorMessage = ref('')
 const logErrorMessage = ref('')
+const reviewedItemIds = ref(new Set())
+const reviewLookupLoading = ref(false)
+const reviewLookupError = ref('')
+const showReview = ref(false)
+const reviewSubmitting = ref(false)
+const reviewItem = ref(null)
+const reviewForm = reactive({
+  rating: 5,
+  content: '',
+})
 let requestSequence = 0
+let reviewRequestSequence = 0
 
 const status = computed(() => orderStatusInfo(order.value?.status))
 const totalQuantity = computed(() =>
   (order.value?.items || []).reduce((count, item) => count + item.quantity, 0),
 )
+
+const loadReviewStatus = async (items = []) => {
+  const requestId = ++reviewRequestSequence
+  reviewedItemIds.value = new Set()
+  reviewLookupError.value = ''
+  reviewLookupLoading.value = false
+  if (!items.length) return
+
+  reviewLookupLoading.value = true
+  try {
+    const ids = await getReviewedOrderItemIds(items.map((item) => item.id))
+    if (requestId === reviewRequestSequence) reviewedItemIds.value = ids
+  } catch (error) {
+    if (requestId === reviewRequestSequence) {
+      reviewLookupError.value = error.message || '评价状态加载失败'
+    }
+  } finally {
+    if (requestId === reviewRequestSequence) reviewLookupLoading.value = false
+  }
+}
 
 const loadDetail = async () => {
   const requestId = ++requestSequence
@@ -27,6 +59,10 @@ const loadDetail = async () => {
   logErrorMessage.value = ''
   order.value = null
   logs.value = []
+  reviewRequestSequence += 1
+  reviewedItemIds.value = new Set()
+  reviewLookupLoading.value = false
+  reviewLookupError.value = ''
   try {
     const id = Number(route.params.id)
     if (!Number.isInteger(id) || id <= 0) throw new Error('订单编号不正确')
@@ -35,6 +71,9 @@ const loadDetail = async () => {
     if (orderResult.status === 'rejected') throw orderResult.reason
 
     order.value = orderResult.value
+    if (orderResult.value.status === 'COMPLETED') {
+      void loadReviewStatus(orderResult.value.items || [])
+    }
     if (logResult.status === 'fulfilled') {
       logs.value = logResult.value || []
     } else {
@@ -46,6 +85,66 @@ const loadDetail = async () => {
   } finally {
     if (requestId === requestSequence) loading.value = false
   }
+}
+
+const openReview = (item) => {
+  if (order.value?.status !== 'COMPLETED') {
+    showToast('订单完成后才能评价商品')
+    return
+  }
+  if (reviewedItemIds.value.has(item.id)) {
+    showToast('该商品已经评价')
+    return
+  }
+  reviewItem.value = item
+  reviewForm.rating = 5
+  reviewForm.content = ''
+  showReview.value = true
+}
+
+const submitReview = async () => {
+  if (reviewSubmitting.value || !reviewItem.value) return false
+  const content = reviewForm.content.trim()
+  if (!Number.isInteger(reviewForm.rating) || reviewForm.rating < 1 || reviewForm.rating > 5) {
+    showToast({ type: 'fail', message: '请选择 1—5 星评分' })
+    return false
+  }
+  if (!content || content.length > 1000) {
+    showToast({
+      type: 'fail',
+      message: content ? '评价内容不能超过 1000 个字符' : '请填写评价内容',
+    })
+    return false
+  }
+
+  const orderItemId = reviewItem.value.id
+  reviewSubmitting.value = true
+  try {
+    await createReview({
+      orderItemId,
+      rating: reviewForm.rating,
+      content,
+    })
+    reviewedItemIds.value = new Set([...reviewedItemIds.value, orderItemId])
+    showToast({ type: 'success', message: '评价发布成功' })
+    return true
+  } catch (error) {
+    if (String(error.message || '').includes('已经评价')) {
+      reviewedItemIds.value = new Set([...reviewedItemIds.value, orderItemId])
+      showToast(error.message)
+      return true
+    }
+    showToast({ type: 'fail', message: error.message || '评价发布失败' })
+    return false
+  } finally {
+    reviewSubmitting.value = false
+  }
+}
+
+const beforeReviewClose = (action) => {
+  if (reviewSubmitting.value) return false
+  if (action !== 'confirm') return true
+  return submitReview()
 }
 
 const cancel = async () => {
@@ -121,6 +220,13 @@ watch(() => route.params.id, loadDetail, { immediate: true })
       </van-cell-group>
 
       <van-cell-group inset title="商品列表" class="block">
+        <van-notice-bar
+          v-if="reviewLookupError"
+          left-icon="warning-o"
+          :text="reviewLookupError"
+          color="#b45309"
+          background="#fef3c7"
+        />
         <van-cell
           v-for="item in (order.items || [])"
           :key="item.id"
@@ -132,6 +238,23 @@ watch(() => route.params.id, loadDetail, { immediate: true })
             <div class="item-value">
               <span>{{ formatMoney(item.price) }} × {{ item.quantity }}</span>
               <strong>{{ formatMoney(item.subtotal) }}</strong>
+              <van-button
+                v-if="order.status === 'COMPLETED' && reviewedItemIds.has(item.id)"
+                size="mini"
+                disabled
+              >
+                已评价
+              </van-button>
+              <van-button
+                v-else-if="order.status === 'COMPLETED'"
+                size="mini"
+                type="primary"
+                plain
+                :loading="reviewLookupLoading"
+                @click.stop="openReview(item)"
+              >
+                评价
+              </van-button>
             </div>
           </template>
           <template #icon>
@@ -205,6 +328,16 @@ watch(() => route.params.id, loadDetail, { immediate: true })
         >
           确认收货
         </van-button>
+        <van-button
+          v-if="order.status === 'COMPLETED'"
+          block
+          plain
+          round
+          type="primary"
+          @click="router.push({ name: 'mobile-reviews' })"
+        >
+          我的评价
+        </van-button>
         <van-button block round @click="router.push({ name: 'mobile-orders' })">
           返回订单列表
         </van-button>
@@ -215,6 +348,35 @@ watch(() => route.params.id, loadDetail, { immediate: true })
       <van-button round type="primary" size="small" @click="loadDetail">重新加载</van-button>
     </van-empty>
     <van-loading v-if="loading" size="24" class="loading" />
+
+    <van-dialog
+      v-model:show="showReview"
+      title="发表商品评价"
+      show-cancel-button
+      :confirm-button-loading="reviewSubmitting"
+      :before-close="beforeReviewClose"
+      close-on-click-overlay
+    >
+      <div v-if="reviewItem" class="review-form">
+        <div class="review-product">
+          <strong>{{ reviewItem.productName }}</strong>
+          <span>{{ specsText(reviewItem.skuSpecs) || '默认规格' }}</span>
+        </div>
+        <div class="rating-row">
+          <span>商品评分</span>
+          <van-rate v-model="reviewForm.rating" color="#f59e0b" void-icon="star" void-color="#d1d5db" />
+        </div>
+        <van-field
+          v-model="reviewForm.content"
+          type="textarea"
+          rows="4"
+          autosize
+          maxlength="1000"
+          show-word-limit
+          placeholder="请分享商品质量、规格和使用体验"
+        />
+      </div>
+    </van-dialog>
   </section>
 </template>
 
@@ -263,6 +425,11 @@ watch(() => route.params.id, loadDetail, { immediate: true })
 
 .action-bar { padding: 16px; display: grid; gap: 10px; background: #fff; }
 .action-bar .van-button + .van-button { margin-top: 0; }
+.review-form { display: grid; gap: 12px; padding: 12px 16px 6px; }
+.review-product { display: grid; gap: 4px; padding: 12px; background: #f7f8fa; border-radius: 10px; }
+.review-product strong { color: #323233; }
+.review-product span { color: #969799; font-size: 12px; }
+.rating-row { display: flex; align-items: center; justify-content: space-between; color: #646566; font-size: 14px; }
 
 :deep(.van-step) h3 { margin: 0 0 4px; color: #323233; font-size: 14px; font-weight: 600; }
 :deep(.van-step) p { margin: 2px 0; color: #64748b; font-size: 12px; }

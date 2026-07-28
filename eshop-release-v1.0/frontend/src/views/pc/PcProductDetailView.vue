@@ -4,6 +4,8 @@ import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { addCartItem } from '../../api/cart'
 import { getProduct } from '../../api/catalog'
+import { addFavorite, getFavoriteStatus, removeFavorite } from '../../api/favorite'
+import ProductReviewList from '../../components/review/ProductReviewList.vue'
 import { useAuthStore } from '../../stores/auth'
 
 const route = useRoute()
@@ -17,6 +19,10 @@ const loading = ref(false)
 const adding = ref(false)
 const imageFailed = ref(false)
 const errorMessage = ref('')
+const favorited = ref(false)
+const favoriteLoading = ref(false)
+let requestSequence = 0
+let favoriteRequestSequence = 0
 
 const selectedSku = computed(() => (
   product.value?.skus.find((sku) => sku.id === selectedSkuId.value) || null
@@ -41,22 +47,75 @@ const skuLabel = (sku) => parseSpecs(sku.specsJson)
   .join(' / ')
 
 const loadProduct = async () => {
+  const requestId = ++requestSequence
   loading.value = true
   errorMessage.value = ''
   imageFailed.value = false
   product.value = null
+  favorited.value = false
+  favoriteLoading.value = false
+  favoriteRequestSequence += 1
   try {
     const id = Number(route.params.id)
     if (!Number.isInteger(id) || id <= 0) throw new Error('商品编号不正确')
     const data = await getProduct(id)
+    if (requestId !== requestSequence) return
     product.value = data
     const firstAvailable = data.skus.find((sku) => sku.stock > 0) || data.skus[0]
     selectedSkuId.value = firstAvailable?.id
     quantity.value = 1
+    if (auth.isLoggedIn) {
+      void loadFavoriteStatus(data.id)
+    }
   } catch (error) {
-    errorMessage.value = error.message || '商品详情加载失败'
+    if (requestId === requestSequence) {
+      errorMessage.value = error.message || '商品详情加载失败'
+    }
   } finally {
-    loading.value = false
+    if (requestId === requestSequence) loading.value = false
+  }
+}
+
+const loadFavoriteStatus = async (productId) => {
+  const requestId = ++favoriteRequestSequence
+  try {
+    const data = await getFavoriteStatus(productId)
+    if (requestId === favoriteRequestSequence && product.value?.id === productId) {
+      favorited.value = Boolean(data?.favorited)
+    }
+  } catch {
+    // 收藏状态加载失败不阻塞商品详情。
+  }
+}
+
+const toggleFavorite = async () => {
+  if (!auth.isLoggedIn) {
+    ElMessage.info('请先登录后再收藏')
+    await router.push({
+      name: 'pc-login',
+      query: { redirect: route.fullPath },
+    })
+    return
+  }
+  const productId = product.value?.id
+  if (!productId || favoriteLoading.value) return
+
+  const previous = favorited.value
+  favoriteLoading.value = true
+  favorited.value = !previous
+  try {
+    if (favorited.value) {
+      await addFavorite(productId)
+      ElMessage.success('已收藏')
+    } else {
+      await removeFavorite(productId)
+      ElMessage.success('已取消收藏')
+    }
+  } catch (error) {
+    if (product.value?.id === productId) favorited.value = previous
+    ElMessage.error(error.message || '收藏操作失败')
+  } finally {
+    if (product.value?.id === productId) favoriteLoading.value = false
   }
 }
 
@@ -134,7 +193,17 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 
         <div class="product-info">
           <div class="product-heading">
-            <el-tag type="primary" effect="light">{{ product.categoryName || '精选商品' }}</el-tag>
+            <div class="heading-actions">
+              <el-tag type="primary" effect="light">{{ product.categoryName || '精选商品' }}</el-tag>
+              <el-button
+                :type="favorited ? 'danger' : 'default'"
+                :plain="!favorited"
+                :loading="favoriteLoading"
+                @click="toggleFavorite"
+              >
+                {{ favorited ? '已收藏' : '收藏商品' }}
+              </el-button>
+            </div>
             <h1>{{ product.name }}</h1>
             <p>{{ product.subtitle || '品质商品，放心选购' }}</p>
           </div>
@@ -207,6 +276,8 @@ watch(() => route.params.id, loadProduct, { immediate: true })
       </div>
       <p>{{ product.detail || '暂无更多商品详情。' }}</p>
     </section>
+
+    <ProductReviewList v-if="product" :product-id="product.id" />
   </div>
 </template>
 
@@ -270,6 +341,13 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 
 .product-info {
   min-width: 0;
+}
+
+.heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .product-heading h1 {

@@ -18,8 +18,10 @@ const logout = async () => {
       <nav>
         <RouterLink to="/pc/products">商品商城</RouterLink>
         <RouterLink to="/pc/cart">购物车</RouterLink>
+        <RouterLink to="/pc/favorites">我的收藏</RouterLink>
         <RouterLink to="/pc/addresses">收货地址</RouterLink>
         <RouterLink to="/pc/orders">我的订单</RouterLink>
+        <RouterLink to="/pc/reviews">我的评价</RouterLink>
         <RouterLink to="/pc/profile">个人资料</RouterLink>
       </nav>
       <div class="pc-user-actions">

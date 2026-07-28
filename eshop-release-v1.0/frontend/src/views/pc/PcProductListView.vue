@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getCategories, getProducts } from '../../api/catalog'
+import HotProductRanking from '../../components/catalog/HotProductRanking.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -120,6 +121,8 @@ watch(
         <span>件在售商品</span>
       </div>
     </section>
+
+    <HotProductRanking />
 
     <section class="filter-panel">
       <form class="search-row" @submit.prevent="search">

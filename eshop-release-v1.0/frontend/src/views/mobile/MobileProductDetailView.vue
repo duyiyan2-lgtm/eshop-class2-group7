@@ -4,7 +4,10 @@ import { showImagePreview, showSuccessToast, showToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { addCartItem } from '../../api/cart'
 import { getProduct } from '../../api/catalog'
+import { addFavorite, getFavoriteStatus, removeFavorite } from '../../api/favorite'
+import ProductReviewList from '../../components/review/ProductReviewList.vue'
 import { useAuthStore } from '../../stores/auth'
+import { notifyCartUpdated } from '../../utils/cartBadge'
 import { formatMoney, parseSpecs } from '../../utils/shop'
 
 const route = useRoute()
@@ -18,6 +21,9 @@ const loading = ref(false)
 const adding = ref(false)
 const imageFailed = ref(false)
 const errorMessage = ref('')
+const favorited = ref(false)
+const favoriteLoading = ref(false)
+let favoriteRequestSequence = 0
 
 const selectedSku = computed(() => {
   if (!product.value || selectedSkuId.value === null) return null
@@ -51,6 +57,9 @@ const loadProduct = async () => {
   product.value = null
   selectedSkuId.value = null
   quantity.value = 1
+  favorited.value = false
+  favoriteLoading.value = false
+  favoriteRequestSequence += 1
 
   try {
     const id = Number(route.params.id)
@@ -61,12 +70,58 @@ const loadProduct = async () => {
     const skus = data.skus || []
     const firstAvailable = skus.find((sku) => sku.stock > 0) || skus[0]
     selectedSkuId.value = firstAvailable ? firstAvailable.id : null
+    if (auth.isLoggedIn) {
+      void loadFavoriteStatus(data.id)
+    }
   } catch (error) {
     if (requestId === requestSequence) {
       errorMessage.value = error.message || '商品详情加载失败'
     }
   } finally {
     if (requestId === requestSequence) loading.value = false
+  }
+}
+
+const loadFavoriteStatus = async (productId) => {
+  const requestId = ++favoriteRequestSequence
+  try {
+    const data = await getFavoriteStatus(productId)
+    if (requestId === favoriteRequestSequence && product.value?.id === productId) {
+      favorited.value = Boolean(data?.favorited)
+    }
+  } catch {
+    // 收藏状态失败不影响商品浏览，登录失效由公共 HTTP 层统一处理。
+  }
+}
+
+const toggleFavorite = async () => {
+  if (!auth.isLoggedIn) {
+    showToast('请先登录后再收藏')
+    await router.push({
+      name: 'mobile-login',
+      query: { redirect: route.fullPath },
+    })
+    return
+  }
+  const productId = product.value?.id
+  if (!productId || favoriteLoading.value) return
+
+  const previous = favorited.value
+  favoriteLoading.value = true
+  favorited.value = !previous
+  try {
+    if (favorited.value) {
+      await addFavorite(productId)
+      showSuccessToast('已收藏')
+    } else {
+      await removeFavorite(productId)
+      showSuccessToast('已取消收藏')
+    }
+  } catch (error) {
+    if (product.value?.id === productId) favorited.value = previous
+    showToast({ type: 'fail', message: error.message || '收藏操作失败' })
+  } finally {
+    if (product.value?.id === productId) favoriteLoading.value = false
   }
 }
 
@@ -127,6 +182,7 @@ const addToCart = async () => {
       skuId: selectedSku.value.id,
       quantity: quantity.value,
     })
+    notifyCartUpdated()
     showSuccessToast({
       message: `已加入购物车，当前数量 ${item.quantity}`,
       duration: 1500,
@@ -170,9 +226,35 @@ watch(() => route.params.id, loadProduct, { immediate: true })
             />
           </van-swipe-item>
         </van-swipe>
+        <button
+          type="button"
+          class="favorite-button"
+          :class="{ active: favorited }"
+          :disabled="favoriteLoading"
+          :aria-label="favorited ? '取消收藏' : '收藏商品'"
+          @click.stop="toggleFavorite"
+        >
+          <van-loading v-if="favoriteLoading" size="18" color="#ee0a24" />
+          <van-icon v-else :name="favorited ? 'like' : 'like-o'" size="22" />
+          <span>{{ favorited ? '已收藏' : '收藏' }}</span>
+        </button>
         <p>点击图片可放大查看</p>
       </div>
-      <div v-else class="gallery placeholder">暂无商品图片</div>
+      <div v-else class="gallery placeholder">
+        <button
+          type="button"
+          class="favorite-button favorite-button--placeholder"
+          :class="{ active: favorited }"
+          :disabled="favoriteLoading"
+          :aria-label="favorited ? '取消收藏' : '收藏商品'"
+          @click.stop="toggleFavorite"
+        >
+          <van-loading v-if="favoriteLoading" size="18" color="#ee0a24" />
+          <van-icon v-else :name="favorited ? 'like' : 'like-o'" size="22" />
+          <span>{{ favorited ? '已收藏' : '收藏' }}</span>
+        </button>
+        暂无商品图片
+      </div>
 
       <div class="card">
         <div class="price-panel">
@@ -240,6 +322,8 @@ watch(() => route.params.id, loadProduct, { immediate: true })
         <p class="detail-text">{{ product.detail || '暂无更多商品详情。' }}</p>
       </div>
 
+      <ProductReviewList :product-id="product.id" :page-size="5" />
+
       <div class="service-row">
         <span>✓ 模拟支付</span>
         <span>✓ 库存实时校验</span>
@@ -295,6 +379,7 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 }
 
 .gallery {
+  position: relative;
   display: grid;
   overflow: hidden;
   background: #fff;
@@ -329,6 +414,40 @@ watch(() => route.params.id, loadProduct, { immediate: true })
   color: #94a3b8;
   font-size: 13px;
   place-items: center;
+}
+
+.favorite-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  color: #475569;
+  background: rgba(255, 255, 255, .94);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .12);
+}
+
+.favorite-button.active {
+  color: #ee0a24;
+}
+
+.favorite-button:disabled {
+  opacity: .72;
+}
+
+.favorite-button span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.favorite-button--placeholder {
+  position: static;
+  margin: 0 auto 12px;
 }
 
 .card {

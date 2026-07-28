@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { showConfirmDialog, showToast } from 'vant'
 import { useRouter } from 'vue-router'
 import { getCart, removeCartItem, updateCartItem } from '../../api/cart'
+import { notifyCartUpdated } from '../../utils/cartBadge'
 import { formatMoney, specsText, sumMoney } from '../../utils/shop'
 
 const router = useRouter()
@@ -69,6 +70,7 @@ const onRefresh = async () => {
   refreshing.value = true
   const succeeded = await loadCart()
   refreshing.value = false
+  if (succeeded) notifyCartUpdated()
   showToast(succeeded ? '已刷新' : { type: 'fail', message: '刷新失败，请重试' })
 }
 
@@ -79,6 +81,7 @@ const updateItem = async (item, payload) => {
     const updated = await updateCartItem(item.id, payload)
     const index = items.value.findIndex((entry) => entry.id === item.id)
     if (index >= 0) items.value[index] = updated
+    notifyCartUpdated()
   } catch (error) {
     showToast({ type: 'fail', message: error.message || '更新失败' })
     await loadCart()
@@ -106,6 +109,7 @@ const toggleAll = async () => {
   try {
     await Promise.all(targets.map((item) => updateCartItem(item.id, { selected })))
     await loadCart()
+    notifyCartUpdated()
   } catch (error) {
     showToast({ type: 'fail', message: error.message || '全选状态更新失败' })
     await loadCart()
@@ -126,6 +130,7 @@ const removeItem = async (item) => {
     setItemUpdating(item.id, true)
     await removeCartItem(item.id)
     items.value = items.value.filter((entry) => entry.id !== item.id)
+    notifyCartUpdated()
     showToast('已移除')
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {

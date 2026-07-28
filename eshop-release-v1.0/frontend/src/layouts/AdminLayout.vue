@@ -20,7 +20,9 @@ const logout = async () => {
         <el-menu-item index="/admin">控制台</el-menu-item>
         <el-menu-item index="/admin/categories">分类管理</el-menu-item>
         <el-menu-item index="/admin/products">商品与 SKU</el-menu-item>
+        <el-menu-item index="/admin/inventory">库存预警</el-menu-item>
         <el-menu-item index="/admin/orders">订单管理</el-menu-item>
+        <el-menu-item index="/admin/reviews">评价管理</el-menu-item>
         <el-menu-item index="/admin/users">用户管理</el-menu-item>
         <el-menu-item index="/admin/logs">操作日志</el-menu-item>
       </el-menu>

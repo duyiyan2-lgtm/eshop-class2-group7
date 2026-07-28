@@ -31,6 +31,12 @@ const routes = [
         meta: { requiresAuth: true },
       },
       {
+        path: 'favorites',
+        name: 'pc-favorites',
+        component: () => import('../views/pc/PcFavoritesView.vue'),
+        meta: { title: '我的收藏', requiresAuth: true },
+      },
+      {
         path: 'addresses',
         name: 'pc-addresses',
         component: () => import('../views/pc/PcAddressView.vue'),
@@ -47,6 +53,12 @@ const routes = [
         name: 'pc-orders',
         component: () => import('../views/pc/PcOrdersView.vue'),
         meta: { requiresAuth: true },
+      },
+      {
+        path: 'reviews',
+        name: 'pc-reviews',
+        component: () => import('../views/pc/PcReviewsView.vue'),
+        meta: { title: '我的评价', requiresAuth: true },
       },
       {
         path: 'orders/:id',
@@ -105,6 +117,16 @@ const routes = [
         },
       },
       {
+        path: 'favorites',
+        name: 'mobile-favorites',
+        component: () => import('../views/mobile/MobileFavoritesView.vue'),
+        meta: {
+          title: '我的收藏',
+          requiresAuth: true,
+          moduleOwner: '商品模块',
+        },
+      },
+      {
         path: 'addresses',
         name: 'mobile-addresses',
         component: () => import('../views/mobile/MobileAddressView.vue'),
@@ -133,6 +155,16 @@ const routes = [
           mobileTabbar: true,
           requiresAuth: true,
           moduleOwner: '订单与支付模块',
+        },
+      },
+      {
+        path: 'reviews',
+        name: 'mobile-reviews',
+        component: () => import('../views/mobile/MobileReviewsView.vue'),
+        meta: {
+          title: '我的评价',
+          requiresAuth: true,
+          moduleOwner: '订单与评价模块',
         },
       },
       {
@@ -181,7 +213,19 @@ const routes = [
       { path: '', name: 'admin-home', component: () => import('../views/admin/AdminHomeView.vue') },
       { path: 'categories', name: 'admin-categories', component: () => import('../views/admin/AdminCategoriesView.vue') },
       { path: 'products', name: 'admin-products', component: () => import('../views/admin/AdminProductsView.vue') },
+      {
+        path: 'inventory',
+        name: 'admin-inventory-alerts',
+        component: () => import('../views/admin/AdminInventoryAlertsView.vue'),
+        meta: { title: '库存预警' },
+      },
       { path: 'orders', name: 'admin-orders', component: () => import('../views/admin/AdminOrdersView.vue') },
+      {
+        path: 'reviews',
+        name: 'admin-reviews',
+        component: () => import('../views/admin/AdminReviewsView.vue'),
+        meta: { title: '评价管理' },
+      },
       { path: 'users', name: 'admin-users', component: () => import('../views/admin/AdminUsersView.vue') },
       { path: 'logs', name: 'admin-operation-logs', component: () => import('../views/admin/OperationLogsView.vue') },
     ],

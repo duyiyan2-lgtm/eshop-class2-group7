@@ -39,6 +39,12 @@ public enum ErrorCode {
     CATEGORY_HAS_ENABLED_CHILDREN(40925, "分类下存在启用的子分类，请先停用子分类"),
     ORDER_PAYMENT_EXPIRED(40926, "订单已超过支付时限"),
     SKU_HAS_ACTIVE_ORDERS(40927, "SKU存在未完成订单，不能删除"),
+    ORDER_ITEM_NOT_FOUND(40417, "订单商品不存在"),
+    FAVORITE_ALREADY_EXISTS(40928, "商品已经收藏"),
+    ORDER_NOT_COMPLETED_FOR_REVIEW(40929, "订单尚未完成，不能评价"),
+    REVIEW_ALREADY_EXISTS(40930, "订单商品已经评价"),
+    REVIEW_RATING_INVALID(40031, "评分必须在1至5分之间"),
+    REVIEW_CONTENT_INVALID(40032, "评价内容长度必须在1至1000个字符之间"),
     INTERNAL_ERROR(50000, "系统异常，请稍后重试"),
     FILE_SAVE_FAILED(50001, "文件保存失败");
 
