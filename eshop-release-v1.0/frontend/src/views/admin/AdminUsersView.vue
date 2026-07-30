@@ -162,7 +162,9 @@ const toggleStatus = async (user) => {
     return
   }
   const newStatus = user.status === 'ENABLED' ? 'DISABLED' : 'ENABLED'
-  const actionText = newStatus === 'ENABLED' ? '启用' : '禁用'
+  const actionText = newStatus === 'ENABLED' && user.role === 'SELLER'
+    ? '审核通过并启用'
+    : newStatus === 'ENABLED' ? '启用' : '禁用'
   try {
     await ElMessageBox.confirm(
       `确定${actionText}「${user.nickname}（${user.username}）」吗？`,
@@ -210,6 +212,10 @@ const toggleRole = async (user) => {
 const statusTagType = (status) => (status === 'ENABLED' ? 'success' : 'danger')
 const roleTagType = (role) => ({ ADMIN: 'primary', SELLER: 'warning', USER: 'info' })[role] || 'info'
 const roleLabel = (role) => ({ ADMIN: '平台管理员', SELLER: '卖家', USER: '买家' })[role] || role
+const statusLabel = (user) => {
+  if (user.status === 'ENABLED') return '已启用'
+  return user.role === 'SELLER' ? '待审核 / 已停用' : '已禁用'
+}
 
 onMounted(refreshAll)
 </script>
@@ -250,9 +256,9 @@ onMounted(refreshAll)
         <small>当前可以正常登录</small>
       </article>
       <article class="disabled-card">
-        <span>禁用账号</span>
+        <span>待审核 / 禁用</span>
         <strong>{{ summary?.disabledCount ?? 0 }}</strong>
-        <small>旧登录令牌同步失效</small>
+        <small>含待审核商家，启用后方可登录</small>
       </article>
     </section>
 
@@ -289,7 +295,7 @@ onMounted(refreshAll)
             @change="onSearch"
           >
             <el-option label="启用" value="ENABLED" />
-            <el-option label="禁用" value="DISABLED" />
+            <el-option label="待审核 / 禁用" value="DISABLED" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -334,10 +340,10 @@ onMounted(refreshAll)
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="145">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.status)" size="small">
-              {{ row.status === 'ENABLED' ? '启用' : '禁用' }}
+              {{ statusLabel(row) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -346,7 +352,7 @@ onMounted(refreshAll)
             {{ row.createdAt ? new Date(row.createdAt).toLocaleString('zh-CN') : '—' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="230" fixed="right">
+        <el-table-column label="操作" width="260" fixed="right">
           <template #default="{ row }">
             <template v-if="row.role !== 'ADMIN'">
               <el-button size="small" plain @click="toggleRole(row)">
@@ -358,7 +364,7 @@ onMounted(refreshAll)
                 plain
                 @click="toggleStatus(row)"
               >
-                {{ row.status === 'ENABLED' ? '禁用' : '启用' }}
+                {{ row.status === 'ENABLED' ? '禁用' : row.role === 'SELLER' ? '审核 / 启用' : '启用' }}
               </el-button>
             </template>
             <span v-else class="protected-note">受保护账号</span>

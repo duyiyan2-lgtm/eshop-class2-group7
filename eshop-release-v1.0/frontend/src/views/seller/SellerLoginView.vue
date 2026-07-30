@@ -7,6 +7,7 @@ import AuthForm from '../../components/AuthForm.vue'
     <AuthForm
       terminal="seller"
       :allowed-roles="['SELLER', 'ADMIN']"
+      :registration-roles="['SELLER']"
       title="E-Shop 商家工作台"
       login-subtitle="卖家登录后管理商品、库存、订单和评价"
     />

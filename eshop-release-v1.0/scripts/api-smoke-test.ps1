@@ -225,28 +225,37 @@ try {
             username = $username
             password = $password
             nickname = "Smoke User"
+            role = "USER"
         } $null
-        Assert-Equal $registered.Status 200 "register $username"
+        Assert-Equal $registered.Status 200 "register buyer $username"
     }
 
-    $sellerCreated = Invoke-Api POST "admin/users" @{
+    $sellerRegistered = Invoke-Api POST "auth/register" @{
         username = $sellerUser
         password = $password
         nickname = "Smoke Seller"
-        phone = "13800138001"
         role = "SELLER"
-        status = "ENABLED"
-    } $adminToken
-    $sellerId = $sellerCreated.Body.data.id
-    Assert-Equal $sellerCreated.Body.data.role "SELLER" "administrator creates seller"
-    $duplicateSeller = Invoke-Api POST "admin/users" @{
+    } $null
+    Assert-Equal $sellerRegistered.Status 200 "public seller registration"
+    $pendingSellerLogin = Invoke-Api POST "auth/login" @{
+        username = $sellerUser
+        password = $password
+    } $null @(403)
+    Assert-Equal $pendingSellerLogin.Body.code 40302 "pending seller cannot login before approval"
+    $duplicateSeller = Invoke-Api POST "auth/register" @{
         username = $sellerUser
         password = $password
         nickname = "Duplicate Seller"
         role = "SELLER"
-        status = "ENABLED"
-    } $adminToken @(409)
-    Assert-Equal $duplicateSeller.Body.code 40901 "duplicate managed account rejected"
+    } $null @(409)
+    Assert-Equal $duplicateSeller.Body.code 40901 "duplicate seller registration rejected"
+    $invalidPublicRole = Invoke-Api POST "auth/register" @{
+        username = "public_admin_$suffix"
+        password = $password
+        nickname = "Invalid Public Admin"
+        role = "ADMIN"
+    } $null @(400)
+    Assert-Equal $invalidPublicRole.Body.code 40001 "public registration cannot create administrator"
     $invalidManagedRole = Invoke-Api POST "admin/users" @{
         username = "invalid_admin_$suffix"
         password = $password
@@ -261,6 +270,12 @@ try {
     $sellerList = Invoke-Api GET "admin/users?role=SELLER" $null $adminToken
     Assert-Equal $sellerList.Body.data.total 1 "seller account filter"
     Assert-Equal $sellerList.Body.data.records[0].username $sellerUser "seller account detail"
+    Assert-Equal $sellerList.Body.data.records[0].status "DISABLED" "self-registered seller awaits approval"
+    $sellerId = $sellerList.Body.data.records[0].id
+    $sellerEnabled = Invoke-Api PATCH "admin/users/$sellerId/status" @{
+        status = "ENABLED"
+    } $adminToken
+    Assert-Equal $sellerEnabled.Body.data.status "ENABLED" "platform administrator approves seller"
     $sellerLogin = Invoke-Api POST "auth/login" @{
         username = $sellerUser
         password = $password

@@ -9,11 +9,21 @@ a { color: inherit; text-decoration: none; }
 .auth-form h1 { margin: 0; font-size: 25px; color: #1d4ed8; }
 .auth-subtitle, .auth-message { margin: -8px 0 0; color: #64748b; font-size: 14px; }
 .auth-message { color: #dc2626; }
+.auth-message.is-success { color: #15803d; }
 .auth-form label { display: grid; gap: 8px; font-size: 14px; font-weight: 600; }
 .auth-form input { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 11px 12px; font: inherit; outline-color: #2563eb; }
 .auth-form button { border: 0; border-radius: 8px; padding: 11px 14px; background: #2563eb; color: #fff; cursor: pointer; font: inherit; font-weight: 600; }
 .auth-form button:disabled { opacity: .6; cursor: not-allowed; }
 .auth-form .auth-link { padding: 0; background: transparent; color: #2563eb; font-weight: 400; }
+.registration-roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; border: 0; }
+.registration-roles legend { grid-column: 1 / -1; margin-bottom: 8px; padding: 0; font-size: 14px; font-weight: 600; }
+.auth-form .registration-role { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; cursor: pointer; }
+.auth-form .registration-role.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 1px #2563eb; }
+.auth-form .registration-role input { width: auto; margin: 3px 0 0; padding: 0; accent-color: #2563eb; }
+.registration-role span { display: grid; gap: 4px; }
+.registration-role small { color: #64748b; font-size: 12px; font-weight: 400; line-height: 1.45; }
+.registration-single-role { display: grid; gap: 4px; padding: 12px; border: 1px solid #bfdbfe; border-radius: 10px; background: #eff6ff; color: #1e3a8a; font-size: 14px; }
+.registration-single-role span { color: #64748b; font-size: 12px; }
 
 .pc-shell { min-height: 100vh; }
 .pc-header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 32px; height: 64px; background: rgba(255, 255, 255, .94); border-bottom: 1px solid #e2e8f0; backdrop-filter: blur(12px); }

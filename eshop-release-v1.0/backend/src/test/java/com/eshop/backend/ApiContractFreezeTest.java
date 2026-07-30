@@ -129,7 +129,7 @@ class ApiContractFreezeTest {
     @Test
     void frozenV1RequestJsonFieldsDoNotDrift() {
         Map<Class<?>, List<String>> expected = new LinkedHashMap<>();
-        expected.put(RegisterRequest.class, List.of("username", "password", "nickname"));
+        expected.put(RegisterRequest.class, List.of("username", "password", "nickname", "role"));
         expected.put(LoginRequest.class, List.of("username", "password"));
         expected.put(UserProfileRequest.class, List.of("nickname", "phone"));
         expected.put(AddressRequest.class,

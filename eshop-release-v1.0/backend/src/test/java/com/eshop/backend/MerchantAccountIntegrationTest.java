@@ -58,33 +58,41 @@ class MerchantAccountIntegrationTest {
                 .andExpect(status().isOk());
         String buyerToken = login(buyerUsername, "test123456", "USER");
 
-        MvcResult sellerCreated = mockMvc.perform(post("/admin/users")
-                        .header("Authorization", bearer(adminToken))
+        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(Map.of(
                                 "username", sellerUsername,
                                 "password", "seller123",
                                 "nickname", "测试商家",
-                                "phone", "13800138000",
-                                "role", "SELLER",
-                                "status", "ENABLED"))))
+                                "role", "SELLER"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.role").value("SELLER"))
-                .andExpect(jsonPath("$.data.status").value("ENABLED"))
-                .andReturn();
-        long sellerId = responseData(sellerCreated).path("id").asLong();
+                .andExpect(jsonPath("$.code").value(0));
 
-        mockMvc.perform(post("/admin/users")
-                        .header("Authorization", bearer(adminToken))
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("username", sellerUsername, "password", "seller123"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(40302));
+
+        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(Map.of(
                                 "username", sellerUsername,
                                 "password", "seller123",
                                 "nickname", "重复商家",
-                                "role", "SELLER",
-                                "status", "ENABLED"))))
+                                "role", "SELLER"))))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value(40901));
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "username", "public_admin_" + suffix,
+                                "password", "seller123",
+                                "nickname", "非法管理员",
+                                "role", "ADMIN"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(40001));
 
         mockMvc.perform(post("/admin/users")
                         .header("Authorization", bearer(adminToken))
@@ -104,14 +112,25 @@ class MerchantAccountIntegrationTest {
                 .andExpect(jsonPath("$.data.managedAccountCount").value(2))
                 .andExpect(jsonPath("$.data.buyerCount").value(1))
                 .andExpect(jsonPath("$.data.sellerCount").value(1))
-                .andExpect(jsonPath("$.data.enabledCount").value(2));
+                .andExpect(jsonPath("$.data.enabledCount").value(1))
+                .andExpect(jsonPath("$.data.disabledCount").value(1));
 
-        mockMvc.perform(get("/admin/users")
+        MvcResult sellerPage = mockMvc.perform(get("/admin/users")
                         .param("role", "SELLER")
                         .header("Authorization", bearer(adminToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.total").value(1))
-                .andExpect(jsonPath("$.data.records[0].username").value(sellerUsername));
+                .andExpect(jsonPath("$.data.records[0].username").value(sellerUsername))
+                .andExpect(jsonPath("$.data.records[0].status").value("DISABLED"))
+                .andReturn();
+        long sellerId = responseData(sellerPage).path("records").path(0).path("id").asLong();
+
+        mockMvc.perform(patch("/admin/users/{id}/status", sellerId)
+                        .header("Authorization", bearer(adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"ENABLED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("ENABLED"));
 
         String sellerToken = login(sellerUsername, "seller123", "SELLER");
         mockMvc.perform(get("/admin/dashboard/summary")
