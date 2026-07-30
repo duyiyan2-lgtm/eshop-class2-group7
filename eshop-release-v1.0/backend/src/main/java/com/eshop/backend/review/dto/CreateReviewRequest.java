@@ -23,7 +23,6 @@ public record CreateReviewRequest(
         @Size(max = 1000, message = "评价内容不能超过1000个字符")
         String content,
 
-        @Size(max = 3, message = "评价图片最多上传3张")
-        List<@Size(max = 500, message = "图片地址过长") String> imageUrls
+        List<String> imageUrls
 ) {
 }

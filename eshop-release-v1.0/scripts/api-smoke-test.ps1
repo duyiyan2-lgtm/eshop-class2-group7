@@ -61,6 +61,7 @@ function Remove-SmokeFixtures {
 START TRANSACTION;
 DELETE FROM product_review WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB'));
 DELETE FROM product_favorite WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB'));
+DELETE FROM product_browse_history WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB'));
 DELETE FROM payment_record WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB'));
 DELETE FROM order_status_log WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB')));
 DELETE FROM order_item WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB')));
@@ -271,6 +272,10 @@ try {
     Assert-Equal $forbidden.Body.code 40301 "ordinary user blocked from admin API"
     $dashboardForbidden = Invoke-Api GET "admin/dashboard/summary" $null $tokenA @(403)
     Assert-Equal $dashboardForbidden.Body.code 40301 "ordinary user blocked from dashboard"
+    $salesTrendForbidden = Invoke-Api GET "admin/dashboard/sales-trend" $null $tokenA @(403)
+    Assert-Equal $salesTrendForbidden.Body.code 40301 "ordinary user blocked from sales trend"
+    $topProductsForbidden = Invoke-Api GET "admin/dashboard/top-products" $null $tokenA @(403)
+    Assert-Equal $topProductsForbidden.Body.code 40301 "ordinary user blocked from top products"
     $inventoryForbidden = Invoke-Api GET "admin/inventory/alerts" $null $tokenA @(403)
     Assert-Equal $inventoryForbidden.Body.code 40301 "ordinary user blocked from inventory alerts"
     $reviewsForbidden = Invoke-Api GET "admin/reviews" $null $tokenA @(403)
@@ -356,6 +361,27 @@ try {
 
     $search = Invoke-Api GET ("products?keyword=" + [Uri]::EscapeDataString($productName)) $null $null
     Assert-Equal $search.Body.data.total 1 "product keyword search"
+
+    $anonymousHistory = Invoke-Api GET "browse-history" $null $null @(401)
+    Assert-Equal $anonymousHistory.Body.code 40101 "browse history requires login"
+    $null = Invoke-Api POST "browse-history/$productId" $null $tokenA
+    $null = Invoke-Api POST "browse-history/$productId" $null $tokenA
+    $historyPage = Invoke-Api GET "browse-history?current=1&size=10" $null $tokenA
+    Assert-Equal $historyPage.Body.data.total 1 "duplicate browse history is idempotent"
+    Assert-Equal $historyPage.Body.data.records[0].productId $productId "browse history product detail"
+    Assert-Equal $historyPage.Body.data.records[0].totalStock 10 "browse history product stock"
+    $foreignHistory = Invoke-Api GET "browse-history?current=1&size=10" $null $tokenB
+    Assert-Equal $foreignHistory.Body.data.total 0 "browse history ownership isolation"
+    $null = Invoke-Api DELETE "browse-history/$productId" $null $tokenB
+    $historyAfterForeignRemoval = Invoke-Api GET "browse-history" $null $tokenA
+    Assert-Equal $historyAfterForeignRemoval.Body.data.total 1 "foreign history removal does not affect owner"
+    $null = Invoke-Api DELETE "browse-history/$productId" $null $tokenA
+    $null = Invoke-Api DELETE "browse-history/$productId" $null $tokenA
+    $null = Invoke-Api POST "browse-history/$productId" $null $tokenA
+    $null = Invoke-Api DELETE "browse-history" $null $tokenA
+    $null = Invoke-Api DELETE "browse-history" $null $tokenA
+    $emptyHistory = Invoke-Api GET "browse-history" $null $tokenA
+    Assert-Equal $emptyHistory.Body.data.total 0 "browse history clear is idempotent"
 
     $anonymousFavorites = Invoke-Api GET "favorites" $null $null @(401)
     Assert-Equal $anonymousFavorites.Body.code 40101 "favorite list requires login"
@@ -462,12 +488,38 @@ try {
         content = "Foreign order review"
     } $tokenB @(404)
     Assert-Equal $foreignReview.Body.code 40417 "review ownership isolation"
+    $tooManyImages = Invoke-Api POST "reviews" @{
+        orderItemId = $orderItemId
+        rating = 5
+        content = "Too many review images"
+        imageUrls = @(
+            "/api/uploads/one.png",
+            "/api/uploads/two.png",
+            "/api/uploads/three.png",
+            "/api/uploads/four.png"
+        )
+    } $tokenA @(400)
+    Assert-Equal $tooManyImages.Body.code 40033 "review image count limit"
+    $invalidImageUrl = Invoke-Api POST "reviews" @{
+        orderItemId = $orderItemId
+        rating = 5
+        content = "Invalid review image"
+        imageUrls = @("https://example.com/external.png")
+    } $tokenA @(400)
+    Assert-Equal $invalidImageUrl.Body.code 40034 "review image URL validation"
     $createdReview = Invoke-Api POST "reviews" @{
         orderItemId = $orderItemId
         rating = 5
         content = "  Smoke review works  "
+        imageUrls = @(
+            "/api/uploads/smoke-review-one.png",
+            "/api/uploads/smoke-review-two.jpg"
+        )
     } $tokenA
     Assert-Equal $createdReview.Body.data.content "Smoke review works" "create trimmed product review"
+    Assert-Equal @($createdReview.Body.data.imageUrls).Count 2 "create review with images"
+    Assert-Equal $createdReview.Body.data.imageUrls[0] "/api/uploads/smoke-review-one.png" `
+        "created review image detail"
     $duplicateReview = Invoke-Api POST "reviews" @{
         orderItemId = $orderItemId
         rating = 4
@@ -477,6 +529,8 @@ try {
     $publicReviews = Invoke-Api GET "products/$productId/reviews?current=1&size=10" $null $null
     Assert-Equal $publicReviews.Body.data.total 1 "public product review list"
     Assert-Equal $publicReviews.Body.data.records[0].rating 5 "public product review rating"
+    Assert-Equal @($publicReviews.Body.data.records[0].imageUrls).Count 2 `
+        "public product review images"
     Assert-True (-not ($publicReviews.Body.data.records[0].PSObject.Properties.Name -contains "orderId")) `
         "public review hides order identifiers"
     $reviewSummary = Invoke-Api GET "products/$productId/reviews/summary" $null $null
@@ -490,6 +544,8 @@ try {
     Assert-Equal $adminReviews.Body.data.total 1 "administrator review search"
     Assert-Equal $adminReviews.Body.data.records[0].id $createdReview.Body.data.id `
         "administrator review detail"
+    Assert-Equal @($adminReviews.Body.data.records[0].imageUrls).Count 2 `
+        "administrator review images"
     $hiddenReview = Invoke-Api PATCH "admin/reviews/$($createdReview.Body.data.id)/status" @{
         status = "HIDDEN"
     } $adminToken
@@ -504,6 +560,7 @@ try {
     Assert-Equal $restoredReview.Body.data.status "PUBLISHED" "administrator restores review"
     $myReviews = Invoke-Api GET "reviews/mine?current=1&size=10" $null $tokenA
     Assert-Equal $myReviews.Body.data.records[0].orderItemId $orderItemId "my review list"
+    Assert-Equal @($myReviews.Body.data.records[0].imageUrls).Count 2 "my review images"
     $foreignReviewList = Invoke-Api GET "reviews/mine" $null $tokenB
     Assert-Equal $foreignReviewList.Body.data.total 0 "my reviews are user scoped"
     $hotProducts = Invoke-Api GET "products/hot-ranking?days=30&limit=20" $null $null
@@ -512,6 +569,21 @@ try {
     })
     Assert-Equal $hotProduct.Count 1 "completed order appears in hot product ranking"
     Assert-Equal $hotProduct[0].salesQuantity 2 "hot product ranking sales quantity"
+    $invalidSalesTrend = Invoke-Api GET "admin/dashboard/sales-trend?days=0" $null $adminToken @(400)
+    Assert-Equal $invalidSalesTrend.Body.code 40001 "sales trend day boundary"
+    $salesTrend = Invoke-Api GET "admin/dashboard/sales-trend?days=7" $null $adminToken
+    Assert-Equal $salesTrend.Body.data.days 7 "sales trend range"
+    Assert-Equal @($salesTrend.Body.data.points).Count 7 "sales trend fills missing dates"
+    $trendSalesAmount = @($salesTrend.Body.data.points |
+        ForEach-Object { [decimal]$_.salesAmount } |
+        Measure-Object -Sum).Sum
+    Assert-True ([decimal]$trendSalesAmount -ge 24.68) "sales trend includes completed order"
+    $topProducts = Invoke-Api GET "admin/dashboard/top-products?limit=20" $null $adminToken
+    $topProduct = @($topProducts.Body.data.items | Where-Object {
+        [long]$_.productId -eq [long]$productId
+    })
+    Assert-Equal $topProduct.Count 1 "dashboard top products include completed order"
+    Assert-Equal $topProduct[0].soldQuantity 2 "dashboard top product quantity"
 
     $cartForCancel = Invoke-Api POST "cart" @{
         skuId = $skuId

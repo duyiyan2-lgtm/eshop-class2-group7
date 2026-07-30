@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -107,7 +108,38 @@ class ReviewIntegrationTest {
         mockMvc.perform(post("/reviews")
                         .header("Authorization", bearer(owner.token()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(reviewJson(itemId, 5, "  商品符合描述  ")))
+                        .content(reviewJsonWithImages(
+                                itemId,
+                                5,
+                                "图片过多",
+                                List.of(
+                                        "/api/uploads/one.png",
+                                        "/api/uploads/two.png",
+                                        "/api/uploads/three.png",
+                                        "/api/uploads/four.png"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(40033));
+        mockMvc.perform(post("/reviews")
+                        .header("Authorization", bearer(owner.token()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reviewJsonWithImages(
+                                itemId,
+                                5,
+                                "非法图片地址",
+                                List.of("https://example.com/not-ours.png"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(40034));
+
+        mockMvc.perform(post("/reviews")
+                        .header("Authorization", bearer(owner.token()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reviewJsonWithImages(
+                                itemId,
+                                5,
+                                "  商品符合描述  ",
+                                List.of(
+                                        "/api/uploads/review-one.png",
+                                        "/api/uploads/review-two.jpg"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.orderItemId").value(itemId))
@@ -115,7 +147,9 @@ class ReviewIntegrationTest {
                 .andExpect(jsonPath("$.data.rating").value(5))
                 .andExpect(jsonPath("$.data.content").value("商品符合描述"))
                 .andExpect(jsonPath("$.data.imageUrls").isArray())
-                .andExpect(jsonPath("$.data.imageUrls.length()").value(0));
+                .andExpect(jsonPath("$.data.imageUrls.length()").value(2))
+                .andExpect(jsonPath("$.data.imageUrls[0]").value("/api/uploads/review-one.png"))
+                .andExpect(jsonPath("$.data.imageUrls[1]").value("/api/uploads/review-two.jpg"));
 
         mockMvc.perform(post("/reviews")
                         .header("Authorization", bearer(owner.token()))
@@ -136,7 +170,9 @@ class ReviewIntegrationTest {
                 .andExpect(jsonPath("$.data.records[0].userId").doesNotExist())
                 .andExpect(jsonPath("$.data.records[0].orderId").doesNotExist())
                 .andExpect(jsonPath("$.data.records[0].orderItemId").doesNotExist())
-                .andExpect(jsonPath("$.data.records[0].imageUrls").isArray());
+                .andExpect(jsonPath("$.data.records[0].imageUrls").isArray())
+                .andExpect(jsonPath("$.data.records[0].imageUrls.length()").value(2))
+                .andExpect(jsonPath("$.data.records[0].imageUrls[0]").value("/api/uploads/review-one.png"));
 
         mockMvc.perform(get("/products/{productId}/reviews/summary", productId))
                 .andExpect(status().isOk())
@@ -156,7 +192,8 @@ class ReviewIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.total").value(1))
                 .andExpect(jsonPath("$.data.records[0].orderId").value(orderId))
-                .andExpect(jsonPath("$.data.records[0].orderItemId").value(itemId));
+                .andExpect(jsonPath("$.data.records[0].orderItemId").value(itemId))
+                .andExpect(jsonPath("$.data.records[0].imageUrls.length()").value(2));
         mockMvc.perform(get("/reviews/mine")
                         .header("Authorization", bearer(other.token())))
                 .andExpect(status().isOk())
@@ -237,6 +274,17 @@ class ReviewIntegrationTest {
                 "orderItemId", orderItemId,
                 "rating", rating,
                 "content", content));
+    }
+
+    private String reviewJsonWithImages(long orderItemId,
+                                        int rating,
+                                        String content,
+                                        List<String> imageUrls) throws Exception {
+        return objectMapper.writeValueAsString(Map.of(
+                "orderItemId", orderItemId,
+                "rating", rating,
+                "content", content,
+                "imageUrls", imageUrls));
     }
 
     private String bearer(String token) {
