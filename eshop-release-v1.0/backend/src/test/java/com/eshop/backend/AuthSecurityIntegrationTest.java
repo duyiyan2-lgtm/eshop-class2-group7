@@ -169,6 +169,19 @@ class AuthSecurityIntegrationTest {
     void completeCommerceFlowWorksFromCatalogToReceipt() throws Exception {
         String suffix = String.valueOf(System.nanoTime());
         String adminToken = loginAndGetToken("admin", "admin123", "ADMIN");
+        String sellerUsername = "merchant_" + suffix;
+        mockMvc.perform(post("/admin/users")
+                        .header("Authorization", bearer(adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "username", sellerUsername,
+                                "password", "seller123",
+                                "nickname", "发货测试商家",
+                                "role", "SELLER",
+                                "status", "ENABLED"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.role").value("SELLER"));
+        String sellerToken = loginAndGetToken(sellerUsername, "seller123", "SELLER");
 
         long categoryId = dataId(mockMvc.perform(post("/admin/categories")
                         .header("Authorization", bearer(adminToken))
@@ -270,7 +283,12 @@ class AuthSecurityIntegrationTest {
                 .andExpect(jsonPath("$.data.status").value("SUCCESS"));
 
         mockMvc.perform(post("/admin/orders/{id}/ship", orderId)
-                        .header("Authorization", bearer(adminToken)))
+                        .header("Authorization", bearer(userToken)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(40301));
+
+        mockMvc.perform(post("/admin/orders/{id}/ship", orderId)
+                        .header("Authorization", bearer(sellerToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("SHIPPED"));
 

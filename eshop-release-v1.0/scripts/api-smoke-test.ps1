@@ -547,8 +547,8 @@ try {
     $duplicatePay = Invoke-Api POST "orders/$orderId/pay" $null $tokenA @(409)
     Assert-Equal $duplicatePay.Body.code 40912 "duplicate payment rejected"
 
-    $shipped = Invoke-Api POST "admin/orders/$orderId/ship" $null $adminToken
-    Assert-Equal $shipped.Body.data.status "SHIPPED" "administrator shipment"
+    $shipped = Invoke-Api POST "admin/orders/$orderId/ship" $null $sellerToken
+    Assert-Equal $shipped.Body.data.status "SHIPPED" "seller shipment"
     $completed = Invoke-Api POST "orders/$orderId/confirm" $null $tokenA
     Assert-Equal $completed.Body.data.status "COMPLETED" "confirm receipt"
     $logs = Invoke-Api GET "orders/$orderId/logs" $null $tokenA

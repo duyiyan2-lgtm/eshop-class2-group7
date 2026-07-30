@@ -6,6 +6,7 @@ import com.eshop.backend.order.dto.OrderResponse;
 import com.eshop.backend.order.dto.OrderStatusLogResponse;
 import com.eshop.backend.security.LoginUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/orders")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
 public class AdminOrderController {
     private final OrderService orderService;
 
@@ -43,9 +45,9 @@ public class AdminOrderController {
 
     @PostMapping("/{id}/ship")
     public ApiResponse<OrderResponse> ship(
-            @AuthenticationPrincipal LoginUser admin,
+            @AuthenticationPrincipal LoginUser operator,
             @PathVariable Long id) {
-        return ApiResponse.success(orderService.ship(admin, id));
+        return ApiResponse.success(orderService.ship(operator, id));
     }
 
     @PostMapping("/{id}/cancel")

@@ -263,7 +263,7 @@ onMounted(loadOrders)
       <div>
         <p>ORDER FULFILLMENT</p>
         <h1>订单管理</h1>
-        <span>查询全站订单，核对收货信息，并处理订单取消与发货。</span>
+        <span>核对买家订单与收货信息；已支付订单可由商家确认发货。</span>
       </div>
       <div class="heading-summary">
         <strong>{{ total }}</strong>
@@ -350,7 +350,7 @@ onMounted(loadOrders)
               :loading="operatingId === row.id"
               @click="ship(row)"
             >
-              发货
+              确认发货
             </el-button>
             <el-button
               v-if="row.status === 'PENDING_PAYMENT'"
