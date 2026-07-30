@@ -153,7 +153,13 @@ const addToCart = async () => {
       skuId: selectedSku.value.id,
       quantity: quantity.value,
     })
-    ElMessage.success(`已加入购物车，当前数量 ${item.quantity}`)
+    ElMessage({
+      type: 'success',
+      message: `已加入购物车，当前数量 ${item.quantity}`,
+      duration: 2400,
+      showClose: true,
+      grouping: true,
+    })
   } catch (error) {
     ElMessage.error(error.message || '加入购物车失败')
   } finally {
