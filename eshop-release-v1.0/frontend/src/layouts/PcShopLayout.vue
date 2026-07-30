@@ -26,6 +26,7 @@ const logout = async () => {
         <RouterLink to="/pc/profile">个人资料</RouterLink>
       </nav>
       <div class="pc-user-actions">
+        <RouterLink class="workspace-switch-link" to="/">切换入口</RouterLink>
         <RouterLink v-if="!auth.isLoggedIn" to="/pc/login">登录 / 注册</RouterLink>
         <template v-else>
           <span>你好，{{ auth.user?.nickname }}</span>

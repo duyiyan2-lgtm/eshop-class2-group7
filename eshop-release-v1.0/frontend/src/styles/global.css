@@ -15,6 +15,8 @@ a { color: inherit; text-decoration: none; }
 .auth-form button { border: 0; border-radius: 8px; padding: 11px 14px; background: #2563eb; color: #fff; cursor: pointer; font: inherit; font-weight: 600; }
 .auth-form button:disabled { opacity: .6; cursor: not-allowed; }
 .auth-form .auth-link { padding: 0; background: transparent; color: #2563eb; font-weight: 400; }
+.auth-portal-link { padding-top: 4px; color: #64748b; font-size: 13px; text-align: center; }
+.auth-portal-link:hover { color: #2563eb; }
 .registration-roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; border: 0; }
 .registration-roles legend { grid-column: 1 / -1; margin-bottom: 8px; padding: 0; font-size: 14px; font-weight: 600; }
 .auth-form .registration-role { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; cursor: pointer; }
@@ -34,11 +36,14 @@ a { color: inherit; text-decoration: none; }
 .pc-header nav a.router-link-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; background: #2563eb; border-radius: 3px 3px 0 0; content: ""; }
 .nav-disabled { color: #94a3b8; }
 .pc-user-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.workspace-switch-link { color: #2563eb; font-weight: 700; }
 .pc-main { padding: 20px; }
 
 .mobile-shell { min-height: 100vh; background: #f7f8fa; }
 .mobile-main { min-height: calc(100vh - 96px); padding: 12px; }
 .mobile-login-link { color: #2563eb; font-size: 14px; }
+.mobile-nav-actions { display: flex; align-items: center; gap: 9px; }
+.mobile-nav-actions .workspace-switch-link { font-size: 13px; }
 .mobile-tabbar { --van-tabbar-item-active-color: #2563eb; }
 
 .admin-shell { min-height: 100vh; }
@@ -53,6 +58,7 @@ a { color: inherit; text-decoration: none; }
 .admin-header > div { display: grid; gap: 3px; }
 .admin-header > div b { color: #0f172a; }
 .admin-header > div span { color: #64748b; font-size: 12px; }
+.admin-header .admin-header-actions { display: flex; align-items: center; gap: 8px; }
 .admin-main { padding: 24px; background: #f5f7fb; }
 
 .terminal-welcome { max-width: 860px; margin: 24px auto; padding: 36px; background: #fff; border-radius: 16px; box-shadow: 0 8px 24px rgba(15, 23, 42, .06); }

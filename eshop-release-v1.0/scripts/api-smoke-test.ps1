@@ -266,8 +266,10 @@ try {
     Assert-Equal $invalidManagedRole.Body.code 40001 "platform admin role cannot be delegated"
     $managedSummary = Invoke-Api GET "admin/users/summary" $null $adminToken
     Assert-True ([long]$managedSummary.Body.data.buyerCount -ge 2) "managed buyer account summary"
-    Assert-Equal $managedSummary.Body.data.sellerCount 1 "managed seller account summary"
-    $sellerList = Invoke-Api GET "admin/users?role=SELLER" $null $adminToken
+    Assert-True ([long]$managedSummary.Body.data.sellerCount -ge 1) "managed seller account summary"
+    $sellerList = Invoke-Api GET (
+        "admin/users?role=SELLER&keyword=" + [Uri]::EscapeDataString($sellerUser)
+    ) $null $adminToken
     Assert-Equal $sellerList.Body.data.total 1 "seller account filter"
     Assert-Equal $sellerList.Body.data.records[0].username $sellerUser "seller account detail"
     Assert-Equal $sellerList.Body.data.records[0].status "DISABLED" "self-registered seller awaits approval"

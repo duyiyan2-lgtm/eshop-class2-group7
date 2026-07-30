@@ -17,6 +17,7 @@ const logout = async () => {
     <el-aside width="220px" class="admin-aside">
       <h1><span>E</span>-Shop 平台</h1>
       <el-menu router :default-active="route.path">
+        <el-menu-item index="/">统一入口</el-menu-item>
         <el-menu-item index="/admin/users">买家与卖家</el-menu-item>
       </el-menu>
       <div class="merchant-entry">
@@ -30,7 +31,10 @@ const logout = async () => {
           <b>{{ route.meta.title || '平台账号管理' }}</b>
           <span>平台管理员：{{ auth.user?.nickname }}</span>
         </div>
-        <el-button type="primary" plain @click="logout">退出登录</el-button>
+        <div class="admin-header-actions">
+          <el-button @click="router.push('/')">切换入口</el-button>
+          <el-button type="primary" plain @click="logout">退出登录</el-button>
+        </div>
       </el-header>
       <el-main class="admin-main"><RouterView /></el-main>
     </el-container>

@@ -94,18 +94,21 @@ watch(
       @click-left="goBack"
     >
       <template #right>
-        <van-button
-          v-if="auth.isLoggedIn"
-          :loading="loggingOut"
-          size="small"
-          type="primary"
-          plain
-          hairline
-          @click="logout"
-        >
-          退出
-        </van-button>
-        <RouterLink v-else class="mobile-login-link" :to="loginTarget">登录</RouterLink>
+        <div class="mobile-nav-actions">
+          <RouterLink class="workspace-switch-link" to="/">切换</RouterLink>
+          <van-button
+            v-if="auth.isLoggedIn"
+            :loading="loggingOut"
+            size="small"
+            type="primary"
+            plain
+            hairline
+            @click="logout"
+          >
+            退出
+          </van-button>
+          <RouterLink v-else class="mobile-login-link" :to="loginTarget">登录</RouterLink>
+        </div>
       </template>
     </van-nav-bar>
     <main class="mobile-main"><RouterView /></main>

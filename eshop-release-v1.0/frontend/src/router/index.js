@@ -3,7 +3,12 @@ import { pinia } from '../pinia'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
-  { path: '/', redirect: '/pc' },
+  {
+    path: '/',
+    name: 'portal',
+    component: () => import('../views/PortalView.vue'),
+    meta: { title: '统一入口' },
+  },
   {
     path: '/pc/login',
     name: 'pc-login',
@@ -290,7 +295,7 @@ const routes = [
       },
     ],
   },
-  { path: '/:pathMatch(.*)*', redirect: '/pc' },
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
 const router = createRouter({

@@ -174,5 +174,6 @@ const submit = async () => {
     <button v-if="canRegister" class="auth-link" type="button" @click="switchMode">
       {{ mode === 'login' ? '没有账号？选择身份注册' : '已有账号？返回登录' }}
     </button>
+    <RouterLink class="auth-portal-link" to="/">返回统一入口，切换其他端</RouterLink>
   </form>
 </template>
