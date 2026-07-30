@@ -13,7 +13,7 @@ const logout = async () => {
 </script>
 
 <template>
-  <el-container class="admin-shell">
+  <el-container class="admin-shell platform-shell">
     <el-aside width="220px" class="admin-aside">
       <h1><span>E</span>-Shop 平台</h1>
       <el-menu router :default-active="route.path">
@@ -25,7 +25,7 @@ const logout = async () => {
         <RouterLink to="/seller">进入商家工作台 →</RouterLink>
       </div>
     </el-aside>
-    <el-container>
+    <el-container class="admin-workspace">
       <el-header class="admin-header">
         <div>
           <b>{{ route.meta.title || '平台账号管理' }}</b>

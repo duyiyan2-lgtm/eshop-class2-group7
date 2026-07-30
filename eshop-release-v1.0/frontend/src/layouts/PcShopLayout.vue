@@ -14,7 +14,7 @@ const logout = async () => {
 <template>
   <el-container class="pc-shell">
     <el-header class="pc-header">
-      <RouterLink class="brand" to="/pc">E-Shop</RouterLink>
+      <RouterLink class="brand" to="/pc"><span>E</span>-Shop<small>PC STORE</small></RouterLink>
       <nav>
         <RouterLink to="/pc/products">商品商城</RouterLink>
         <RouterLink to="/pc/cart">购物车</RouterLink>
