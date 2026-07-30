@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { showConfirmDialog, showToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { cancelOrder, confirmOrder, getOrder, getOrderLogs } from '../../api/order'
+import { uploadUserImage } from '../../api/file'
 import { createReview, getReviewedOrderItemIds } from '../../api/review'
 import { formatDateTime, formatMoney, orderStatusInfo, specsText } from '../../utils/shop'
 
@@ -23,7 +24,9 @@ const reviewItem = ref(null)
 const reviewForm = reactive({
   rating: 5,
   content: '',
+  imageUrls: [],
 })
+const reviewUploading = ref(false)
 let requestSequence = 0
 let reviewRequestSequence = 0
 
@@ -99,13 +102,40 @@ const openReview = (item) => {
   reviewItem.value = item
   reviewForm.rating = 5
   reviewForm.content = ''
+  reviewForm.imageUrls = []
   showReview.value = true
+}
+
+const onReviewImageChange = async (event) => {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file) return
+  if (reviewForm.imageUrls.length >= 3) {
+    showToast({ type: 'fail', message: '评价图片最多上传 3 张' })
+    return
+  }
+  reviewUploading.value = true
+  try {
+    const data = await uploadUserImage(file)
+    if (data?.url) {
+      reviewForm.imageUrls = [...reviewForm.imageUrls, data.url]
+    }
+  } catch (error) {
+    showToast({ type: 'fail', message: error.message || '图片上传失败' })
+  } finally {
+    reviewUploading.value = false
+  }
+}
+
+const removeReviewImage = (index) => {
+  reviewForm.imageUrls = reviewForm.imageUrls.filter((_, i) => i !== index)
 }
 
 const submitReview = async () => {
   if (reviewSubmitting.value || !reviewItem.value) return false
   const content = reviewForm.content.trim()
-  if (!Number.isInteger(reviewForm.rating) || reviewForm.rating < 1 || reviewForm.rating > 5) {
+  const rating = Number(reviewForm.rating)
+  if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
     showToast({ type: 'fail', message: '请选择 1—5 星评分' })
     return false
   }
@@ -116,25 +146,31 @@ const submitReview = async () => {
     })
     return false
   }
+  if (reviewForm.imageUrls.length > 3) {
+    showToast({ type: 'fail', message: '评价图片最多上传 3 张' })
+    return false
+  }
 
   const orderItemId = reviewItem.value.id
   reviewSubmitting.value = true
   try {
     await createReview({
       orderItemId,
-      rating: reviewForm.rating,
+      rating: Math.round(rating),
       content,
+      imageUrls: reviewForm.imageUrls,
     })
     reviewedItemIds.value = new Set([...reviewedItemIds.value, orderItemId])
     showToast({ type: 'success', message: '评价发布成功' })
     return true
   } catch (error) {
-    if (String(error.message || '').includes('已经评价')) {
+    const message = error.message || '评价发布失败'
+    if (message.includes('已经评价')) {
       reviewedItemIds.value = new Set([...reviewedItemIds.value, orderItemId])
-      showToast(error.message)
+      showToast(message)
       return true
     }
-    showToast({ type: 'fail', message: error.message || '评价发布失败' })
+    showToast({ type: 'fail', message })
     return false
   } finally {
     reviewSubmitting.value = false
@@ -375,6 +411,22 @@ watch(() => route.params.id, loadDetail, { immediate: true })
           show-word-limit
           placeholder="请分享商品质量、规格和使用体验"
         />
+        <div class="review-images">
+          <div v-for="(url, index) in reviewForm.imageUrls" :key="url" class="review-image-item">
+            <img :src="url" alt="评价图片" />
+            <button type="button" @click="removeReviewImage(index)">删</button>
+          </div>
+          <label v-if="reviewForm.imageUrls.length < 3" class="upload-tile">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              hidden
+              :disabled="reviewUploading || reviewSubmitting"
+              @change="onReviewImageChange"
+            />
+            <span>{{ reviewUploading ? '…' : '+图' }}</span>
+          </label>
+        </div>
       </div>
     </van-dialog>
   </section>
@@ -417,6 +469,11 @@ watch(() => route.params.id, loadDetail, { immediate: true })
   font-weight: 800;
 }
 .thumb img { width: 100%; height: 100%; object-fit: contain; }
+.review-images { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 16px 12px; }
+.review-image-item { position: relative; width: 64px; height: 64px; overflow: hidden; border-radius: 8px; background: #f1f5f9; }
+.review-image-item img { width: 100%; height: 100%; object-fit: cover; }
+.review-image-item button { position: absolute; right: 2px; bottom: 2px; padding: 0 4px; border: 0; border-radius: 4px; color: #fff; background: rgba(15, 23, 42, .75); font-size: 10px; }
+.upload-tile { display: grid; width: 64px; height: 64px; place-items: center; border: 1px dashed #cbd5e1; border-radius: 8px; color: #64748b; background: #f8fafc; font-size: 12px; }
 .item-value { display: grid; gap: 4px; text-align: right; }
 .item-value span { color: #969799; font-size: 12px; }
 .item-value strong { color: #dc2626; font-size: 14px; }

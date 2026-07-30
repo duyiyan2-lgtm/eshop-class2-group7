@@ -125,6 +125,7 @@ onMounted(refreshProfile)
       <van-cell title="我的订单" is-link to="/m/orders" icon="orders-o" />
       <van-cell title="我的评价" is-link to="/m/reviews" icon="comment-o" />
       <van-cell title="我的收藏" is-link to="/m/favorites" icon="like-o" />
+      <van-cell title="浏览历史" is-link to="/m/history" icon="clock-o" />
       <van-cell title="收货地址" is-link to="/m/addresses" icon="location-o" />
       <van-cell title="购物车" is-link to="/m/cart" icon="cart-o" />
       <van-cell title="编辑资料" is-link icon="edit" @click="openEdit" />

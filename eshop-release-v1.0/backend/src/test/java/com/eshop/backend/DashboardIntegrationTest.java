@@ -87,6 +87,33 @@ class DashboardIntegrationTest {
                 .andExpect(jsonPath("$.data.lowStockSkuCount").value(1))
                 .andExpect(jsonPath("$.data.paidSalesAmount").value(90.0))
                 .andExpect(jsonPath("$.data.generatedAt").exists());
+
+        mockMvc.perform(get("/admin/dashboard/sales-trend")
+                        .param("days", "7")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(40301));
+
+        mockMvc.perform(get("/admin/dashboard/sales-trend")
+                        .param("days", "7")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.days").value(7))
+                .andExpect(jsonPath("$.data.points.length()").value(7));
+
+        mockMvc.perform(get("/admin/dashboard/top-products")
+                        .param("limit", "5")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.limit").value(5))
+                .andExpect(jsonPath("$.data.items").isArray());
+
+        mockMvc.perform(get("/admin/dashboard/sales-trend")
+                        .param("days", "0")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isBadRequest());
     }
 
     private String login(String username, String password) throws Exception {

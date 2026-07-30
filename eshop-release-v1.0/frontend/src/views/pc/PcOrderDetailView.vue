@@ -8,6 +8,7 @@ import {
   getOrder,
   getOrderLogs,
 } from '../../api/order'
+import { uploadUserImage } from '../../api/file'
 import { createReview, getReviewedOrderItemIds } from '../../api/review'
 import {
   formatDateTime,
@@ -32,7 +33,9 @@ const reviewItem = ref(null)
 const reviewForm = reactive({
   rating: 5,
   content: '',
+  imageUrls: [],
 })
+const reviewUploading = ref(false)
 let reviewRequestSequence = 0
 const status = computed(() => orderStatusInfo(order.value?.status))
 
@@ -131,18 +134,49 @@ const openReview = (item) => {
   reviewItem.value = item
   reviewForm.rating = 5
   reviewForm.content = ''
+  reviewForm.imageUrls = []
   reviewDialogVisible.value = true
+}
+
+const onReviewImageChange = async (event) => {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file) return
+  if (reviewForm.imageUrls.length >= 3) {
+    ElMessage.warning('评价图片最多上传 3 张')
+    return
+  }
+  reviewUploading.value = true
+  try {
+    const data = await uploadUserImage(file)
+    if (data?.url) {
+      reviewForm.imageUrls = [...reviewForm.imageUrls, data.url]
+    }
+  } catch (error) {
+    ElMessage.error(error.message || '图片上传失败')
+  } finally {
+    reviewUploading.value = false
+  }
+}
+
+const removeReviewImage = (index) => {
+  reviewForm.imageUrls = reviewForm.imageUrls.filter((_, i) => i !== index)
 }
 
 const submitReview = async () => {
   if (reviewSubmitting.value || !reviewItem.value) return
   const content = reviewForm.content.trim()
-  if (!Number.isInteger(reviewForm.rating) || reviewForm.rating < 1 || reviewForm.rating > 5) {
+  const rating = Number(reviewForm.rating)
+  if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
     ElMessage.warning('请选择 1—5 星评分')
     return
   }
   if (!content || content.length > 1000) {
     ElMessage.warning(content ? '评价内容不能超过 1000 个字符' : '请填写评价内容')
+    return
+  }
+  if (reviewForm.imageUrls.length > 3) {
+    ElMessage.warning('评价图片最多上传 3 张')
     return
   }
 
@@ -151,18 +185,22 @@ const submitReview = async () => {
   try {
     await createReview({
       orderItemId,
-      rating: reviewForm.rating,
+      rating: Math.round(rating),
       content,
+      imageUrls: reviewForm.imageUrls,
     })
     reviewedItemIds.value = new Set([...reviewedItemIds.value, orderItemId])
     reviewDialogVisible.value = false
     ElMessage.success('评价发布成功')
   } catch (error) {
-    if (String(error.message || '').includes('已经评价')) {
+    const message = error.message || '评价发布失败'
+    if (message.includes('已经评价')) {
       reviewedItemIds.value = new Set([...reviewedItemIds.value, orderItemId])
       reviewDialogVisible.value = false
+      ElMessage.info(message)
+      return
     }
-    ElMessage.error(error.message || '评价发布失败')
+    ElMessage.error(message)
   } finally {
     reviewSubmitting.value = false
   }
@@ -345,6 +383,23 @@ watch(() => route.params.id, loadDetail, { immediate: true })
           resize="vertical"
           placeholder="请分享商品质量、规格和使用体验"
         />
+        <label>晒图（可选，最多 3 张）</label>
+        <div class="review-images">
+          <div v-for="(url, index) in reviewForm.imageUrls" :key="url" class="review-image-item">
+            <img :src="url" alt="评价图片" />
+            <button type="button" @click="removeReviewImage(index)">删除</button>
+          </div>
+          <label v-if="reviewForm.imageUrls.length < 3" class="upload-tile">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              hidden
+              :disabled="reviewUploading || reviewSubmitting"
+              @change="onReviewImageChange"
+            />
+            <span>{{ reviewUploading ? '上传中…' : '+ 上传' }}</span>
+          </label>
+        </div>
       </div>
       <template #footer>
         <el-button :disabled="reviewSubmitting" @click="reviewDialogVisible = false">
@@ -383,6 +438,11 @@ watch(() => route.params.id, loadDetail, { immediate: true })
 .review-product { display: grid; gap: 5px; padding: 14px; background: #f8fafc; border-radius: 10px; }
 .review-product strong { color: #0f172a; }
 .review-product span { color: #64748b; font-size: 12px; }
+.review-images { display: flex; flex-wrap: wrap; gap: 10px; }
+.review-image-item { position: relative; width: 84px; height: 84px; overflow: hidden; border-radius: 10px; background: #f8fafc; }
+.review-image-item img { width: 100%; height: 100%; object-fit: cover; }
+.review-image-item button { position: absolute; right: 4px; bottom: 4px; padding: 2px 6px; border: 0; border-radius: 6px; color: #fff; background: rgba(15, 23, 42, .72); font-size: 11px; cursor: pointer; }
+.upload-tile { display: grid; width: 84px; height: 84px; place-items: center; border: 1px dashed #cbd5e1; border-radius: 10px; color: #64748b; cursor: pointer; background: #f8fafc; }
 .amount-row { display: flex; align-items: baseline; justify-content: flex-end; gap: 18px; padding-top: 22px; color: #64748b; }
 .amount-row strong { color: #dc2626; font-size: 28px; }
 .info-card dl { display: grid; grid-template-columns: 90px 1fr; gap: 15px; margin: 0; }

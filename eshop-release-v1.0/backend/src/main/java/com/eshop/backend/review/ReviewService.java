@@ -1,10 +1,11 @@
 package com.eshop.backend.review;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.eshop.backend.admin.operationlog.OperationLogAction;
 import com.eshop.backend.catalog.entity.Product;
 import com.eshop.backend.catalog.mapper.ProductMapper;
-import com.eshop.backend.admin.operationlog.OperationLogAction;
 import com.eshop.backend.common.BusinessException;
 import com.eshop.backend.common.ErrorCode;
 import com.eshop.backend.common.PageResult;
@@ -13,10 +14,11 @@ import com.eshop.backend.order.OrderItemMapper;
 import com.eshop.backend.order.OrderService;
 import com.eshop.backend.order.ShopOrder;
 import com.eshop.backend.order.ShopOrderMapper;
-import com.eshop.backend.review.dto.CreateReviewRequest;
 import com.eshop.backend.review.dto.AdminReviewResponse;
+import com.eshop.backend.review.dto.CreateReviewRequest;
 import com.eshop.backend.review.dto.MyReviewResponse;
 import com.eshop.backend.review.dto.ProductReviewResponse;
+import com.eshop.backend.review.dto.ProductReviewRow;
 import com.eshop.backend.review.dto.ProductReviewSummaryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -48,6 +51,7 @@ public class ReviewService {
         if (request.rating() == null || request.rating() < 1 || request.rating() > 5) {
             throw new BusinessException(ErrorCode.REVIEW_RATING_INVALID);
         }
+        String imagesJson = ReviewImages.toJson(request.imageUrls());
 
         OrderItem item = orderItemMapper.selectById(request.orderItemId());
         if (item == null) {
@@ -74,6 +78,7 @@ public class ReviewService {
         review.setOrderItemId(item.getId());
         review.setRating(request.rating());
         review.setContent(content);
+        review.setImagesJson(imagesJson);
         review.setStatus(PUBLISHED);
         review.setCreatedAt(now);
         review.setUpdatedAt(now);
@@ -88,10 +93,11 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public PageResult<ProductReviewResponse> pageByProduct(Long productId, long current, long size) {
         requirePublicProduct(productId);
-        Page<ProductReviewResponse> page = new Page<>(
+        Page<ProductReviewRow> page = new Page<>(
                 Math.max(current, 1),
                 Math.min(Math.max(size, 1), 50));
-        return PageResult.from(reviewMapper.selectProductReviewPage(page, productId));
+        IPage<ProductReviewRow> result = reviewMapper.selectProductReviewPage(page, productId);
+        return mapPage(result, this::toProductResponse);
     }
 
     @Transactional(readOnly = true)
@@ -102,10 +108,11 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public PageResult<MyReviewResponse> pageMine(Long userId, long current, long size) {
-        Page<MyReviewResponse> page = new Page<>(
+        Page<ProductReviewRow> page = new Page<>(
                 Math.max(current, 1),
                 Math.min(Math.max(size, 1), 50));
-        return PageResult.from(reviewMapper.selectMyReviewPage(page, userId));
+        IPage<ProductReviewRow> result = reviewMapper.selectMyReviewPage(page, userId);
+        return mapPage(result, this::toMyResponse);
     }
 
     @Transactional(readOnly = true)
@@ -123,14 +130,15 @@ public class ReviewService {
         if (rating != null && (rating < 1 || rating > 5)) {
             throw new BusinessException(ErrorCode.REVIEW_RATING_INVALID);
         }
-        Page<AdminReviewResponse> page = new Page<>(
+        Page<ProductReviewRow> page = new Page<>(
                 Math.max(current, 1),
                 Math.min(Math.max(size, 1), 100));
-        return PageResult.from(reviewMapper.selectAdminReviewPage(
+        IPage<ProductReviewRow> result = reviewMapper.selectAdminReviewPage(
                 page,
                 normalizedKeyword,
                 rating,
-                normalizedStatus));
+                normalizedStatus);
+        return mapPage(result, this::toAdminResponse);
     }
 
     @Transactional
@@ -149,7 +157,8 @@ public class ReviewService {
             review.setUpdatedAt(LocalDateTime.now());
             reviewMapper.updateById(review);
         }
-        return reviewMapper.selectAdminReviewById(id);
+        ProductReviewRow row = reviewMapper.selectAdminReviewById(id);
+        return toAdminResponse(row);
     }
 
     private MyReviewResponse toMyResponse(ProductReview review, OrderItem item) {
@@ -165,7 +174,64 @@ public class ReviewService {
                 review.getContent(),
                 review.getStatus(),
                 review.getCreatedAt(),
-                review.getUpdatedAt());
+                review.getUpdatedAt(),
+                ReviewImages.fromJson(review.getImagesJson()));
+    }
+
+    private MyReviewResponse toMyResponse(ProductReviewRow row) {
+        return new MyReviewResponse(
+                row.getId(),
+                row.getProductId(),
+                row.getOrderId(),
+                row.getOrderItemId(),
+                row.getProductName(),
+                row.getSkuSpecs(),
+                row.getProductImage(),
+                row.getRating(),
+                row.getContent(),
+                row.getStatus(),
+                row.getCreatedAt(),
+                row.getUpdatedAt(),
+                ReviewImages.fromJson(row.getImagesJson()));
+    }
+
+    private ProductReviewResponse toProductResponse(ProductReviewRow row) {
+        return new ProductReviewResponse(
+                row.getId(),
+                row.getProductId(),
+                row.getProductName(),
+                row.getSkuSpecs(),
+                row.getRating(),
+                row.getContent(),
+                row.getReviewerNickname(),
+                row.getCreatedAt(),
+                ReviewImages.fromJson(row.getImagesJson()));
+    }
+
+    private AdminReviewResponse toAdminResponse(ProductReviewRow row) {
+        return new AdminReviewResponse(
+                row.getId(),
+                row.getUserId(),
+                row.getUsername(),
+                row.getReviewerNickname(),
+                row.getProductId(),
+                row.getProductName(),
+                row.getSkuSpecs(),
+                row.getRating(),
+                row.getContent(),
+                row.getStatus(),
+                row.getCreatedAt(),
+                row.getUpdatedAt(),
+                ReviewImages.fromJson(row.getImagesJson()));
+    }
+
+    private <T> PageResult<T> mapPage(IPage<ProductReviewRow> source, java.util.function.Function<ProductReviewRow, T> mapper) {
+        List<T> records = source.getRecords().stream().map(mapper).toList();
+        return new PageResult<>(
+                source.getCurrent(),
+                source.getSize(),
+                source.getTotal(),
+                records);
     }
 
     private Product requirePublicProduct(Long productId) {

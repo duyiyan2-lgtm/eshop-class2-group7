@@ -3,9 +3,7 @@ package com.eshop.backend.review;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.eshop.backend.review.dto.MyReviewResponse;
-import com.eshop.backend.review.dto.AdminReviewResponse;
-import com.eshop.backend.review.dto.ProductReviewResponse;
+import com.eshop.backend.review.dto.ProductReviewRow;
 import com.eshop.backend.review.dto.ProductReviewSummaryResponse;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -24,6 +22,7 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
                 item.sku_specs AS sku_specs,
                 review.rating,
                 review.content,
+                review.images_json AS images_json,
                 review.status,
                 review.created_at AS created_at,
                 review.updated_at AS updated_at
@@ -48,8 +47,8 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
             ORDER BY review.created_at DESC, review.id DESC
             </script>
             """)
-    IPage<AdminReviewResponse> selectAdminReviewPage(
-            Page<AdminReviewResponse> page,
+    IPage<ProductReviewRow> selectAdminReviewPage(
+            Page<ProductReviewRow> page,
             @Param("keyword") String keyword,
             @Param("rating") Integer rating,
             @Param("status") String status);
@@ -65,6 +64,7 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
                 item.sku_specs AS sku_specs,
                 review.rating,
                 review.content,
+                review.images_json AS images_json,
                 review.status,
                 review.created_at AS created_at,
                 review.updated_at AS updated_at
@@ -73,7 +73,7 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
             LEFT JOIN sys_user reviewer ON reviewer.id = review.user_id
             WHERE review.id = #{id}
             """)
-    AdminReviewResponse selectAdminReviewById(@Param("id") Long id);
+    ProductReviewRow selectAdminReviewById(@Param("id") Long id);
 
     @Select("""
             SELECT
@@ -83,6 +83,7 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
                 item.sku_specs AS sku_specs,
                 review.rating,
                 review.content,
+                review.images_json AS images_json,
                 COALESCE(NULLIF(TRIM(reviewer.nickname), ''), '匿名用户') AS reviewer_nickname,
                 review.created_at AS created_at
             FROM product_review review
@@ -92,8 +93,8 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
               AND review.status = 'PUBLISHED'
             ORDER BY review.created_at DESC, review.id DESC
             """)
-    IPage<ProductReviewResponse> selectProductReviewPage(
-            Page<ProductReviewResponse> page,
+    IPage<ProductReviewRow> selectProductReviewPage(
+            Page<ProductReviewRow> page,
             @Param("productId") Long productId);
 
     @Select("""
@@ -107,6 +108,7 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
                 item.product_image AS product_image,
                 review.rating,
                 review.content,
+                review.images_json AS images_json,
                 review.status,
                 review.created_at AS created_at,
                 review.updated_at AS updated_at
@@ -115,8 +117,8 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
             WHERE review.user_id = #{userId}
             ORDER BY review.created_at DESC, review.id DESC
             """)
-    IPage<MyReviewResponse> selectMyReviewPage(
-            Page<MyReviewResponse> page,
+    IPage<ProductReviewRow> selectMyReviewPage(
+            Page<ProductReviewRow> page,
             @Param("userId") Long userId);
 
     @Select("""

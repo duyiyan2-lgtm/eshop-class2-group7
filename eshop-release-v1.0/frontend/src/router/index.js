@@ -37,6 +37,12 @@ const routes = [
         meta: { title: '我的收藏', requiresAuth: true },
       },
       {
+        path: 'history',
+        name: 'pc-history',
+        component: () => import('../views/pc/PcBrowseHistoryView.vue'),
+        meta: { title: '浏览历史', requiresAuth: true },
+      },
+      {
         path: 'addresses',
         name: 'pc-addresses',
         component: () => import('../views/pc/PcAddressView.vue'),
@@ -122,6 +128,16 @@ const routes = [
         component: () => import('../views/mobile/MobileFavoritesView.vue'),
         meta: {
           title: '我的收藏',
+          requiresAuth: true,
+          moduleOwner: '商品模块',
+        },
+      },
+      {
+        path: 'history',
+        name: 'mobile-history',
+        component: () => import('../views/mobile/MobileBrowseHistoryView.vue'),
+        meta: {
+          title: '浏览历史',
           requiresAuth: true,
           moduleOwner: '商品模块',
         },

@@ -4,6 +4,7 @@ import { showImagePreview, showSuccessToast, showToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { addCartItem } from '../../api/cart'
 import { getProduct } from '../../api/catalog'
+import { recordBrowseHistory } from '../../api/browseHistory'
 import { addFavorite, getFavoriteStatus, removeFavorite } from '../../api/favorite'
 import ProductReviewList from '../../components/review/ProductReviewList.vue'
 import { useAuthStore } from '../../stores/auth'
@@ -72,6 +73,7 @@ const loadProduct = async () => {
     selectedSkuId.value = firstAvailable ? firstAvailable.id : null
     if (auth.isLoggedIn) {
       void loadFavoriteStatus(data.id)
+      void recordBrowseQuietly(data.id)
     }
   } catch (error) {
     if (requestId === requestSequence) {
@@ -79,6 +81,14 @@ const loadProduct = async () => {
     }
   } finally {
     if (requestId === requestSequence) loading.value = false
+  }
+}
+
+const recordBrowseQuietly = async (productId) => {
+  try {
+    await recordBrowseHistory(productId)
+  } catch {
+    // 浏览历史失败不打断商品浏览。
   }
 }
 

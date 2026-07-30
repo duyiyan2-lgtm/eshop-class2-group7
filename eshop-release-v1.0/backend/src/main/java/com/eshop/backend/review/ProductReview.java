@@ -18,6 +18,7 @@ public class ProductReview {
     private Long orderItemId;
     private Integer rating;
     private String content;
+    private String imagesJson;
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

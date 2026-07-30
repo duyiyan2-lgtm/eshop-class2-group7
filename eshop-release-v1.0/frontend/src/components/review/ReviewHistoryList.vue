@@ -102,6 +102,17 @@ void loadReviews(1)
           </div>
           <small>{{ specsText(review.skuSpecs) || '默认规格' }}</small>
           <p>{{ review.content }}</p>
+          <div v-if="review.imageUrls?.length" class="review-photos">
+            <a
+              v-for="(url, index) in review.imageUrls"
+              :key="`${review.id}-${index}`"
+              :href="url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img :src="url" :alt="`评价图片 ${index + 1}`" />
+            </a>
+          </div>
           <footer>
             <span>订单编号：{{ review.orderId }}</span>
             <span>状态：{{ review.status === 'PUBLISHED' ? '已发布' : review.status }}</span>
@@ -172,6 +183,28 @@ void loadReviews(1)
 
 .review-content {
   min-width: 0;
+}
+
+.review-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.review-photos a {
+  display: block;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f1f5f9;
+}
+
+.review-photos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .review-heading {

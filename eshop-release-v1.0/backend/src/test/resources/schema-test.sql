@@ -158,9 +158,20 @@ CREATE TABLE product_review (
     order_item_id BIGINT NOT NULL,
     rating TINYINT NOT NULL,
     content VARCHAR(1000) NOT NULL,
+    images_json VARCHAR(2000),
     status VARCHAR(20) NOT NULL DEFAULT 'PUBLISHED',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_review_order_item UNIQUE (order_item_id),
     CONSTRAINT chk_review_rating CHECK (rating BETWEEN 1 AND 5)
 );
+
+CREATE TABLE product_browse_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    browsed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_browse_user_product UNIQUE (user_id, product_id)
+);
+
+CREATE INDEX idx_browse_user_browsed ON product_browse_history(user_id, browsed_at);

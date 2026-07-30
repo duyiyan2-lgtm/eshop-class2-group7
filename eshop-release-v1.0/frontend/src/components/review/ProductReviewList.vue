@@ -162,6 +162,17 @@ watch(
           <time>{{ formatDateTime(review.createdAt) }}</time>
         </div>
         <p>{{ review.content }}</p>
+        <div v-if="review.imageUrls?.length" class="review-photos">
+          <a
+            v-for="(url, index) in review.imageUrls"
+            :key="`${review.id}-${index}`"
+            :href="url"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img :src="url" :alt="`评价图片 ${index + 1}`" />
+          </a>
+        </div>
         <small v-if="specsText(review.skuSpecs)" class="review-specs">
           购买规格：{{ specsText(review.skuSpecs) }}
         </small>
@@ -197,6 +208,28 @@ watch(
   border: 1px solid #e2e8f0;
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(15, 23, 42, .05);
+}
+
+.review-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.review-photos a {
+  display: block;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f1f5f9;
+}
+
+.review-photos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .product-reviews > header,

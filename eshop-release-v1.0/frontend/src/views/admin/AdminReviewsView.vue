@@ -157,6 +157,17 @@ onMounted(loadReviews)
         <el-table-column label="评价内容" min-width="280">
           <template #default="{ row }">
             <p class="review-content">{{ row.content }}</p>
+            <div v-if="row.imageUrls?.length" class="review-photos">
+              <a
+                v-for="(url, index) in row.imageUrls"
+                :key="`${row.id}-${index}`"
+                :href="url"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img :src="url" :alt="`晒图 ${index + 1}`" />
+              </a>
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="110">
@@ -240,6 +251,28 @@ td small {
   margin-bottom: 16px;
 }
 
+.review-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.review-photos a {
+  display: block;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f5f7fa;
+}
+
+.review-photos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .keyword-input {
   width: 260px;
 }
@@ -256,7 +289,9 @@ td small {
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
+  color: #303133;
   line-height: 1.55;
+  word-break: break-word;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }

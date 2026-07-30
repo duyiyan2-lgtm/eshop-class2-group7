@@ -1,6 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { getDashboardSummary } from '../../api/admin'
+import {
+  getDashboardSalesTrend,
+  getDashboardSummary,
+  getDashboardTopProducts,
+} from '../../api/admin'
 import { getHotProducts } from '../../api/catalog'
 import { formatDateTime, formatMoney } from '../../utils/shop'
 
@@ -9,6 +13,14 @@ const errorMessage = ref('')
 const summary = ref(null)
 const hotLoading = ref(false)
 const hotProducts = ref([])
+const trendLoading = ref(false)
+const salesTrend = ref([])
+const topLoading = ref(false)
+const topProducts = ref([])
+
+const maxTrendOrders = computed(() => (
+  Math.max(1, ...salesTrend.value.map((point) => Number(point.orderCount) || 0), 1)
+))
 
 const loadSummary = async () => {
   if (loading.value) return
@@ -20,6 +32,32 @@ const loadSummary = async () => {
     errorMessage.value = error.message || '运营数据加载失败'
   } finally {
     loading.value = false
+  }
+}
+
+const loadSalesTrend = async () => {
+  if (trendLoading.value) return
+  trendLoading.value = true
+  try {
+    const data = await getDashboardSalesTrend(7)
+    salesTrend.value = Array.isArray(data?.points) ? data.points : []
+  } catch {
+    salesTrend.value = []
+  } finally {
+    trendLoading.value = false
+  }
+}
+
+const loadTopProducts = async () => {
+  if (topLoading.value) return
+  topLoading.value = true
+  try {
+    const data = await getDashboardTopProducts(10)
+    topProducts.value = Array.isArray(data?.items) ? data.items : []
+  } catch {
+    topProducts.value = []
+  } finally {
+    topLoading.value = false
   }
 }
 
@@ -96,10 +134,14 @@ const orderStatuses = computed(() => [
   },
 ])
 
-onMounted(() => {
+const refreshAll = () => {
   loadSummary()
+  loadSalesTrend()
+  loadTopProducts()
   loadHotProducts()
-})
+}
+
+onMounted(refreshAll)
 </script>
 
 <template>
@@ -117,8 +159,8 @@ onMounted(() => {
         <el-button
           type="primary"
           plain
-          :loading="loading"
-          @click="loadSummary"
+          :loading="loading || trendLoading || topLoading"
+          @click="refreshAll"
         >
           刷新数据
         </el-button>
@@ -169,6 +211,56 @@ onMounted(() => {
           <span>{{ status.label }}</span>
           <strong>{{ loading && !summary ? '—' : status.value }}</strong>
         </div>
+      </div>
+    </section>
+
+    <section class="trend-overview">
+      <div class="section-heading">
+        <div>
+          <p>SALES TREND</p>
+          <h2>近 7 日销售趋势</h2>
+        </div>
+      </div>
+      <div v-loading="trendLoading" class="trend-table">
+        <div v-for="point in salesTrend" :key="point.date" class="trend-row">
+          <span class="trend-date">{{ point.date }}</span>
+          <div class="trend-bar-wrap" :title="`订单 ${point.orderCount}`">
+            <i :style="{ width: `${Math.max(6, (Number(point.orderCount) / maxTrendOrders) * 100)}%` }" />
+          </div>
+          <span><small>订单</small><strong>{{ point.orderCount }}</strong></span>
+          <span><small>销售额</small><strong>{{ formatMoney(point.salesAmount) }}</strong></span>
+        </div>
+        <el-empty
+          v-if="!trendLoading && !salesTrend.length"
+          description="暂无趋势数据"
+          :image-size="70"
+        />
+      </div>
+    </section>
+
+    <section class="hot-overview">
+      <div class="section-heading">
+        <div>
+          <p>TOP PRODUCTS</p>
+          <h2>销量 Top 商品</h2>
+        </div>
+        <RouterLink to="/admin/products">管理商品 →</RouterLink>
+      </div>
+      <div v-loading="topLoading" class="hot-table">
+        <div v-for="(product, index) in topProducts" :key="product.productId" class="hot-row">
+          <b>{{ index + 1 }}</b>
+          <span>
+            <strong>{{ product.productName }}</strong>
+            <small>商品编号 {{ product.productId }}</small>
+          </span>
+          <span><small>销量</small><strong>{{ product.soldQuantity }} 件</strong></span>
+          <span><small>销售额</small><strong>{{ formatMoney(product.salesAmount) }}</strong></span>
+        </div>
+        <el-empty
+          v-if="!topLoading && !topProducts.length"
+          description="暂无销量排行"
+          :image-size="70"
+        />
       </div>
     </section>
 
@@ -237,6 +329,57 @@ onMounted(() => {
 .admin-dashboard {
   max-width: 1240px;
   margin: 0 auto;
+}
+
+.trend-overview {
+  margin: 22px 0;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+}
+
+.trend-table {
+  display: grid;
+  gap: 12px;
+}
+
+.trend-row {
+  display: grid;
+  grid-template-columns: 110px minmax(120px, 1fr) 90px 120px;
+  gap: 14px;
+  align-items: center;
+}
+
+.trend-date {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.trend-bar-wrap {
+  height: 10px;
+  overflow: hidden;
+  background: #e2e8f0;
+  border-radius: 999px;
+}
+
+.trend-bar-wrap i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  border-radius: inherit;
+}
+
+.trend-row small {
+  display: block;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.trend-row strong {
+  color: #0f172a;
+  font-size: 14px;
 }
 
 .dashboard-hero {

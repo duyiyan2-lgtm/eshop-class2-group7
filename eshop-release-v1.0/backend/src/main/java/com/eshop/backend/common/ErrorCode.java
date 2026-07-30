@@ -45,6 +45,9 @@ public enum ErrorCode {
     REVIEW_ALREADY_EXISTS(40930, "订单商品已经评价"),
     REVIEW_RATING_INVALID(40031, "评分必须在1至5分之间"),
     REVIEW_CONTENT_INVALID(40032, "评价内容长度必须在1至1000个字符之间"),
+    REVIEW_IMAGE_LIMIT(40033, "评价图片最多上传3张"),
+    REVIEW_IMAGE_INVALID(40034, "评价图片地址不合法"),
+    BROWSE_HISTORY_NOT_FOUND(40418, "浏览记录不存在"),
     INTERNAL_ERROR(50000, "系统异常，请稍后重试"),
     FILE_SAVE_FAILED(50001, "文件保存失败");
 

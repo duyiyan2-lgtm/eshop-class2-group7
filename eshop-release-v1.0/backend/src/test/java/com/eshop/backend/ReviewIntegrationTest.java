@@ -113,7 +113,9 @@ class ReviewIntegrationTest {
                 .andExpect(jsonPath("$.data.orderItemId").value(itemId))
                 .andExpect(jsonPath("$.data.productName").value("评价测试商品" + suffix))
                 .andExpect(jsonPath("$.data.rating").value(5))
-                .andExpect(jsonPath("$.data.content").value("商品符合描述"));
+                .andExpect(jsonPath("$.data.content").value("商品符合描述"))
+                .andExpect(jsonPath("$.data.imageUrls").isArray())
+                .andExpect(jsonPath("$.data.imageUrls.length()").value(0));
 
         mockMvc.perform(post("/reviews")
                         .header("Authorization", bearer(owner.token()))
@@ -133,7 +135,8 @@ class ReviewIntegrationTest {
                 .andExpect(jsonPath("$.data.records[0].rating").value(5))
                 .andExpect(jsonPath("$.data.records[0].userId").doesNotExist())
                 .andExpect(jsonPath("$.data.records[0].orderId").doesNotExist())
-                .andExpect(jsonPath("$.data.records[0].orderItemId").doesNotExist());
+                .andExpect(jsonPath("$.data.records[0].orderItemId").doesNotExist())
+                .andExpect(jsonPath("$.data.records[0].imageUrls").isArray());
 
         mockMvc.perform(get("/products/{productId}/reviews/summary", productId))
                 .andExpect(status().isOk())

@@ -2,6 +2,14 @@ import http from './http'
 
 export const getDashboardSummary = () => http.get('/admin/dashboard/summary')
 
+export const getDashboardSalesTrend = (days = 7) => (
+  http.get('/admin/dashboard/sales-trend', { params: { days } })
+)
+
+export const getDashboardTopProducts = (limit = 10) => (
+  http.get('/admin/dashboard/top-products', { params: { limit } })
+)
+
 export const getInventoryAlerts = ({
   current = 1,
   size = 20,

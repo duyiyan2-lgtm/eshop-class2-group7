@@ -1,6 +1,7 @@
 package com.eshop.backend.review.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record MyReviewResponse(
         Long id,
@@ -14,6 +15,7 @@ public record MyReviewResponse(
         String content,
         String status,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        List<String> imageUrls
 ) {
 }

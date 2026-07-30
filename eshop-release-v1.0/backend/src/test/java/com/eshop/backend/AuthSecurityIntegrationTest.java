@@ -55,6 +55,10 @@ class AuthSecurityIntegrationTest {
         mockMvc.perform(get("/admin/logs"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(40101));
+
+        mockMvc.perform(post("/files/upload"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(40101));
     }
 
     @Test
