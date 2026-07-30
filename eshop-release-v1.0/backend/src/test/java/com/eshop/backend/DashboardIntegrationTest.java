@@ -75,7 +75,7 @@ class DashboardIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.userCount").value(2))
+                .andExpect(jsonPath("$.data.userCount").value(1))
                 .andExpect(jsonPath("$.data.productCount").value(2))
                 .andExpect(jsonPath("$.data.onSaleProductCount").value(1))
                 .andExpect(jsonPath("$.data.orderCount").value(5))

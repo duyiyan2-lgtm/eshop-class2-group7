@@ -45,6 +45,7 @@ function Remove-SmokeFixtures {
         [hashtable]$Settings,
         [string]$UserA,
         [string]$UserB,
+        [string]$SellerUser,
         [string]$CategoryName,
         [string]$ProductName,
         [string]$SkuCode,
@@ -68,7 +69,7 @@ DELETE FROM order_item WHERE order_id IN (SELECT id FROM orders WHERE user_id IN
 DELETE FROM orders WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB'));
 DELETE FROM cart_item WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB'));
 DELETE FROM user_address WHERE user_id IN (SELECT id FROM sys_user WHERE username IN ('$UserA', '$UserB'));
-DELETE FROM sys_user WHERE username IN ('$UserA', '$UserB');
+DELETE FROM sys_user WHERE username IN ('$UserA', '$UserB', '$SellerUser');
 DELETE FROM cart_item WHERE sku_id IN (SELECT id FROM product_sku WHERE sku_code = '$SkuCode');
 DELETE FROM product_sku WHERE sku_code = '$SkuCode';
 DELETE FROM product WHERE name = '$ProductName';
@@ -187,6 +188,7 @@ $script:Client.Timeout = [TimeSpan]::FromSeconds(15)
 $suffix = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
 $userA = "smoke_a_$suffix"
 $userB = "smoke_b_$suffix"
+$sellerUser = "smoke_seller_$suffix"
 $password = "Smoke123456"
 $categoryName = "Smoke Category $suffix"
 $productName = "Smoke Product $suffix"
@@ -206,7 +208,7 @@ try {
     Assert-Equal $adminLogin.Body.data.role "ADMIN" "administrator login"
 
     $dashboard = Invoke-Api GET "admin/dashboard/summary" $null $adminToken
-    Assert-True ($dashboard.Body.data.userCount -ge 1) "dashboard user count"
+    Assert-True ($dashboard.Body.data.userCount -ge 0) "dashboard buyer count"
     Assert-True ($dashboard.Body.data.productCount -ge $dashboard.Body.data.onSaleProductCount) `
         "dashboard product counts"
     $dashboardOrderTotal = [long]$dashboard.Body.data.pendingPaymentOrderCount +
@@ -226,6 +228,61 @@ try {
         } $null
         Assert-Equal $registered.Status 200 "register $username"
     }
+
+    $sellerCreated = Invoke-Api POST "admin/users" @{
+        username = $sellerUser
+        password = $password
+        nickname = "Smoke Seller"
+        phone = "13800138001"
+        role = "SELLER"
+        status = "ENABLED"
+    } $adminToken
+    $sellerId = $sellerCreated.Body.data.id
+    Assert-Equal $sellerCreated.Body.data.role "SELLER" "administrator creates seller"
+    $duplicateSeller = Invoke-Api POST "admin/users" @{
+        username = $sellerUser
+        password = $password
+        nickname = "Duplicate Seller"
+        role = "SELLER"
+        status = "ENABLED"
+    } $adminToken @(409)
+    Assert-Equal $duplicateSeller.Body.code 40901 "duplicate managed account rejected"
+    $invalidManagedRole = Invoke-Api POST "admin/users" @{
+        username = "invalid_admin_$suffix"
+        password = $password
+        nickname = "Invalid Admin"
+        role = "ADMIN"
+        status = "ENABLED"
+    } $adminToken @(400)
+    Assert-Equal $invalidManagedRole.Body.code 40001 "platform admin role cannot be delegated"
+    $managedSummary = Invoke-Api GET "admin/users/summary" $null $adminToken
+    Assert-True ([long]$managedSummary.Body.data.buyerCount -ge 2) "managed buyer account summary"
+    Assert-Equal $managedSummary.Body.data.sellerCount 1 "managed seller account summary"
+    $sellerList = Invoke-Api GET "admin/users?role=SELLER" $null $adminToken
+    Assert-Equal $sellerList.Body.data.total 1 "seller account filter"
+    Assert-Equal $sellerList.Body.data.records[0].username $sellerUser "seller account detail"
+    $sellerLogin = Invoke-Api POST "auth/login" @{
+        username = $sellerUser
+        password = $password
+    } $null
+    $sellerToken = $sellerLogin.Body.data.token
+    Assert-Equal $sellerLogin.Body.data.role "SELLER" "seller login"
+    $sellerDashboard = Invoke-Api GET "admin/dashboard/summary" $null $sellerToken
+    Assert-True ($null -ne $sellerDashboard.Body.data.productCount) "seller accesses merchant dashboard"
+    $sellerProducts = Invoke-Api GET "admin/products?current=1&size=1" $null $sellerToken
+    Assert-True ($null -ne $sellerProducts.Body.data.total) "seller accesses product management"
+    $sellerUsersForbidden = Invoke-Api GET "admin/users" $null $sellerToken @(403)
+    Assert-Equal $sellerUsersForbidden.Body.code 40301 "seller blocked from platform account management"
+    $sellerToBuyer = Invoke-Api PATCH "admin/users/$sellerId/role" @{
+        role = "USER"
+    } $adminToken
+    Assert-Equal $sellerToBuyer.Body.data.role "USER" "administrator changes seller to buyer"
+    $oldSellerTokenForbidden = Invoke-Api GET "admin/dashboard/summary" $null $sellerToken @(403)
+    Assert-Equal $oldSellerTokenForbidden.Body.code 40301 "role change affects old seller token"
+    $sellerRestored = Invoke-Api PATCH "admin/users/$sellerId/role" @{
+        role = "SELLER"
+    } $adminToken
+    Assert-Equal $sellerRestored.Body.data.role "SELLER" "administrator restores seller role"
 
     $duplicate = Invoke-Api POST "auth/register" @{
         username = $userA
@@ -645,6 +702,7 @@ try {
             -Settings $settings `
             -UserA $userA `
             -UserB $userB `
+            -SellerUser $sellerUser `
             -CategoryName $categoryName `
             -ProductName $productName `
             -SkuCode $skuCode `

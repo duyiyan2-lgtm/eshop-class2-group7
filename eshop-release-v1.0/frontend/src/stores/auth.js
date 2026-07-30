@@ -17,6 +17,8 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
     isAdmin: (state) => state.user?.role === 'ADMIN',
+    isSeller: (state) => state.user?.role === 'SELLER',
+    canManageStore: (state) => ['ADMIN', 'SELLER'].includes(state.user?.role),
   },
   actions: {
     async signIn(payload) {

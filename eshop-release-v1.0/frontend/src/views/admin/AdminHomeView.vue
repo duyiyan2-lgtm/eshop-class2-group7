@@ -75,9 +75,9 @@ const loadHotProducts = async () => {
 
 const overviewCards = computed(() => [
   {
-    label: '用户总数',
+    label: '买家总数',
     value: summary.value?.userCount ?? 0,
-    note: '当前平台注册账号',
+    note: '当前商城消费者账号',
     tone: 'blue',
   },
   {
@@ -148,9 +148,9 @@ onMounted(refreshAll)
   <section class="admin-dashboard">
     <header class="dashboard-hero">
       <div>
-        <p>WEB ADMIN · LIVE OVERVIEW</p>
-        <h1>商城运营控制台</h1>
-        <span>实时查看用户、商品、订单与有效销售额，快速进入日常运营模块。</span>
+        <p>SELLER CENTER · LIVE OVERVIEW</p>
+        <h1>商家运营控制台</h1>
+        <span>实时查看买家、商品、订单与有效销售额，快速进入日常经营模块。</span>
       </div>
       <div class="hero-actions">
         <small v-if="summary?.generatedAt">
@@ -199,7 +199,7 @@ onMounted(refreshAll)
           <p>ORDER PIPELINE</p>
           <h2>订单状态分布</h2>
         </div>
-        <RouterLink to="/admin/orders">处理订单 →</RouterLink>
+        <RouterLink to="/seller/orders">处理订单 →</RouterLink>
       </div>
       <div class="status-grid">
         <div
@@ -244,7 +244,7 @@ onMounted(refreshAll)
           <p>TOP PRODUCTS</p>
           <h2>销量 Top 商品</h2>
         </div>
-        <RouterLink to="/admin/products">管理商品 →</RouterLink>
+        <RouterLink to="/seller/products">管理商品 →</RouterLink>
       </div>
       <div v-loading="topLoading" class="hot-table">
         <div v-for="(product, index) in topProducts" :key="product.productId" class="hot-row">
@@ -270,7 +270,7 @@ onMounted(refreshAll)
           <p>TOP SELLING</p>
           <h2>近 30 天热销商品</h2>
         </div>
-        <RouterLink to="/admin/products">管理商品 →</RouterLink>
+        <RouterLink to="/seller/products">管理商品 →</RouterLink>
       </div>
       <div v-loading="hotLoading" class="hot-table">
         <div v-for="(product, index) in hotProducts" :key="product.productId" class="hot-row">
@@ -299,26 +299,23 @@ onMounted(refreshAll)
         </div>
       </div>
       <div class="entry-grid">
-        <RouterLink to="/admin/categories">
+        <RouterLink to="/seller/categories">
           <b>01</b><h3>分类管理</h3><p>维护分类结构、排序与启用状态。</p><span>进入管理 →</span>
         </RouterLink>
-        <RouterLink to="/admin/products">
+        <RouterLink to="/seller/products">
           <b>02</b><h3>商品与 SKU</h3><p>维护商品、规格、价格与库存。</p><span>进入管理 →</span>
         </RouterLink>
-        <RouterLink to="/admin/inventory">
+        <RouterLink to="/seller/inventory">
           <b>03</b><h3>库存预警</h3><p>定位在售商品的低库存和缺货 SKU。</p><span>查看预警 →</span>
         </RouterLink>
-        <RouterLink to="/admin/orders">
+        <RouterLink to="/seller/orders">
           <b>04</b><h3>订单管理</h3><p>查询订单并完成发货与取消操作。</p><span>进入管理 →</span>
         </RouterLink>
-        <RouterLink to="/admin/users">
-          <b>05</b><h3>用户管理</h3><p>搜索用户并管理账号启用状态。</p><span>进入管理 →</span>
+        <RouterLink to="/seller/logs">
+          <b>05</b><h3>操作日志</h3><p>审计商家工作台关键业务操作结果。</p><span>查看日志 →</span>
         </RouterLink>
-        <RouterLink to="/admin/logs">
-          <b>06</b><h3>操作日志</h3><p>审计后台关键业务操作结果。</p><span>查看日志 →</span>
-        </RouterLink>
-        <RouterLink to="/admin/reviews">
-          <b>07</b><h3>评价管理</h3><p>查看消费者评价并处理不适合公开展示的内容。</p><span>审核评价 →</span>
+        <RouterLink to="/seller/reviews">
+          <b>06</b><h3>评价管理</h3><p>查看消费者评价并处理不适合公开展示的内容。</p><span>审核评价 →</span>
         </RouterLink>
       </div>
     </section>

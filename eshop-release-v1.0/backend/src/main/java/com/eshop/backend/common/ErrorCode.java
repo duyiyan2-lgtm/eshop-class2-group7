@@ -48,6 +48,8 @@ public enum ErrorCode {
     REVIEW_IMAGE_LIMIT(40033, "评价图片最多上传3张"),
     REVIEW_IMAGE_INVALID(40034, "评价图片地址不合法"),
     BROWSE_HISTORY_NOT_FOUND(40418, "浏览记录不存在"),
+    SELF_ROLE_CHANGE_NOT_ALLOWED(40931, "不能修改当前登录账号的角色"),
+    ADMIN_ACCOUNT_PROTECTED(40932, "平台管理员账号受保护，不能在账号管理中修改"),
     INTERNAL_ERROR(50000, "系统异常，请稍后重试"),
     FILE_SAVE_FAILED(50001, "文件保存失败");
 

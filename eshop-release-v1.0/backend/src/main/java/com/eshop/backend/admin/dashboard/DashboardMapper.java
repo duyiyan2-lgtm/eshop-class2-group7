@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DashboardMapper {
 
-    @Select("SELECT COUNT(*) FROM sys_user")
+    @Select("SELECT COUNT(*) FROM sys_user WHERE role = 'USER'")
     long countUsers();
 
     @Select("SELECT COUNT(*) FROM product")

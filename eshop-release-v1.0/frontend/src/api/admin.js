@@ -29,8 +29,16 @@ export const getUsers = ({
   params: { current, size, keyword, role, status },
 })
 
+export const getUserSummary = () => http.get('/admin/users/summary')
+
+export const createManagedUser = (payload) => http.post('/admin/users', payload)
+
 export const updateUserStatus = (id, status) => (
   http.patch(`/admin/users/${id}/status`, { status })
+)
+
+export const updateUserRole = (id, role) => (
+  http.patch(`/admin/users/${id}/role`, { role })
 )
 
 export const getAdminReviews = ({

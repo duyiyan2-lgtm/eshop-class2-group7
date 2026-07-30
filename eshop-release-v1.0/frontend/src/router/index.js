@@ -223,27 +223,71 @@ const routes = [
   },
   {
     path: '/admin',
-    component: () => import('../layouts/AdminLayout.vue'),
+    component: () => import('../layouts/PlatformAdminLayout.vue'),
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
-      { path: '', name: 'admin-home', component: () => import('../views/admin/AdminHomeView.vue') },
-      { path: 'categories', name: 'admin-categories', component: () => import('../views/admin/AdminCategoriesView.vue') },
-      { path: 'products', name: 'admin-products', component: () => import('../views/admin/AdminProductsView.vue') },
+      { path: '', redirect: { name: 'admin-users' } },
+      {
+        path: 'users',
+        name: 'admin-users',
+        component: () => import('../views/admin/AdminUsersView.vue'),
+        meta: { title: '买家与卖家管理' },
+      },
+    ],
+  },
+  { path: '/admin/categories', redirect: '/seller/categories' },
+  { path: '/admin/products', redirect: '/seller/products' },
+  { path: '/admin/inventory', redirect: '/seller/inventory' },
+  { path: '/admin/orders', redirect: '/seller/orders' },
+  { path: '/admin/reviews', redirect: '/seller/reviews' },
+  { path: '/admin/logs', redirect: '/seller/logs' },
+  {
+    path: '/seller/login',
+    name: 'seller-login',
+    component: () => import('../views/seller/SellerLoginView.vue'),
+  },
+  {
+    path: '/seller',
+    component: () => import('../layouts/AdminLayout.vue'),
+    meta: { requiresAuth: true, requiresMerchant: true },
+    children: [
+      { path: '', name: 'seller-home', component: () => import('../views/admin/AdminHomeView.vue') },
+      {
+        path: 'categories',
+        name: 'seller-categories',
+        component: () => import('../views/admin/AdminCategoriesView.vue'),
+        meta: { title: '分类管理' },
+      },
+      {
+        path: 'products',
+        name: 'seller-products',
+        component: () => import('../views/admin/AdminProductsView.vue'),
+        meta: { title: '商品与 SKU' },
+      },
       {
         path: 'inventory',
-        name: 'admin-inventory-alerts',
+        name: 'seller-inventory-alerts',
         component: () => import('../views/admin/AdminInventoryAlertsView.vue'),
         meta: { title: '库存预警' },
       },
-      { path: 'orders', name: 'admin-orders', component: () => import('../views/admin/AdminOrdersView.vue') },
+      {
+        path: 'orders',
+        name: 'seller-orders',
+        component: () => import('../views/admin/AdminOrdersView.vue'),
+        meta: { title: '订单管理' },
+      },
       {
         path: 'reviews',
-        name: 'admin-reviews',
+        name: 'seller-reviews',
         component: () => import('../views/admin/AdminReviewsView.vue'),
         meta: { title: '评价管理' },
       },
-      { path: 'users', name: 'admin-users', component: () => import('../views/admin/AdminUsersView.vue') },
-      { path: 'logs', name: 'admin-operation-logs', component: () => import('../views/admin/OperationLogsView.vue') },
+      {
+        path: 'logs',
+        name: 'seller-operation-logs',
+        component: () => import('../views/admin/OperationLogsView.vue'),
+        meta: { title: '操作日志' },
+      },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/pc' },
@@ -260,14 +304,26 @@ router.beforeEach((to) => {
     if (to.path.startsWith('/admin')) {
       return { name: 'admin-login' }
     }
+    if (to.path.startsWith('/seller')) {
+      return { name: 'seller-login', query: { redirect: to.fullPath } }
+    }
     const loginName = to.path.startsWith('/m') ? 'mobile-login' : 'pc-login'
     return { name: loginName, query: { redirect: to.fullPath } }
   }
   if (to.meta.requiresAdmin && !auth.isAdmin) {
     return { name: 'admin-login', query: { reason: 'forbidden' } }
   }
+  if (to.meta.requiresMerchant && !auth.canManageStore) {
+    return { name: 'seller-login', query: { reason: 'forbidden' } }
+  }
   if (to.name === 'admin-login' && auth.isAdmin) {
-    return { name: 'admin-home' }
+    return { name: 'admin-users' }
+  }
+  if (to.name === 'admin-login' && auth.isSeller) {
+    return { name: 'seller-home' }
+  }
+  if (to.name === 'seller-login' && auth.canManageStore) {
+    return { name: 'seller-home' }
   }
   if (to.name === 'mobile-login' && auth.isLoggedIn) {
     return { name: 'mobile-products' }

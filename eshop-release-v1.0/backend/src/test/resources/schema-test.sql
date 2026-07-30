@@ -11,6 +11,7 @@ CREATE TABLE sys_user (
 );
 
 CREATE INDEX idx_sys_user_status ON sys_user(status);
+CREATE INDEX idx_sys_user_role_status ON sys_user(role, status);
 
 CREATE TABLE operation_log (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
