@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { showConfirmDialog, showToast } from 'vant'
+import { showConfirmDialog, showSuccessToast, showToast } from 'vant'
 import { useRouter } from 'vue-router'
 import { getCart, removeCartItem, updateCartItem } from '../../api/cart'
 import { notifyCartUpdated } from '../../utils/cartBadge'
@@ -122,16 +122,28 @@ const removeItem = async (item) => {
   if (isItemUpdating(item.id) || bulkUpdating.value) return
   try {
     await showConfirmDialog({
-      title: '删除商品',
-      message: `确定从购物车删除「${item.productName}」吗？`,
-      confirmButtonText: '删除',
-      cancelButtonText: '保留',
+      title: '移出购物车',
+      message: `确定移除「${item.productName}」吗？\n移除后仍可重新加入购物车。`,
+      messageAlign: 'left',
+      confirmButtonText: '确认移除',
+      cancelButtonText: '暂不移除',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#64748b',
+      className: 'eshop-delete-dialog',
+      overlayClass: 'eshop-mobile-dialog-overlay',
     })
     setItemUpdating(item.id, true)
     await removeCartItem(item.id)
     items.value = items.value.filter((entry) => entry.id !== item.id)
     notifyCartUpdated()
-    showToast('已移除')
+    showSuccessToast({
+      message: '商品已从购物车移除',
+      duration: 2000,
+      position: 'top',
+      className: 'eshop-mobile-toast eshop-mobile-toast--success',
+      wordBreak: 'break-word',
+      closeOnClick: true,
+    })
   } catch (error) {
     if (error !== 'cancel' && error !== 'close') {
       showToast({ type: 'fail', message: error.message || '删除失败' })

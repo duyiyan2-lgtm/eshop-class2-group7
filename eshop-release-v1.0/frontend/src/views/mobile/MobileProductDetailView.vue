@@ -195,7 +195,11 @@ const addToCart = async () => {
     notifyCartUpdated()
     showSuccessToast({
       message: `已加入购物车，当前数量 ${item.quantity}`,
-      duration: 1500,
+      duration: 2200,
+      position: 'top',
+      className: 'eshop-mobile-toast eshop-mobile-toast--success',
+      wordBreak: 'break-word',
+      closeOnClick: true,
     })
   } catch (error) {
     showToast({ type: 'fail', message: error.message || '加入购物车失败' })

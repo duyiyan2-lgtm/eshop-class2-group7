@@ -50,6 +50,84 @@ a { color: inherit; text-decoration: none; }
 .el-message-box__btns .el-button { min-width: 92px; border-radius: 9px; font-weight: 700; }
 .el-message-box__btns .el-button--primary { border-color: #2563eb; background: #2563eb; box-shadow: 0 8px 18px rgba(37, 99, 235, .2); }
 
+/* Vant 函数式反馈组件：移动端使用轻量悬浮卡片和居中确认框。 */
+.van-toast.eshop-mobile-toast {
+  box-sizing: border-box;
+  flex-direction: row;
+  width: auto;
+  min-width: min(280px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  min-height: 0;
+  padding: 13px 16px;
+  color: #166534;
+  text-align: left;
+  word-break: normal;
+  background: rgba(240, 253, 244, .98);
+  border: 1px solid #86efac;
+  border-radius: 14px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, .2);
+  backdrop-filter: blur(14px);
+}
+.van-toast--top.eshop-mobile-toast {
+  top: calc(58px + env(safe-area-inset-top));
+  transform: none;
+}
+.eshop-mobile-toast .van-toast__icon {
+  flex: 0 0 auto;
+  margin-right: 10px;
+  color: #16a34a;
+  font-size: 23px;
+}
+.eshop-mobile-toast .van-toast__text {
+  margin-top: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.van-overlay.eshop-mobile-dialog-overlay {
+  background: rgba(15, 23, 42, .5);
+  backdrop-filter: blur(5px);
+}
+.van-dialog.eshop-delete-dialog {
+  width: min(340px, calc(100vw - 36px));
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, .9);
+  border-radius: 20px;
+  box-shadow: 0 26px 70px rgba(15, 23, 42, .3);
+}
+.eshop-delete-dialog .van-dialog__header {
+  padding: 24px 22px 0;
+  color: #0f172a;
+  font-size: 19px;
+  font-weight: 800;
+  text-align: left;
+}
+.eshop-delete-dialog .van-dialog__message--has-title {
+  padding: 12px 22px 22px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.eshop-delete-dialog .van-dialog__footer {
+  gap: 10px;
+  padding: 14px 18px 18px;
+  background: #f8fafc;
+  border-top: 1px solid #eef2f7;
+}
+.eshop-delete-dialog .van-dialog__cancel,
+.eshop-delete-dialog .van-dialog__confirm {
+  height: 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-weight: 700;
+}
+.eshop-delete-dialog .van-dialog__confirm {
+  color: #fff !important;
+  background: #dc2626;
+  border-color: #dc2626;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, .2);
+}
+
 .auth-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: linear-gradient(135deg, #eff6ff, #f8fafc); }
 .mobile-auth-page { padding: 16px; background: #f7f8fa; }
 .auth-form { width: min(100%, 400px); display: grid; gap: 16px; padding: 32px; background: #fff; border-radius: 16px; box-shadow: 0 18px 50px rgba(30, 64, 175, .12); }
