@@ -1,12 +1,12 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { ElMessageBox } from 'element-plus'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const auth = useAuthStore()
 const switchingKey = ref('')
+const pendingWorkspace = ref(null)
 
 const roleLabel = computed(() => ({
   USER: '买家',
@@ -72,24 +72,30 @@ const workspaces = computed(() => [
 const openWorkspace = async (workspace) => {
   if (switchingKey.value) return
   if (workspace.accountSwitch) {
-    try {
-      await ElMessageBox.confirm(
-        `当前登录的是${roleLabel.value}账号。进入${workspace.title}需要更换账号，是否退出当前账号？`,
-        '切换账号',
-        {
-          confirmButtonText: '退出并继续',
-          cancelButtonText: '取消',
-          type: 'warning',
-        },
-      )
-    } catch {
-      return
-    }
+    pendingWorkspace.value = workspace
+    return
   }
 
   switchingKey.value = workspace.key
   try {
-    if (workspace.accountSwitch) await auth.signOut()
+    await router.push(workspace.target)
+  } finally {
+    switchingKey.value = ''
+  }
+}
+
+const closeSwitchDialog = () => {
+  if (switchingKey.value) return
+  pendingWorkspace.value = null
+}
+
+const confirmWorkspaceSwitch = async () => {
+  const workspace = pendingWorkspace.value
+  if (!workspace || switchingKey.value) return
+  switchingKey.value = workspace.key
+  pendingWorkspace.value = null
+  try {
+    await auth.signOut()
     await router.push(workspace.target)
   } finally {
     switchingKey.value = ''
@@ -105,6 +111,24 @@ const logout = async () => {
     switchingKey.value = ''
   }
 }
+
+const handleEscape = (event) => {
+  if (event.key === 'Escape') closeSwitchDialog()
+}
+
+watch(pendingWorkspace, (workspace) => {
+  document.body.style.overflow = workspace ? 'hidden' : ''
+  if (workspace) {
+    window.addEventListener('keydown', handleEscape)
+  } else {
+    window.removeEventListener('keydown', handleEscape)
+  }
+})
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
+  window.removeEventListener('keydown', handleEscape)
+})
 </script>
 
 <template>
@@ -172,6 +196,71 @@ const logout = async () => {
       <span>PC 消费者端 · 手机 H5 端 · Web 商家/平台管理端</span>
       <span>角色权限保持隔离，切换入口不会绕过后端鉴权。</span>
     </footer>
+
+    <Teleport to="body">
+      <Transition name="switch-dialog">
+        <div
+          v-if="pendingWorkspace"
+          class="switch-dialog-backdrop"
+          @click.self="closeSwitchDialog"
+        >
+          <section
+            class="switch-dialog-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="switch-dialog-title"
+          >
+            <button
+              class="dialog-close"
+              type="button"
+              aria-label="关闭"
+              @click="closeSwitchDialog"
+            >
+              ×
+            </button>
+            <div class="dialog-icon"><span>↗</span></div>
+            <p>WORKSPACE SWITCH</p>
+            <h2 id="switch-dialog-title">需要切换登录账号</h2>
+            <span class="dialog-description">
+              当前{{ roleLabel }}账号没有进入“{{ pendingWorkspace.title }}”的权限，
+              退出后将带你前往对应的登录页面。
+            </span>
+
+            <div class="identity-flow">
+              <article>
+                <small>当前身份</small>
+                <strong>{{ roleLabel }}</strong>
+                <span>{{ auth.user?.nickname || auth.user?.username }}</span>
+              </article>
+              <b>→</b>
+              <article class="target-identity">
+                <small>目标入口</small>
+                <strong>{{ pendingWorkspace.title }}</strong>
+                <span>{{ pendingWorkspace.access }}</span>
+              </article>
+            </div>
+
+            <div class="dialog-notice">
+              <i>i</i>
+              <span>退出只会清除当前浏览器的登录状态，不会删除账号或业务数据。</span>
+            </div>
+
+            <div class="dialog-actions">
+              <button class="cancel-button" type="button" @click="closeSwitchDialog">暂不切换</button>
+              <button
+                class="confirm-button"
+                type="button"
+                :disabled="Boolean(switchingKey)"
+                @click="confirmWorkspaceSwitch"
+              >
+                {{ switchingKey ? '正在切换…' : '退出并前往登录' }}
+                <span>→</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      </Transition>
+    </Teleport>
   </main>
 </template>
 
@@ -252,10 +341,10 @@ const logout = async () => {
 }
 
 .hero-copy h1 {
-  max-width: 760px;
+  max-width: 920px;
   margin: 0 0 18px;
   color: #fff;
-  font-size: clamp(38px, 5vw, 64px);
+  font-size: clamp(38px, 4.5vw, 58px);
   line-height: 1.08;
   letter-spacing: -.045em;
 }
@@ -386,6 +475,194 @@ footer {
   font-size: 12px;
 }
 
+.switch-dialog-backdrop {
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+  display: grid;
+  padding: 24px;
+  background: rgba(2, 6, 23, .76);
+  backdrop-filter: blur(10px);
+  place-items: center;
+}
+
+.switch-dialog-card {
+  position: relative;
+  width: min(100%, 520px);
+  padding: 34px;
+  overflow: hidden;
+  color: #e2e8f0;
+  background:
+    radial-gradient(circle at 100% 0, rgba(124, 58, 237, .2), transparent 42%),
+    linear-gradient(145deg, #101c30, #0b1424);
+  border: 1px solid rgba(167, 139, 250, .28);
+  border-radius: 24px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
+}
+
+.switch-dialog-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed, #ec4899);
+  content: "";
+}
+
+.dialog-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, .09);
+  border: 1px solid rgba(148, 163, 184, .16);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 23px;
+  line-height: 1;
+  place-items: center;
+}
+
+.dialog-close:hover { color: #fff; background: rgba(148, 163, 184, .16); }
+
+.dialog-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(99, 102, 241, .32);
+  font-size: 26px;
+  place-items: center;
+}
+
+.switch-dialog-card > p {
+  margin: 0 0 8px;
+  color: #a78bfa;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
+
+.switch-dialog-card h2 {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 28px;
+  letter-spacing: -.025em;
+}
+
+.dialog-description {
+  display: block;
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.identity-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin: 24px 0 16px;
+}
+
+.identity-flow article {
+  display: grid;
+  gap: 5px;
+  min-height: 98px;
+  padding: 15px;
+  background: rgba(15, 23, 42, .62);
+  border: 1px solid rgba(148, 163, 184, .16);
+  border-radius: 14px;
+}
+
+.identity-flow > b { color: #64748b; font-size: 20px; }
+.identity-flow small { color: #64748b; }
+.identity-flow strong { color: #f8fafc; font-size: 17px; }
+.identity-flow span { color: #94a3b8; font-size: 12px; line-height: 1.45; }
+.identity-flow .target-identity {
+  background: rgba(124, 58, 237, .1);
+  border-color: rgba(167, 139, 250, .3);
+}
+
+.dialog-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px 14px;
+  color: #a5b4fc;
+  background: rgba(37, 99, 235, .09);
+  border: 1px solid rgba(96, 165, 250, .17);
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.dialog-notice i {
+  display: grid;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: #dbeafe;
+  border: 1px solid #60a5fa;
+  border-radius: 50%;
+  font-size: 11px;
+  font-style: normal;
+  place-items: center;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.55fr;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.dialog-actions button {
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 11px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.cancel-button {
+  color: #cbd5e1;
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, .3);
+}
+
+.confirm-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+  background: linear-gradient(100deg, #2563eb, #7c3aed);
+  border: 0;
+  box-shadow: 0 12px 26px rgba(99, 102, 241, .25);
+}
+
+.dialog-actions button:hover { transform: translateY(-1px); }
+.dialog-actions button:disabled { cursor: wait; opacity: .65; transform: none; }
+.confirm-button span { font-size: 18px; }
+
+.switch-dialog-enter-active,
+.switch-dialog-leave-active { transition: opacity .2s ease; }
+.switch-dialog-enter-active .switch-dialog-card,
+.switch-dialog-leave-active .switch-dialog-card { transition: transform .22s ease, opacity .2s ease; }
+.switch-dialog-enter-from,
+.switch-dialog-leave-to { opacity: 0; }
+.switch-dialog-enter-from .switch-dialog-card,
+.switch-dialog-leave-to .switch-dialog-card { opacity: 0; transform: translateY(18px) scale(.97); }
+
 @media (max-width: 1050px) {
   .workspace-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -400,5 +677,12 @@ footer {
   .workspace-grid { grid-template-columns: 1fr; }
   .workspace-card { min-height: 300px; }
   footer { align-items: flex-start; flex-direction: column; }
+  .switch-dialog-backdrop { padding: 14px; }
+  .switch-dialog-card { padding: 28px 20px 22px; border-radius: 20px; }
+  .switch-dialog-card h2 { padding-right: 34px; font-size: 24px; }
+  .identity-flow { grid-template-columns: 1fr; }
+  .identity-flow > b { transform: rotate(90deg); text-align: center; }
+  .identity-flow article { min-height: auto; }
+  .dialog-actions { grid-template-columns: 1fr; }
 }
 </style>
