@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "app.bootstrap-admin.enabled=true",
         "app.bootstrap-admin.username=admin",
         "app.bootstrap-admin.password=admin123",
+        "app.cors.allowed-origin-patterns=http://localhost:*,https://eshop.zhuyiyuan9.top",
         "app.bootstrap-admin.nickname=测试管理员",
         "app.upload-dir=target/test-uploads",
         "app.order-timeout.enabled=false"
@@ -70,6 +71,18 @@ class AuthSecurityIntegrationTest {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"));
+    }
+
+    @Test
+    void productionOriginCanLogin() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .header("Origin", "https://eshop.zhuyiyuan9.top")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "username", "admin",
+                                "password", "admin123"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.role").value("ADMIN"));
     }
 
     @Test
