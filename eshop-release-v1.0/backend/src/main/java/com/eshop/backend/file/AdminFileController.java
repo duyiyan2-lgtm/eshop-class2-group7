@@ -16,6 +16,6 @@ public class AdminFileController {
 
     @PostMapping("/upload")
     public ApiResponse<FileUploadResponse> upload(@RequestPart("file") MultipartFile file) {
-        return ApiResponse.success(fileUploadService.uploadImage(file));
+        return ApiResponse.success(fileUploadService.uploadAdminImage(file));
     }
 }

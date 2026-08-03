@@ -1,16 +1,26 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { showConfirmDialog, showToast } from 'vant'
 import { useRouter } from 'vue-router'
+import { updateProfile } from '../../api/auth'
 import { useAuthStore } from '../../stores/auth'
 
 const router = useRouter()
 const auth = useAuthStore()
 const loading = ref(false)
 const errorMessage = ref('')
+const showEdit = ref(false)
+const saving = ref(false)
+const form = reactive({
+  nickname: '',
+  phone: '',
+})
 
 const avatarText = computed(() => (
   String(auth.user?.nickname || auth.user?.username || '用').trim().slice(0, 1)
+))
+const phoneValid = computed(() => (
+  !form.phone.trim() || /^[0-9+\- ]{6,20}$/.test(form.phone.trim())
 ))
 
 const refreshProfile = async () => {
@@ -43,6 +53,49 @@ const handleLogout = async () => {
   }
 }
 
+const openEdit = () => {
+  form.nickname = auth.user?.nickname || ''
+  form.phone = auth.user?.phone || ''
+  showEdit.value = true
+}
+
+const saveProfile = async () => {
+  if (saving.value) return false
+  const nickname = form.nickname.trim()
+  const phone = form.phone.trim()
+  if (!nickname || nickname.length > 50) {
+    showToast({
+      type: 'fail',
+      message: nickname ? '昵称不能超过 50 个字符' : '昵称不能为空',
+    })
+    return false
+  }
+  if (!phoneValid.value) {
+    showToast({ type: 'fail', message: '联系电话格式不正确' })
+    return false
+  }
+
+  saving.value = true
+  try {
+    const user = await updateProfile({ nickname, phone })
+    auth.user = user
+    localStorage.setItem('eshop_user', JSON.stringify(user))
+    showToast('资料已更新')
+    return true
+  } catch (error) {
+    showToast({ type: 'fail', message: error.message || '保存失败' })
+    return false
+  } finally {
+    saving.value = false
+  }
+}
+
+const beforeEditClose = (action) => {
+  if (saving.value) return false
+  if (action !== 'confirm') return true
+  return saveProfile()
+}
+
 onMounted(refreshProfile)
 </script>
 
@@ -70,13 +123,46 @@ onMounted(refreshProfile)
 
     <van-cell-group inset class="profile-menu">
       <van-cell title="我的订单" is-link to="/m/orders" icon="orders-o" />
+      <van-cell title="我的评价" is-link to="/m/reviews" icon="comment-o" />
+      <van-cell title="我的收藏" is-link to="/m/favorites" icon="like-o" />
+      <van-cell title="浏览历史" is-link to="/m/history" icon="clock-o" />
       <van-cell title="收货地址" is-link to="/m/addresses" icon="location-o" />
       <van-cell title="购物车" is-link to="/m/cart" icon="cart-o" />
+      <van-cell title="编辑资料" is-link icon="edit" @click="openEdit" />
     </van-cell-group>
 
     <div class="profile-logout">
       <van-button round block type="danger" plain @click="handleLogout">退出登录</van-button>
     </div>
+
+    <van-dialog
+      v-model:show="showEdit"
+      title="编辑资料"
+      show-cancel-button
+      :confirm-button-loading="saving"
+      :before-close="beforeEditClose"
+      close-on-click-overlay
+    >
+      <div class="form-body">
+        <van-field
+          v-model="form.nickname"
+          label="昵称"
+          placeholder="请输入昵称"
+          maxlength="50"
+          clearable
+          required
+        />
+        <van-field
+          v-model="form.phone"
+          type="tel"
+          label="联系电话"
+          placeholder="6—20 位数字、空格、+ 或 -"
+          maxlength="20"
+          clearable
+          :error-message="form.phone && !phoneValid ? '联系电话格式不正确' : ''"
+        />
+      </div>
+    </van-dialog>
   </section>
 </template>
 
@@ -151,5 +237,9 @@ onMounted(refreshProfile)
 
 .profile-logout {
   padding: 0 16px;
+}
+
+.form-body {
+  padding: 8px 12px 4px;
 }
 </style>

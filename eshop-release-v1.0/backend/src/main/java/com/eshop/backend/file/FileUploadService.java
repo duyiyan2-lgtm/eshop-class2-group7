@@ -22,8 +22,22 @@ public class FileUploadService {
         this.uploadRoot = Path.of(uploadDir).toAbsolutePath().normalize();
     }
 
+    /**
+     * 管理员上传商品图片，写入操作日志。
+     */
     @OperationLogAction(module = "文件管理", action = "上传商品图片")
-    public FileUploadResponse uploadImage(MultipartFile file) {
+    public FileUploadResponse uploadAdminImage(MultipartFile file) {
+        return saveImage(file);
+    }
+
+    /**
+     * 登录用户上传图片（评价晒图等），不写后台操作日志。
+     */
+    public FileUploadResponse uploadUserImage(MultipartFile file) {
+        return saveImage(file);
+    }
+
+    private FileUploadResponse saveImage(MultipartFile file) {
         if (file == null || file.isEmpty() || file.getSize() > MAX_FILE_SIZE) {
             throw new BusinessException(ErrorCode.INVALID_FILE);
         }

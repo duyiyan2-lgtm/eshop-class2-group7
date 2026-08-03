@@ -3,17 +3,154 @@
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 a { color: inherit; text-decoration: none; }
 
+/* Element Plus 反馈服务由脚本直接创建，需全局加载并统一视觉。 */
+.el-message {
+  min-width: 320px;
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, .97);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .17);
+  backdrop-filter: blur(14px);
+}
+.el-message .el-message__icon { margin-right: 10px; font-size: 20px; }
+.el-message .el-message__content { color: #334155; font-size: 14px; font-weight: 700; line-height: 1.5; }
+.el-message .el-message__closeBtn { color: #94a3b8; font-size: 16px; }
+.el-message--success { background: linear-gradient(110deg, rgba(236, 253, 245, .98), rgba(255, 255, 255, .98)); border-color: #a7f3d0; }
+.el-message--success .el-message__icon { color: #10b981; }
+.el-message--warning { background: linear-gradient(110deg, rgba(255, 251, 235, .98), rgba(255, 255, 255, .98)); border-color: #fde68a; }
+.el-message--warning .el-message__icon { color: #f59e0b; }
+.el-message--error { background: linear-gradient(110deg, rgba(254, 242, 242, .98), rgba(255, 255, 255, .98)); border-color: #fecaca; }
+.el-message--error .el-message__icon { color: #ef4444; }
+.el-message--info { background: linear-gradient(110deg, rgba(239, 246, 255, .98), rgba(255, 255, 255, .98)); border-color: #bfdbfe; }
+.el-message--info .el-message__icon { color: #3b82f6; }
+
+.el-overlay-message-box {
+  background: rgba(15, 23, 42, .48);
+  backdrop-filter: blur(5px);
+}
+.el-message-box {
+  width: min(440px, calc(100vw - 32px));
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, .28);
+}
+.el-message-box__header { padding: 24px 26px 12px; }
+.el-message-box__title { color: #0f172a; font-size: 20px; font-weight: 800; }
+.el-message-box__headerbtn { top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 50%; }
+.el-message-box__headerbtn:hover { background: #f1f5f9; }
+.el-message-box__content { padding: 10px 26px 20px; color: #475569; }
+.el-message-box__container { align-items: flex-start; }
+.el-message-box__status { margin-top: 1px; font-size: 23px !important; }
+.el-message-box__message { line-height: 1.75; }
+.el-message-box__btns { gap: 10px; padding: 16px 26px 24px; background: #f8fafc; border-top: 1px solid #eef2f7; }
+.el-message-box__btns .el-button { min-width: 92px; border-radius: 9px; font-weight: 700; }
+.el-message-box__btns .el-button--primary { border-color: #2563eb; background: #2563eb; box-shadow: 0 8px 18px rgba(37, 99, 235, .2); }
+
+/* Vant 函数式反馈组件：移动端使用轻量悬浮卡片和居中确认框。 */
+.van-toast.eshop-mobile-toast {
+  box-sizing: border-box;
+  flex-direction: row;
+  width: auto;
+  min-width: min(280px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  min-height: 0;
+  padding: 13px 16px;
+  color: #166534;
+  text-align: left;
+  word-break: normal;
+  background: rgba(240, 253, 244, .98);
+  border: 1px solid #86efac;
+  border-radius: 14px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, .2);
+  backdrop-filter: blur(14px);
+}
+.van-toast--top.eshop-mobile-toast {
+  top: calc(58px + env(safe-area-inset-top));
+  transform: none;
+}
+.eshop-mobile-toast .van-toast__icon {
+  flex: 0 0 auto;
+  margin-right: 10px;
+  color: #16a34a;
+  font-size: 23px;
+}
+.eshop-mobile-toast .van-toast__text {
+  margin-top: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.van-overlay.eshop-mobile-dialog-overlay {
+  background: rgba(15, 23, 42, .5);
+  backdrop-filter: blur(5px);
+}
+.van-dialog.eshop-delete-dialog {
+  width: min(340px, calc(100vw - 36px));
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, .9);
+  border-radius: 20px;
+  box-shadow: 0 26px 70px rgba(15, 23, 42, .3);
+}
+.eshop-delete-dialog .van-dialog__header {
+  padding: 24px 22px 0;
+  color: #0f172a;
+  font-size: 19px;
+  font-weight: 800;
+  text-align: left;
+}
+.eshop-delete-dialog .van-dialog__message--has-title {
+  padding: 12px 22px 22px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.eshop-delete-dialog .van-dialog__footer {
+  gap: 10px;
+  padding: 14px 18px 18px;
+  background: #f8fafc;
+  border-top: 1px solid #eef2f7;
+}
+.eshop-delete-dialog .van-dialog__cancel,
+.eshop-delete-dialog .van-dialog__confirm {
+  height: 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-weight: 700;
+}
+.eshop-delete-dialog .van-dialog__confirm {
+  color: #fff !important;
+  background: #dc2626;
+  border-color: #dc2626;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, .2);
+}
+
 .auth-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: linear-gradient(135deg, #eff6ff, #f8fafc); }
 .mobile-auth-page { padding: 16px; background: #f7f8fa; }
 .auth-form { width: min(100%, 400px); display: grid; gap: 16px; padding: 32px; background: #fff; border-radius: 16px; box-shadow: 0 18px 50px rgba(30, 64, 175, .12); }
 .auth-form h1 { margin: 0; font-size: 25px; color: #1d4ed8; }
 .auth-subtitle, .auth-message { margin: -8px 0 0; color: #64748b; font-size: 14px; }
 .auth-message { color: #dc2626; }
+.auth-message.is-success { color: #15803d; }
 .auth-form label { display: grid; gap: 8px; font-size: 14px; font-weight: 600; }
 .auth-form input { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 11px 12px; font: inherit; outline-color: #2563eb; }
 .auth-form button { border: 0; border-radius: 8px; padding: 11px 14px; background: #2563eb; color: #fff; cursor: pointer; font: inherit; font-weight: 600; }
 .auth-form button:disabled { opacity: .6; cursor: not-allowed; }
 .auth-form .auth-link { padding: 0; background: transparent; color: #2563eb; font-weight: 400; }
+.auth-portal-link { padding-top: 4px; color: #64748b; font-size: 13px; text-align: center; }
+.auth-portal-link:hover { color: #2563eb; }
+.registration-roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; border: 0; }
+.registration-roles legend { grid-column: 1 / -1; margin-bottom: 8px; padding: 0; font-size: 14px; font-weight: 600; }
+.auth-form .registration-role { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; cursor: pointer; }
+.auth-form .registration-role.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 1px #2563eb; }
+.auth-form .registration-role input { width: auto; margin: 3px 0 0; padding: 0; accent-color: #2563eb; }
+.registration-role span { display: grid; gap: 4px; }
+.registration-role small { color: #64748b; font-size: 12px; font-weight: 400; line-height: 1.45; }
+.registration-single-role { display: grid; gap: 4px; padding: 12px; border: 1px solid #bfdbfe; border-radius: 10px; background: #eff6ff; color: #1e3a8a; font-size: 14px; }
+.registration-single-role span { color: #64748b; font-size: 12px; }
 
 .pc-shell { min-height: 100vh; }
 .pc-header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 32px; height: 64px; background: rgba(255, 255, 255, .94); border-bottom: 1px solid #e2e8f0; backdrop-filter: blur(12px); }
@@ -24,11 +161,14 @@ a { color: inherit; text-decoration: none; }
 .pc-header nav a.router-link-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; background: #2563eb; border-radius: 3px 3px 0 0; content: ""; }
 .nav-disabled { color: #94a3b8; }
 .pc-user-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.workspace-switch-link { color: #2563eb; font-weight: 700; }
 .pc-main { padding: 20px; }
 
 .mobile-shell { min-height: 100vh; background: #f7f8fa; }
 .mobile-main { min-height: calc(100vh - 96px); padding: 12px; }
 .mobile-login-link { color: #2563eb; font-size: 14px; }
+.mobile-nav-actions { display: flex; align-items: center; gap: 9px; }
+.mobile-nav-actions .workspace-switch-link { font-size: 13px; }
 .mobile-tabbar { --van-tabbar-item-active-color: #2563eb; }
 
 .admin-shell { min-height: 100vh; }
@@ -43,6 +183,7 @@ a { color: inherit; text-decoration: none; }
 .admin-header > div { display: grid; gap: 3px; }
 .admin-header > div b { color: #0f172a; }
 .admin-header > div span { color: #64748b; font-size: 12px; }
+.admin-header .admin-header-actions { display: flex; align-items: center; gap: 8px; }
 .admin-main { padding: 24px; background: #f5f7fb; }
 
 .terminal-welcome { max-width: 860px; margin: 24px auto; padding: 36px; background: #fff; border-radius: 16px; box-shadow: 0 8px 24px rgba(15, 23, 42, .06); }
@@ -55,6 +196,7 @@ a { color: inherit; text-decoration: none; }
 .pagination { display: flex; justify-content: flex-end; margin-top: 20px; }
 
 @media (max-width: 768px) {
+  .el-message { min-width: 0; width: calc(100vw - 28px); padding: 12px 14px; }
   .pc-header { gap: 12px; padding: 0 14px; }
   .pc-header nav { display: none; }
   .pc-user-actions { font-size: 13px; }

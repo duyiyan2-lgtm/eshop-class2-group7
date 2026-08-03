@@ -241,6 +241,15 @@ onActivated(() => {
             >
               确认收货
             </van-button>
+            <van-button
+              v-if="order.status === 'COMPLETED'"
+              size="small"
+              type="primary"
+              plain
+              @click.stop="goDetail(order)"
+            >
+              评价商品
+            </van-button>
             <van-button size="small" plain @click.stop="goDetail(order)">
               订单详情
             </van-button>

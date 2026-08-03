@@ -36,6 +36,7 @@ public class AuthService {
     @Transactional
     public void register(RegisterRequest request) {
         validatePasswordLength(request.password());
+        String role = request.role() == null ? "USER" : request.role();
         Long count = userMapper.selectCount(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getUsername, request.username()));
         if (count != null && count > 0) {
@@ -45,8 +46,10 @@ public class AuthService {
         user.setUsername(request.username());
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setNickname(request.nickname());
-        user.setRole("USER");
-        user.setStatus("ENABLED");
+        user.setRole(role);
+        // Buyers can use the shop immediately. Merchant self-registration requires platform approval
+        // before the account can access shared catalog, inventory and order data.
+        user.setStatus("SELLER".equals(role) ? "DISABLED" : "ENABLED");
         userMapper.insert(user);
     }
 

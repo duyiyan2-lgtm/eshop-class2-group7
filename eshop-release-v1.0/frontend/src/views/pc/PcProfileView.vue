@@ -118,8 +118,8 @@ onMounted(loadProfile)
         </el-form-item>
 
         <el-form-item label="账户角色">
-          <el-tag :type="auth.isAdmin ? 'primary' : 'info'">
-            {{ auth.isAdmin ? '管理员' : '普通用户' }}
+          <el-tag :type="auth.isAdmin ? 'primary' : auth.isSeller ? 'warning' : 'info'">
+            {{ auth.isAdmin ? '平台管理员' : auth.isSeller ? '卖家' : '买家' }}
           </el-tag>
         </el-form-item>
 

@@ -22,8 +22,15 @@ const redirectToLogin = () => {
 
   const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`
   const isAdmin = window.location.pathname.startsWith('/admin')
+  const isSeller = window.location.pathname.startsWith('/seller')
   const isMobile = window.location.pathname.startsWith('/m')
-  const loginPath = isAdmin ? '/admin/login' : isMobile ? '/m/login' : '/pc/login'
+  const loginPath = isAdmin
+    ? '/admin/login'
+    : isSeller
+      ? '/seller/login'
+      : isMobile
+        ? '/m/login'
+        : '/pc/login'
 
   if (window.location.pathname === loginPath) return
   const redirect = isAdmin ? '' : `?redirect=${encodeURIComponent(currentPath)}`

@@ -250,9 +250,10 @@ public class OrderService {
 
     @Transactional
     @OperationLogAction(module = "订单管理", action = "订单发货")
-    public OrderResponse ship(LoginUser admin, Long id) {
+    public OrderResponse ship(LoginUser operator, Long id) {
         ShopOrder order = requireOrder(id);
-        transition(order, PAID, SHIPPED, admin, "管理员发货");
+        String message = "SELLER".equals(operator.getRole()) ? "商家发货" : "管理员发货";
+        transition(order, PAID, SHIPPED, operator, message);
         return toResponse(requireOrder(id));
     }
 

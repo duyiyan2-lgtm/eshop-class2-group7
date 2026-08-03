@@ -39,6 +39,8 @@ jwt:
   expiration-ms: ${JWT_EXPIRATION_MS:7200000}
 
 app:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
   upload-dir: ${UPLOAD_DIR:./data/uploads}
   bootstrap-admin:
     enabled: ${BOOTSTRAP_ADMIN_ENABLED:false}

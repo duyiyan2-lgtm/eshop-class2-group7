@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import 'element-plus/es/components/message/style/css'
 import { getOperationLogs } from '../../api/operationLogs'
 
 const loading = ref(false)

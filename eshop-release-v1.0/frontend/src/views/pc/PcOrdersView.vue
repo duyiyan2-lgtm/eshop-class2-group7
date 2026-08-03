@@ -195,6 +195,14 @@ onMounted(loadOrders)
               确认收货
             </el-button>
             <el-button
+              v-if="order.status === 'COMPLETED'"
+              type="primary"
+              plain
+              @click="router.push({ name: 'pc-order-detail', params: { id: order.id } })"
+            >
+              评价商品
+            </el-button>
+            <el-button
               @click="router.push({ name: 'pc-order-detail', params: { id: order.id } })"
             >
               订单详情

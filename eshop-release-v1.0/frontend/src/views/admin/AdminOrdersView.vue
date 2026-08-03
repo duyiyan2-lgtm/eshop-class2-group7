@@ -23,6 +23,7 @@ const total = ref(0)
 const orderNo = ref('')
 const statusFilter = ref('')
 const loading = ref(false)
+const exporting = ref(false)
 const operatingId = ref()
 
 const detailVisible = ref(false)
@@ -151,6 +152,108 @@ const cancel = async (order) => {
   }
 }
 
+const maskPhone = (value) => {
+  const text = String(value || '')
+  if (text.length <= 7) return text ? `${text.slice(0, 3)}****` : ''
+  return `${text.slice(0, 3)}****${text.slice(-4)}`
+}
+
+const maskAddress = (value) => {
+  const text = String(value || '').trim()
+  if (!text) return ''
+  return `${text.slice(0, Math.min(6, text.length))}***`
+}
+
+const csvCell = (value) => {
+  let text = String(value ?? '').replace(/[\r\n]+/g, ' ')
+  if (/^[=+\-@]/.test(text)) text = `'${text}`
+  return `"${text.replace(/"/g, '""')}"`
+}
+
+const exportOrders = async () => {
+  if (exporting.value) return
+  exporting.value = true
+  try {
+    const records = []
+    const pageSize = 100
+    const maxPages = 100
+    let page = 1
+    let expectedTotal = 0
+
+    while (page <= maxPages) {
+      const result = await getAdminOrders({
+        current: page,
+        size: pageSize,
+        status: statusFilter.value || undefined,
+        orderNo: orderNo.value.trim() || undefined,
+      })
+      const pageRecords = Array.isArray(result?.records) ? result.records : []
+      expectedTotal = Number(result?.total) || 0
+      records.push(...pageRecords)
+      if (!pageRecords.length || records.length >= expectedTotal || pageRecords.length < pageSize) break
+      page += 1
+    }
+
+    if (!records.length) {
+      ElMessage.info('当前筛选条件下没有可导出的订单')
+      return
+    }
+
+    const headers = [
+      '订单号',
+      '用户ID',
+      '收货人',
+      '联系电话（脱敏）',
+      '收货地址（脱敏）',
+      '商品件数',
+      '订单金额',
+      '订单状态',
+      '下单时间',
+      '支付时间',
+      '发货时间',
+      '完成时间',
+      '取消时间',
+    ]
+    const rows = records.map((order) => [
+      order.orderNo,
+      order.userId,
+      order.receiverName,
+      maskPhone(order.receiverPhone),
+      maskAddress(order.receiverAddress),
+      itemCount(order),
+      Number(order.totalAmount || 0).toFixed(2),
+      orderStatusInfo(order.status).label,
+      formatDateTime(order.createdAt),
+      order.paidAt ? formatDateTime(order.paidAt) : '',
+      order.shippedAt ? formatDateTime(order.shippedAt) : '',
+      order.completedAt ? formatDateTime(order.completedAt) : '',
+      order.canceledAt ? formatDateTime(order.canceledAt) : '',
+    ])
+    const csv = [headers, ...rows]
+      .map((row) => row.map(csvCell).join(','))
+      .join('\r\n')
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `eshop-orders-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+
+    if (records.length < expectedTotal) {
+      ElMessage.warning(`订单数量较多，已导出前 ${records.length} 条`)
+    } else {
+      ElMessage.success(`已导出 ${records.length} 条订单，敏感信息已脱敏`)
+    }
+  } catch (error) {
+    ElMessage.error(error.message || '订单导出失败')
+  } finally {
+    exporting.value = false
+  }
+}
+
 onMounted(loadOrders)
 </script>
 
@@ -160,7 +263,7 @@ onMounted(loadOrders)
       <div>
         <p>ORDER FULFILLMENT</p>
         <h1>订单管理</h1>
-        <span>查询全站订单，核对收货信息，并处理订单取消与发货。</span>
+        <span>核对买家订单与收货信息；已支付订单可由商家确认发货。</span>
       </div>
       <div class="heading-summary">
         <strong>{{ total }}</strong>
@@ -186,6 +289,14 @@ onMounted(loadOrders)
       <el-button type="primary" @click="search">查询</el-button>
       <el-button @click="resetSearch">重置</el-button>
       <el-button @click="loadOrders">刷新</el-button>
+      <el-button
+        type="success"
+        plain
+        :loading="exporting"
+        @click="exportOrders"
+      >
+        导出 CSV
+      </el-button>
     </section>
 
     <section class="table-card">
@@ -239,7 +350,7 @@ onMounted(loadOrders)
               :loading="operatingId === row.id"
               @click="ship(row)"
             >
-              发货
+              确认发货
             </el-button>
             <el-button
               v-if="row.status === 'PENDING_PAYMENT'"
@@ -389,7 +500,7 @@ onMounted(loadOrders)
 .admin-page-heading > div:first-child > span { display: block; margin-top: 8px; color: #64748b; }
 .heading-summary { display: flex; align-items: baseline; gap: 7px; padding: 12px 18px; color: #64748b; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
 .heading-summary strong { color: #2563eb; font-size: 25px; }
-.filter-card { display: grid; grid-template-columns: minmax(260px, 1fr) 190px auto auto auto 1fr; gap: 10px; align-items: center; margin-bottom: 16px; padding: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; }
+.filter-card { display: grid; grid-template-columns: minmax(260px, 1fr) 190px auto auto auto auto 1fr; gap: 10px; align-items: center; margin-bottom: 16px; padding: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; }
 .table-card { overflow: hidden; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 10px 30px rgba(15, 23, 42, .04); }
 .order-number, .receiver { display: grid; gap: 6px; }
 .order-number b { color: #0f172a; font-size: 13px; }

@@ -7,19 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.Base64;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:h2:mem:eshop;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE",
+        "spring.datasource.url=jdbc:h2:mem:eshop_auth;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE",
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.datasource.driver-class-name=org.h2.Driver",
@@ -30,7 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "app.bootstrap-admin.enabled=true",
         "app.bootstrap-admin.username=admin",
         "app.bootstrap-admin.password=admin123",
+        "app.cors.allowed-origin-patterns=http://localhost:*,https://eshop.zhuyiyuan9.top",
         "app.bootstrap-admin.nickname=测试管理员",
+        "app.upload-dir=target/test-uploads",
         "app.order-timeout.enabled=false"
 })
 @AutoConfigureMockMvc
@@ -55,6 +60,10 @@ class AuthSecurityIntegrationTest {
         mockMvc.perform(get("/admin/logs"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(40101));
+
+        mockMvc.perform(post("/files/upload"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(40101));
     }
 
     @Test
@@ -62,6 +71,18 @@ class AuthSecurityIntegrationTest {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"));
+    }
+
+    @Test
+    void productionOriginCanLogin() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .header("Origin", "https://eshop.zhuyiyuan9.top")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "username", "admin",
+                                "password", "admin123"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.role").value("ADMIN"));
     }
 
     @Test
@@ -122,9 +143,58 @@ class AuthSecurityIntegrationTest {
     }
 
     @Test
+    void authenticatedUserCanUploadValidatedReviewImage() throws Exception {
+        String username = "upload_" + System.nanoTime();
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "username", username,
+                                "password", "test123456",
+                                "nickname", "晒图测试用户"))))
+                .andExpect(status().isOk());
+        String token = loginAndGetToken(username, "test123456", "USER");
+
+        byte[] png = Base64.getDecoder().decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=");
+        MockMultipartFile validImage =
+                new MockMultipartFile("file", "review.png", "image/png", png);
+        mockMvc.perform(multipart("/files/upload")
+                        .file(validImage)
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.url").value(
+                        org.hamcrest.Matchers.startsWith("/api/uploads/")))
+                .andExpect(jsonPath("$.data.filename").value(
+                        org.hamcrest.Matchers.endsWith(".png")))
+                .andExpect(jsonPath("$.data.size").value(png.length));
+
+        MockMultipartFile invalidImage =
+                new MockMultipartFile("file", "fake.png", "image/png", "not an image".getBytes());
+        mockMvc.perform(multipart("/files/upload")
+                        .file(invalidImage)
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(40020));
+    }
+
+    @Test
     void completeCommerceFlowWorksFromCatalogToReceipt() throws Exception {
         String suffix = String.valueOf(System.nanoTime());
         String adminToken = loginAndGetToken("admin", "admin123", "ADMIN");
+        String sellerUsername = "merchant_" + suffix;
+        mockMvc.perform(post("/admin/users")
+                        .header("Authorization", bearer(adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "username", sellerUsername,
+                                "password", "seller123",
+                                "nickname", "发货测试商家",
+                                "role", "SELLER",
+                                "status", "ENABLED"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.role").value("SELLER"));
+        String sellerToken = loginAndGetToken(sellerUsername, "seller123", "SELLER");
 
         long categoryId = dataId(mockMvc.perform(post("/admin/categories")
                         .header("Authorization", bearer(adminToken))
@@ -226,7 +296,12 @@ class AuthSecurityIntegrationTest {
                 .andExpect(jsonPath("$.data.status").value("SUCCESS"));
 
         mockMvc.perform(post("/admin/orders/{id}/ship", orderId)
-                        .header("Authorization", bearer(adminToken)))
+                        .header("Authorization", bearer(userToken)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(40301));
+
+        mockMvc.perform(post("/admin/orders/{id}/ship", orderId)
+                        .header("Authorization", bearer(sellerToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("SHIPPED"));
 

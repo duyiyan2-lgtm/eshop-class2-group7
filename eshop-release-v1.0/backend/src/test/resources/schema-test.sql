@@ -11,6 +11,7 @@ CREATE TABLE sys_user (
 );
 
 CREATE INDEX idx_sys_user_status ON sys_user(status);
+CREATE INDEX idx_sys_user_role_status ON sys_user(role, status);
 
 CREATE TABLE operation_log (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -141,3 +142,37 @@ CREATE TABLE payment_record (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE product_favorite (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_favorite_user_product UNIQUE (user_id, product_id)
+);
+
+CREATE TABLE product_review (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    order_id BIGINT NOT NULL,
+    order_item_id BIGINT NOT NULL,
+    rating TINYINT NOT NULL,
+    content VARCHAR(1000) NOT NULL,
+    images_json VARCHAR(2000),
+    status VARCHAR(20) NOT NULL DEFAULT 'PUBLISHED',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_review_order_item UNIQUE (order_item_id),
+    CONSTRAINT chk_review_rating CHECK (rating BETWEEN 1 AND 5)
+);
+
+CREATE TABLE product_browse_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    browsed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_browse_user_product UNIQUE (user_id, product_id)
+);
+
+CREATE INDEX idx_browse_user_browsed ON product_browse_history(user_id, browsed_at);
