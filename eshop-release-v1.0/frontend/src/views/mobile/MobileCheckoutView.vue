@@ -1,13 +1,15 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { showToast } from 'vant'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getAddresses } from '../../api/address'
 import { getCart } from '../../api/cart'
-import { createOrder } from '../../api/order'
+import { getProduct } from '../../api/catalog'
+import { buyNowOrder, createOrder } from '../../api/order'
 import { formatMoney, specsText, sumMoney } from '../../utils/shop'
 
 const router = useRouter()
+const route = useRoute()
 const addresses = ref([])
 const cartItems = ref([])
 const selectedAddressId = ref()
@@ -16,6 +18,18 @@ const loading = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
 const failedImages = ref(new Set())
+
+const isBuyNow = computed(() => route.query.mode === 'buyNow')
+const buyNowSelection = computed(() => {
+  if (!isBuyNow.value) return null
+  const productId = Number(route.query.productId)
+  const skuId = Number(route.query.skuId)
+  const quantity = Number(route.query.quantity)
+  if (!Number.isInteger(productId) || productId <= 0) return null
+  if (!Number.isInteger(skuId) || skuId <= 0) return null
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return null
+  return { productId, skuId, quantity }
+})
 
 const selectedItems = computed(() => cartItems.value.filter((item) => item.selected))
 const validSelectedItems = computed(() => selectedItems.value.filter((item) => item.available))
@@ -54,13 +68,35 @@ const submitButtonText = computed(() => {
   return '提交订单'
 })
 
+const loadBuyNowItems = async () => {
+  const selection = buyNowSelection.value
+  if (!selection) throw new Error('立即购买参数无效，请返回商品详情重新选择')
+  const product = await getProduct(selection.productId)
+  const sku = (product.skus || []).find((item) => item.id === selection.skuId)
+  if (!sku) throw new Error('所选商品规格不存在，请重新选择')
+  return [{
+    id: `buy-now-${sku.id}`,
+    productId: product.id,
+    skuId: sku.id,
+    productName: product.name,
+    productImage: product.mainImage,
+    specsJson: sku.specsJson,
+    price: sku.price,
+    quantity: selection.quantity,
+    subtotal: sumMoney(Array.from({ length: selection.quantity }, () => sku.price)),
+    selected: true,
+    available: sku.stock >= selection.quantity,
+  }]
+}
+
 const loadCheckout = async () => {
   if (loading.value) return
   loading.value = true
   errorMessage.value = ''
 
   try {
-    const [addressData, cartData] = await Promise.all([getAddresses(), getCart()])
+    const itemsPromise = isBuyNow.value ? loadBuyNowItems() : getCart()
+    const [addressData, cartData] = await Promise.all([getAddresses(), itemsPromise])
     addresses.value = addressData || []
     cartItems.value = cartData || []
     failedImages.value = new Set()
@@ -86,7 +122,7 @@ const selectAddress = (id) => {
 }
 
 const goAddresses = () => {
-  router.push({ name: 'mobile-addresses', query: { redirect: '/m/checkout' } })
+  router.push({ name: 'mobile-addresses', query: { redirect: route.fullPath } })
 }
 
 const goCart = () => {
@@ -114,10 +150,19 @@ const onSubmit = async () => {
 
   submitting.value = true
   try {
-    const order = await createOrder({
-      addressId: selectedAddressId.value,
-      remark: remark.value.trim() || null,
-    })
+    const remarkValue = remark.value.trim() || null
+    const selection = buyNowSelection.value
+    const order = isBuyNow.value
+      ? await buyNowOrder({
+          addressId: selectedAddressId.value,
+          skuId: selection.skuId,
+          quantity: selection.quantity,
+          remark: remarkValue,
+        })
+      : await createOrder({
+          addressId: selectedAddressId.value,
+          remark: remarkValue,
+        })
     showToast({ type: 'success', message: '订单创建成功，请完成支付' })
     await router.replace({ name: 'mobile-order-payment', params: { id: order.id } })
   } catch (error) {
@@ -128,7 +173,7 @@ const onSubmit = async () => {
   }
 }
 
-onMounted(loadCheckout)
+watch(() => route.fullPath, loadCheckout, { immediate: true })
 </script>
 
 <template>
@@ -190,7 +235,11 @@ onMounted(loadCheckout)
         </van-empty>
       </van-cell-group>
 
-      <van-cell-group inset title="商品清单" class="block">
+      <van-cell-group
+        inset
+        :title="isBuyNow ? '立即购买商品' : '商品清单'"
+        class="block"
+      >
         <van-card
           v-for="item in validSelectedItems"
           :key="item.id"

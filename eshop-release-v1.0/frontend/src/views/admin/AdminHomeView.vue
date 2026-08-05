@@ -247,7 +247,7 @@ onMounted(refreshAll)
         <RouterLink to="/seller/products">管理商品 →</RouterLink>
       </div>
       <div v-loading="topLoading" class="hot-table">
-        <div v-for="(product, index) in topProducts" :key="product.productId" class="hot-row">
+        <div v-for="(product, index) in topProducts" :key="product.productId" class="hot-row hot-row--top">
           <b>{{ index + 1 }}</b>
           <span>
             <strong>{{ product.productName }}</strong>
@@ -273,7 +273,7 @@ onMounted(refreshAll)
         <RouterLink to="/seller/products">管理商品 →</RouterLink>
       </div>
       <div v-loading="hotLoading" class="hot-table">
-        <div v-for="(product, index) in hotProducts" :key="product.productId" class="hot-row">
+        <div v-for="(product, index) in hotProducts" :key="product.productId" class="hot-row hot-row--selling">
           <b>{{ index + 1 }}</b>
           <span>
             <strong>{{ product.name }}</strong>
@@ -492,17 +492,29 @@ onMounted(refreshAll)
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
 }
 
+.hot-overview {
+  container-type: inline-size;
+  overflow: hidden;
+}
+
 .hot-table {
   min-height: 90px;
 }
 
 .hot-row {
   display: grid;
-  grid-template-columns: 42px minmax(240px, 1fr) 120px 140px 100px;
   align-items: center;
   gap: 16px;
   padding: 13px 14px;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.hot-row--top {
+  grid-template-columns: 42px minmax(150px, 1fr) minmax(76px, 96px) minmax(105px, 128px);
+}
+
+.hot-row--selling {
+  grid-template-columns: 42px minmax(160px, 1fr) minmax(78px, 100px) minmax(110px, 132px) minmax(72px, 92px);
 }
 
 .hot-row:last-child {
@@ -524,6 +536,15 @@ onMounted(refreshAll)
   min-width: 0;
   flex-direction: column;
   gap: 3px;
+}
+
+.hot-row > span:nth-child(n + 3) {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.hot-row > span:nth-child(n + 3) strong {
+  font-variant-numeric: tabular-nums;
 }
 
 .hot-row strong {
@@ -560,8 +581,10 @@ onMounted(refreshAll)
 }
 
 .section-heading a {
+  flex: 0 0 auto;
   color: #2563eb;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .status-grid {
@@ -669,11 +692,30 @@ onMounted(refreshAll)
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .hot-row {
-    grid-template-columns: 36px minmax(180px, 1fr) 95px;
+}
+
+@container (max-width: 680px) {
+  .hot-row--top,
+  .hot-row--selling {
+    grid-template-columns: 36px minmax(0, 1fr) minmax(80px, 100px);
+    gap: 10px;
+    padding-inline: 12px;
   }
 
-  .hot-row > span:nth-last-child(-n + 2) {
+  .hot-row--top > span:nth-child(4),
+  .hot-row--selling > span:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+@container (max-width: 460px) {
+  .hot-row--top,
+  .hot-row--selling {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .hot-row--top > span:nth-child(n + 3),
+  .hot-row--selling > span:nth-child(n + 3) {
     display: none;
   }
 }

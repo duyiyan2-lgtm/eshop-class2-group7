@@ -227,6 +227,15 @@ const goPay = () => {
   router.push({ name: 'mobile-order-payment', params: { id: order.value.id } })
 }
 
+const goProduct = (item) => {
+  const productId = Number(item?.productId)
+  if (!Number.isInteger(productId) || productId <= 0) {
+    showToast('该商品信息暂时不可用')
+    return
+  }
+  router.push({ name: 'mobile-product-detail', params: { id: productId } })
+}
+
 watch(() => route.params.id, loadDetail, { immediate: true })
 </script>
 
@@ -268,7 +277,10 @@ watch(() => route.params.id, loadDetail, { immediate: true })
           :key="item.id"
           :title="item.productName"
           :label="specsText(item.skuSpecs) || '默认规格'"
+          :clickable="Boolean(item.productId)"
+          :is-link="Boolean(item.productId)"
           class="item-cell"
+          @click="goProduct(item)"
         >
           <template #value>
             <div class="item-value">

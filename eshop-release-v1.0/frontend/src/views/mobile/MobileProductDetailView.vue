@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { showImagePreview, showSuccessToast, showToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
-import { addCartItem } from '../../api/cart'
+import { addCartItem, getCart } from '../../api/cart'
 import { getProduct } from '../../api/catalog'
 import { recordBrowseHistory } from '../../api/browseHistory'
 import { addFavorite, getFavoriteStatus, removeFavorite } from '../../api/favorite'
@@ -24,7 +24,9 @@ const imageFailed = ref(false)
 const errorMessage = ref('')
 const favorited = ref(false)
 const favoriteLoading = ref(false)
+const cartCount = ref(0)
 let favoriteRequestSequence = 0
+let cartRequestSequence = 0
 
 const selectedSku = computed(() => {
   if (!product.value || selectedSkuId.value === null) return null
@@ -32,6 +34,11 @@ const selectedSku = computed(() => {
 })
 
 const maxQuantity = computed(() => Math.min(selectedSku.value?.stock || 0, 99))
+
+const cartBadge = computed(() => {
+  if (cartCount.value <= 0) return ''
+  return cartCount.value > 99 ? '99+' : String(cartCount.value)
+})
 
 const canAddToCart = computed(() => (
   Boolean(selectedSku.value && selectedSku.value.stock > 0)
@@ -43,6 +50,25 @@ const galleryImages = computed(() => {
   if (!product.value?.mainImage || imageFailed.value) return []
   return [product.value.mainImage]
 })
+
+const loadCartCount = async () => {
+  const requestId = ++cartRequestSequence
+  if (!auth.isLoggedIn) {
+    cartCount.value = 0
+    return
+  }
+
+  try {
+    const items = await getCart()
+    if (requestId !== cartRequestSequence || !auth.isLoggedIn) return
+    cartCount.value = (Array.isArray(items) ? items : []).reduce(
+      (total, item) => total + Math.max(0, Number(item.quantity) || 0),
+      0,
+    )
+  } catch {
+    if (requestId === cartRequestSequence) cartCount.value = 0
+  }
+}
 
 const skuLabel = (sku) => parseSpecs(sku.specsJson)
   .map((item) => item.value)
@@ -193,6 +219,7 @@ const addToCart = async () => {
       quantity: quantity.value,
     })
     notifyCartUpdated()
+    await loadCartCount()
     showSuccessToast({
       message: `已加入购物车，当前数量 ${item.quantity}`,
       duration: 2200,
@@ -212,7 +239,38 @@ const goCart = () => {
   router.push({ name: 'mobile-cart' })
 }
 
+const buyNow = async () => {
+  if (!selectedSku.value) {
+    showToast('请先选择商品规格')
+    return
+  }
+  if (!canAddToCart.value) {
+    showToast(selectedSku.value.stock <= 0 ? '当前规格暂时无货' : '购买数量不正确')
+    return
+  }
+
+  const checkoutLocation = {
+    name: 'mobile-checkout',
+    query: {
+      mode: 'buyNow',
+      productId: String(product.value.id),
+      skuId: String(selectedSku.value.id),
+      quantity: String(quantity.value),
+    },
+  }
+  if (!auth.isLoggedIn) {
+    showToast('请先登录后再立即购买')
+    await router.push({
+      name: 'mobile-login',
+      query: { redirect: router.resolve(checkoutLocation).fullPath },
+    })
+    return
+  }
+  await router.push(checkoutLocation)
+}
+
 watch(() => route.params.id, loadProduct, { immediate: true })
+watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
 </script>
 
 <template>
@@ -349,20 +407,30 @@ watch(() => route.params.id, loadProduct, { immediate: true })
           type="warning"
           plain
           hairline
-          icon="cart-o"
           class="cart-button"
           @click="goCart"
         >
-          购物车
+          <van-badge :content="cartBadge" :show-zero="false">
+            <van-icon name="cart-o" size="19" />
+          </van-badge>
+          <span>购物车</span>
         </van-button>
         <van-button
-          type="danger"
+          type="warning"
           class="add-button"
           :loading="adding"
           :disabled="!canAddToCart"
           @click="addToCart"
         >
           {{ canAddToCart ? '加入购物车' : (selectedSku ? '暂时无货' : '请选择规格') }}
+        </van-button>
+        <van-button
+          type="danger"
+          class="buy-button"
+          :disabled="!canAddToCart"
+          @click="buyNow"
+        >
+          立即购买
         </van-button>
       </div>
     </template>
@@ -608,10 +676,22 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 }
 
 .cart-button {
-  flex: 0 0 96px;
+  flex: 0 0 82px;
+}
+
+.cart-button :deep(.van-button__content) {
+  gap: 6px;
+}
+
+.cart-button :deep(.van-badge__wrapper) {
+  display: inline-flex;
 }
 
 .add-button {
+  flex: 1;
+}
+
+.buy-button {
   flex: 1;
 }
 </style>

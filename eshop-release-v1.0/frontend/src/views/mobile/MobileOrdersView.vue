@@ -3,6 +3,7 @@ import { computed, onActivated, onMounted, ref } from 'vue'
 import { showConfirmDialog, showToast } from 'vant'
 import { useRouter } from 'vue-router'
 import { cancelOrder, confirmOrder, getOrders } from '../../api/order'
+import { getReviewedOrderItemIds } from '../../api/review'
 import { formatDateTime, formatMoney, orderStatusInfo } from '../../utils/shop'
 
 const router = useRouter()
@@ -16,7 +17,10 @@ const loading = ref(false)
 const refreshing = ref(false)
 const errorMessage = ref('')
 const failedPage = ref(null)
+const reviewedItemIds = ref(new Set())
+const reviewLookupLoading = ref(false)
 let requestSequence = 0
+let reviewRequestSequence = 0
 
 const statusOptions = [
   { value: '', label: '全部' },
@@ -34,6 +38,38 @@ const summary = computed(() => {
   }
   return map
 })
+
+const loadReviewStatus = async () => {
+  const requestId = ++reviewRequestSequence
+  const itemIds = orders.value
+    .filter((order) => order.status === 'COMPLETED')
+    .flatMap((order) => order.items || [])
+    .map((item) => item.id)
+
+  reviewedItemIds.value = new Set()
+  reviewLookupLoading.value = false
+  if (!itemIds.length) return
+
+  reviewLookupLoading.value = true
+  try {
+    const ids = await getReviewedOrderItemIds(itemIds)
+    if (requestId === reviewRequestSequence) reviewedItemIds.value = ids
+  } catch {
+    // 评价状态失败不影响订单主流程，进入详情页后仍可再次查询。
+  } finally {
+    if (requestId === reviewRequestSequence) reviewLookupLoading.value = false
+  }
+}
+
+const reviewActionLabel = (order) => {
+  const items = order.items || []
+  if (reviewLookupLoading.value) return '检查评价状态…'
+  if (!items.length) return '查看订单'
+  const reviewedCount = items.filter((item) => reviewedItemIds.value.has(item.id)).length
+  if (reviewedCount >= items.length) return '已评价'
+  if (reviewedCount > 0) return '继续评价'
+  return '评价商品'
+}
 
 const loadOrders = async ({ reset = false, page = reset ? 1 : current.value } = {}) => {
   const requestId = ++requestSequence
@@ -58,6 +94,7 @@ const loadOrders = async ({ reset = false, page = reset ? 1 : current.value } = 
     total.value = data.total ?? orders.value.length
     finished.value = records.length < size || orders.value.length >= total.value
     failedPage.value = null
+    void loadReviewStatus()
     return true
   } catch (error) {
     if (requestId !== requestSequence) return false
@@ -248,7 +285,7 @@ onActivated(() => {
               plain
               @click.stop="goDetail(order)"
             >
-              评价商品
+              {{ reviewActionLabel(order) }}
             </van-button>
             <van-button size="small" plain @click.stop="goDetail(order)">
               订单详情

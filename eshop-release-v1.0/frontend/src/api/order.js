@@ -2,6 +2,8 @@ import http from './http'
 
 export const createOrder = (payload) => http.post('/orders', payload)
 
+export const buyNowOrder = (payload) => http.post('/orders/buy-now', payload)
+
 export const getOrders = (params) => http.get('/orders', { params })
 
 export const getOrder = (id) => http.get(`/orders/${id}`)

@@ -2,6 +2,7 @@ package com.eshop.backend.order;
 
 import com.eshop.backend.common.ApiResponse;
 import com.eshop.backend.common.PageResult;
+import com.eshop.backend.order.dto.BuyNowOrderRequest;
 import com.eshop.backend.order.dto.CreateOrderRequest;
 import com.eshop.backend.order.dto.OrderResponse;
 import com.eshop.backend.order.dto.OrderStatusLogResponse;
@@ -31,6 +32,13 @@ public class OrderController {
             @AuthenticationPrincipal LoginUser user,
             @Valid @RequestBody CreateOrderRequest request) {
         return ApiResponse.success(orderService.createOrder(user, request));
+    }
+
+    @PostMapping("/buy-now")
+    public ApiResponse<OrderResponse> buyNow(
+            @AuthenticationPrincipal LoginUser user,
+            @Valid @RequestBody BuyNowOrderRequest request) {
+        return ApiResponse.success(orderService.buyNow(user, request));
     }
 
     @GetMapping

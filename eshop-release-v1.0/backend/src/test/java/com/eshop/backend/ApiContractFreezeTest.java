@@ -11,6 +11,7 @@ import com.eshop.backend.catalog.dto.ProductRequest;
 import com.eshop.backend.catalog.dto.SkuRequest;
 import com.eshop.backend.catalog.dto.StatusRequest;
 import com.eshop.backend.catalog.dto.StockUpdateRequest;
+import com.eshop.backend.order.dto.BuyNowOrderRequest;
 import com.eshop.backend.order.dto.CreateOrderRequest;
 import com.eshop.backend.user.dto.UserStatusRequest;
 import org.junit.jupiter.api.Test;
@@ -89,6 +90,7 @@ class ApiContractFreezeTest {
             "POST /auth/register",
             "POST /cart",
             "POST /orders",
+            "POST /orders/buy-now",
             "POST /orders/{id}/cancel",
             "POST /orders/{id}/confirm",
             "POST /orders/{id}/pay",
@@ -143,6 +145,7 @@ class ApiContractFreezeTest {
         expected.put(AddCartItemRequest.class, List.of("skuId", "quantity"));
         expected.put(UpdateCartItemRequest.class, List.of("quantity", "selected"));
         expected.put(CreateOrderRequest.class, List.of("addressId", "remark"));
+        expected.put(BuyNowOrderRequest.class, List.of("addressId", "skuId", "quantity", "remark"));
         expected.put(UserStatusRequest.class, List.of("status"));
 
         expected.forEach((type, fields) -> {

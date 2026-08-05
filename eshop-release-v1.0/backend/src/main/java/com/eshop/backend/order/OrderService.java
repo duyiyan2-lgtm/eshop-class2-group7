@@ -16,6 +16,7 @@ import com.eshop.backend.catalog.mapper.ProductSkuMapper;
 import com.eshop.backend.common.BusinessException;
 import com.eshop.backend.common.ErrorCode;
 import com.eshop.backend.common.PageResult;
+import com.eshop.backend.order.dto.BuyNowOrderRequest;
 import com.eshop.backend.order.dto.CreateOrderRequest;
 import com.eshop.backend.order.dto.OrderItemResponse;
 import com.eshop.backend.order.dto.OrderResponse;
@@ -109,6 +110,50 @@ public class OrderService {
         }
         appendStatusLog(order.getId(), null, PENDING_PAYMENT, user, "创建订单");
         cartItemMapper.deleteByIds(cartItems.stream().map(CartItem::getId).toList());
+        return toResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse buyNow(LoginUser user, BuyNowOrderRequest request) {
+        UserAddress address = addressService.requireOwned(user.getUserId(), request.addressId());
+        ProductSku sku = skuMapper.selectById(request.skuId());
+        if (sku == null) {
+            throw new BusinessException(ErrorCode.SKU_NOT_FOUND);
+        }
+        Product product = productMapper.selectById(sku.getProductId());
+        if (product == null || !"ON_SALE".equals(product.getStatus()) || !"ENABLED".equals(sku.getStatus())) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+        if (skuMapper.decrementStock(sku.getId(), request.quantity()) != 1) {
+            throw new BusinessException(ErrorCode.OUT_OF_STOCK);
+        }
+
+        BigDecimal subtotal = sku.getPrice().multiply(BigDecimal.valueOf(request.quantity()));
+        ShopOrder order = new ShopOrder();
+        order.setOrderNo(generateNumber("E"));
+        order.setUserId(user.getUserId());
+        order.setTotalAmount(subtotal);
+        order.setStatus(PENDING_PAYMENT);
+        order.setReceiverName(address.getReceiverName());
+        order.setReceiverPhone(address.getPhone());
+        order.setReceiverAddress(String.join(" ",
+                address.getProvince(), address.getCity(), address.getDistrict(), address.getDetail()));
+        order.setRemark(request.remark());
+        orderMapper.insert(order);
+
+        OrderItem item = new OrderItem();
+        item.setOrderId(order.getId());
+        item.setProductId(product.getId());
+        item.setSkuId(sku.getId());
+        item.setProductName(product.getName());
+        item.setSkuSpecs(sku.getSpecsJson());
+        item.setProductImage(product.getMainImage());
+        item.setPrice(sku.getPrice());
+        item.setQuantity(request.quantity());
+        item.setSubtotal(subtotal);
+        orderItemMapper.insert(item);
+
+        appendStatusLog(order.getId(), null, PENDING_PAYMENT, user, "立即购买创建订单");
         return toResponse(order);
     }
 

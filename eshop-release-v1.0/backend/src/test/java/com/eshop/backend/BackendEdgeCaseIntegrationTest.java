@@ -285,6 +285,67 @@ class BackendEdgeCaseIntegrationTest {
     }
 
     @Test
+    void buyNowCreatesOnlyRequestedItemAndPreservesCart() throws Exception {
+        String suffix = String.valueOf(System.nanoTime());
+        String adminToken = login("admin", "admin123");
+        CatalogIds catalog = createSaleProduct(adminToken, suffix, 10);
+        String userToken = registerAndLogin("buy_now_" + suffix);
+
+        mockMvc.perform(post("/cart")
+                        .header("Authorization", bearer(userToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "skuId", catalog.skuId(),
+                                "quantity", 2))))
+                .andExpect(status().isOk());
+        long addressId = createAddress(userToken, true);
+
+        MvcResult orderResult = mockMvc.perform(post("/orders/buy-now")
+                        .header("Authorization", bearer(userToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "addressId", addressId,
+                                "skuId", catalog.skuId(),
+                                "quantity", 3,
+                                "remark", "buy-now-test"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("PENDING_PAYMENT"))
+                .andExpect(jsonPath("$.data.totalAmount").value(30.0))
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.items[0].quantity").value(3))
+                .andReturn();
+        long orderId = dataId(orderResult);
+
+        mockMvc.perform(get("/cart")
+                        .header("Authorization", bearer(userToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].quantity").value(2));
+        mockMvc.perform(get("/admin/products/{id}", catalog.productId())
+                        .header("Authorization", bearer(adminToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.skus[0].stock").value(7));
+
+        mockMvc.perform(post("/orders/{id}/cancel", orderId)
+                        .header("Authorization", bearer(userToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("CANCELED"));
+        mockMvc.perform(get("/admin/products/{id}", catalog.productId())
+                        .header("Authorization", bearer(adminToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.skus[0].stock").value(10));
+
+        mockMvc.perform(post("/orders/buy-now")
+                        .header("Authorization", bearer(userToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "addressId", addressId,
+                                "skuId", catalog.skuId(),
+                                "quantity", 0))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void malformedAndInvalidUploadRequestsReturnClientErrors() throws Exception {
         String adminToken = login("admin", "admin123");
 
