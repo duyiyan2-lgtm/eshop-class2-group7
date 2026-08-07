@@ -40,6 +40,7 @@ CREATE TABLE category (
 
 CREATE TABLE product (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    seller_id BIGINT,
     category_id BIGINT NOT NULL,
     name VARCHAR(120) NOT NULL,
     subtitle VARCHAR(255),
@@ -91,6 +92,7 @@ CREATE TABLE orders (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_no VARCHAR(32) NOT NULL UNIQUE,
     user_id BIGINT NOT NULL,
+    seller_id BIGINT,
     total_amount DECIMAL(12, 2) NOT NULL,
     status VARCHAR(30) NOT NULL,
     receiver_name VARCHAR(50) NOT NULL,

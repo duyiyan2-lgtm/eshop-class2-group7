@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class Product {
     @TableId(type = IdType.AUTO)
     private Long id;
+    private Long sellerId;
     private Long categoryId;
     private String name;
     private String subtitle;

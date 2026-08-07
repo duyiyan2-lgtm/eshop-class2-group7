@@ -15,6 +15,7 @@ public class ShopOrder {
     private Long id;
     private String orderNo;
     private Long userId;
+    private Long sellerId;
     private BigDecimal totalAmount;
     private String status;
     private String receiverName;
