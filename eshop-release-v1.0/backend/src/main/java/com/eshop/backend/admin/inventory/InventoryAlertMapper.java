@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Select;
 public interface InventoryAlertMapper {
 
     @Select("""
+            <script>
             SELECT
                 sku.id AS sku_id,
                 product.id AS product_id,
@@ -23,16 +24,21 @@ public interface InventoryAlertMapper {
             INNER JOIN product ON product.id = sku.product_id
             WHERE product.status = 'ON_SALE'
               AND sku.status = 'ENABLED'
-              AND sku.stock <= #{threshold}
+              AND sku.stock &lt;= #{threshold}
+              <if test="sellerId != null">
+                AND product.seller_id = #{sellerId}
+              </if>
               AND (
                   #{keyword} IS NULL
                   OR LOWER(product.name) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
                   OR LOWER(sku.sku_code) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
-              )
+            )
             ORDER BY sku.stock ASC, product.id DESC, sku.id DESC
+            </script>
             """)
     IPage<InventoryAlertResponse> selectAlertPage(
             Page<InventoryAlertResponse> page,
             @Param("threshold") int threshold,
-            @Param("keyword") String keyword);
+            @Param("keyword") String keyword,
+            @Param("sellerId") Long sellerId);
 }

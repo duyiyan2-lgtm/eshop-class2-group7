@@ -2,8 +2,10 @@ package com.eshop.backend.admin.inventory;
 
 import com.eshop.backend.common.ApiResponse;
 import com.eshop.backend.common.PageResult;
+import com.eshop.backend.security.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,11 +20,13 @@ public class InventoryAlertController {
 
     @GetMapping("/alerts")
     public ApiResponse<PageResult<InventoryAlertResponse>> alerts(
+            @AuthenticationPrincipal LoginUser operator,
             @RequestParam(defaultValue = "1") long current,
             @RequestParam(defaultValue = "20") long size,
             @RequestParam(defaultValue = "10") int threshold,
             @RequestParam(required = false) String keyword) {
         return ApiResponse.success(inventoryAlertService.page(
+                operator,
                 current,
                 size,
                 threshold,

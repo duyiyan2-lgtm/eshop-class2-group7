@@ -2,6 +2,7 @@ package com.eshop.backend.admin.dashboard;
 
 import com.eshop.backend.common.BusinessException;
 import com.eshop.backend.common.ErrorCode;
+import com.eshop.backend.security.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,25 +22,26 @@ public class DashboardService {
     private final DashboardMapper dashboardMapper;
 
     @Transactional(readOnly = true)
-    public DashboardSummaryResponse summary() {
-        BigDecimal paidSalesAmount = dashboardMapper.sumPaidSalesAmount();
+    public DashboardSummaryResponse summary(LoginUser operator) {
+        Long sellerId = sellerId(operator);
+        BigDecimal paidSalesAmount = dashboardMapper.sumPaidSalesAmount(sellerId);
         return new DashboardSummaryResponse(
-                dashboardMapper.countUsers(),
-                dashboardMapper.countProducts(),
-                dashboardMapper.countOnSaleProducts(),
-                dashboardMapper.countOrders(),
-                dashboardMapper.countOrdersByStatus("PENDING_PAYMENT"),
-                dashboardMapper.countOrdersByStatus("PAID"),
-                dashboardMapper.countOrdersByStatus("SHIPPED"),
-                dashboardMapper.countOrdersByStatus("COMPLETED"),
-                dashboardMapper.countOrdersByStatus("CANCELED"),
-                dashboardMapper.countLowStockSkus(),
+                dashboardMapper.countUsers(sellerId),
+                dashboardMapper.countProducts(sellerId),
+                dashboardMapper.countOnSaleProducts(sellerId),
+                dashboardMapper.countOrders(sellerId),
+                dashboardMapper.countOrdersByStatus("PENDING_PAYMENT", sellerId),
+                dashboardMapper.countOrdersByStatus("PAID", sellerId),
+                dashboardMapper.countOrdersByStatus("SHIPPED", sellerId),
+                dashboardMapper.countOrdersByStatus("COMPLETED", sellerId),
+                dashboardMapper.countOrdersByStatus("CANCELED", sellerId),
+                dashboardMapper.countLowStockSkus(sellerId),
                 paidSalesAmount == null ? BigDecimal.ZERO : paidSalesAmount,
                 LocalDateTime.now());
     }
 
     @Transactional(readOnly = true)
-    public SalesTrendResponse salesTrend(Integer days) {
+    public SalesTrendResponse salesTrend(LoginUser operator, Integer days) {
         int range = days == null ? 7 : days;
         if (range < 1 || range > 30) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
@@ -50,7 +52,7 @@ public class DashboardService {
         LocalDateTime from = startDate.atStartOfDay();
         LocalDateTime to = endDate.plusDays(1).atStartOfDay();
 
-        List<SalesDayAggregate> aggregates = dashboardMapper.selectSalesByDay(from, to);
+        List<SalesDayAggregate> aggregates = dashboardMapper.selectSalesByDay(from, to, sellerId(operator));
         Map<LocalDate, SalesDayAggregate> byDate = new HashMap<>();
         if (aggregates != null) {
             for (SalesDayAggregate aggregate : aggregates) {
@@ -73,12 +75,12 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
-    public TopProductsResponse topProducts(Integer limit) {
+    public TopProductsResponse topProducts(LoginUser operator, Integer limit) {
         int size = limit == null ? 10 : limit;
         if (size < 1 || size > 20) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
         }
-        List<TopProductAggregate> rows = dashboardMapper.selectTopProducts(size);
+        List<TopProductAggregate> rows = dashboardMapper.selectTopProducts(size, sellerId(operator));
         List<TopProductItemResponse> items = rows == null
                 ? List.of()
                 : rows.stream()
@@ -89,5 +91,11 @@ public class DashboardService {
                         row.getSalesAmount() == null ? BigDecimal.ZERO : row.getSalesAmount()))
                 .toList();
         return new TopProductsResponse(size, items);
+    }
+
+    private Long sellerId(LoginUser operator) {
+        return operator != null && "SELLER".equals(operator.getRole())
+                ? operator.getUserId()
+                : null;
     }
 }

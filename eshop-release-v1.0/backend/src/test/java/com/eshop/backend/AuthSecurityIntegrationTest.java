@@ -208,7 +208,7 @@ class AuthSecurityIntegrationTest {
                 .andReturn());
 
         long productId = dataId(mockMvc.perform(post("/admin/products")
-                        .header("Authorization", bearer(adminToken))
+                        .header("Authorization", bearer(sellerToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "categoryId", categoryId,
@@ -221,7 +221,7 @@ class AuthSecurityIntegrationTest {
                 .andReturn());
 
         long skuId = dataId(mockMvc.perform(post("/admin/products/{id}/skus", productId)
-                        .header("Authorization", bearer(adminToken))
+                        .header("Authorization", bearer(sellerToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "skuCode", "SKU-" + suffix,
@@ -234,7 +234,7 @@ class AuthSecurityIntegrationTest {
                 .andReturn());
 
         mockMvc.perform(patch("/admin/products/{id}/status", productId)
-                        .header("Authorization", bearer(adminToken))
+                        .header("Authorization", bearer(sellerToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"ON_SALE\"}"))
                 .andExpect(status().isOk())

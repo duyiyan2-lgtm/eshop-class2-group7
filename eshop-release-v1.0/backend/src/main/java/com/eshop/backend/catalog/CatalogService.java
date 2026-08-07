@@ -20,6 +20,7 @@ import com.eshop.backend.catalog.mapper.ProductSkuMapper;
 import com.eshop.backend.common.BusinessException;
 import com.eshop.backend.common.ErrorCode;
 import com.eshop.backend.common.PageResult;
+import com.eshop.backend.security.LoginUser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -116,6 +117,25 @@ public class CatalogService {
         return new PageResult<>(page.getCurrent(), page.getSize(), page.getTotal(), records);
     }
 
+    public PageResult<ProductSummaryResponse> pageManagedProducts(
+            LoginUser operator,
+            long current,
+            long size,
+            Long categoryId,
+            String keyword) {
+        Page<Product> page = productMapper.selectPage(
+                new Page<>(Math.max(current, 1), Math.min(Math.max(size, 1), 50)),
+                new LambdaQueryWrapper<Product>()
+                        .eq(isSeller(operator), Product::getSellerId, operator.getUserId())
+                        .eq(categoryId != null, Product::getCategoryId, categoryId)
+                        .like(StringUtils.hasText(keyword), Product::getName, keyword)
+                        .orderByDesc(Product::getCreatedAt));
+        List<ProductSummaryResponse> records = page.getRecords().stream()
+                .map(product -> toSummary(product, false))
+                .toList();
+        return new PageResult<>(page.getCurrent(), page.getSize(), page.getTotal(), records);
+    }
+
     public ProductDetailResponse getProduct(Long id, boolean publicOnly) {
         Product product = productMapper.selectById(id);
         if (product == null || (publicOnly && !"ON_SALE".equals(product.getStatus()))) {
@@ -141,51 +161,59 @@ public class CatalogService {
                 product.getUpdatedAt());
     }
 
+    public ProductDetailResponse getManagedProduct(LoginUser operator, Long id) {
+        requireManagedProduct(operator, id);
+        return getProduct(id, false);
+    }
+
     @Transactional
     @OperationLogAction(module = "商品管理", action = "新增商品")
-    public ProductDetailResponse createProduct(ProductRequest request) {
+    public ProductDetailResponse createProduct(LoginUser operator, ProductRequest request) {
         requireEnabledCategory(request.categoryId());
         if ("ON_SALE".equals(request.status())) {
             throw new BusinessException(ErrorCode.PRODUCT_REQUIRES_SKU);
         }
         Product product = new Product();
+        if (isSeller(operator)) {
+            product.setSellerId(operator.getUserId());
+        }
         copyProduct(product, request);
         productMapper.insert(product);
-        return getProduct(product.getId(), false);
+        return getManagedProduct(operator, product.getId());
     }
 
     @Transactional
     @OperationLogAction(module = "商品管理", action = "修改商品")
-    public ProductDetailResponse updateProduct(Long id, ProductRequest request) {
-        Product product = requireProduct(id);
+    public ProductDetailResponse updateProduct(LoginUser operator, Long id, ProductRequest request) {
+        Product product = requireManagedProduct(operator, id);
         requireEnabledCategory(request.categoryId());
         String targetStatus = request.status() == null ? product.getStatus() : request.status();
         ensureProductCanBeOnSale(product.getId(), targetStatus);
         copyProduct(product, request);
         productMapper.updateById(product);
-        return getProduct(id, false);
+        return getManagedProduct(operator, id);
     }
 
     @Transactional
     @OperationLogAction(module = "商品管理", action = "修改商品状态")
-    public ProductDetailResponse updateProductStatus(Long id, String status) {
+    public ProductDetailResponse updateProductStatus(LoginUser operator, Long id, String status) {
         if (!List.of("DRAFT", "ON_SALE", "OFF_SALE").contains(status)) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
         }
-        Product product = requireProduct(id);
+        Product product = requireManagedProduct(operator, id);
         if ("ON_SALE".equals(status)) {
             requireEnabledCategory(product.getCategoryId());
         }
         ensureProductCanBeOnSale(id, status);
         product.setStatus(status);
         productMapper.updateById(product);
-        return getProduct(id, false);
+        return getManagedProduct(operator, id);
     }
 
     @Transactional
     @OperationLogAction(module = "商品管理", action = "删除商品")
-    public void deleteProduct(Long id) {
-        Product product = requireProduct(id);
+    public void deleteProduct(LoginUser operator, Long id) {
+        Product product = requireManagedProduct(operator, id);
         if ("ON_SALE".equals(product.getStatus())) {
             throw new BusinessException(ErrorCode.PRODUCT_MUST_BE_OFF_SALE);
         }
@@ -204,8 +232,8 @@ public class CatalogService {
 
     @Transactional
     @OperationLogAction(module = "SKU管理", action = "新增SKU")
-    public SkuResponse createSku(Long productId, SkuRequest request) {
-        requireProduct(productId);
+    public SkuResponse createSku(LoginUser operator, Long productId, SkuRequest request) {
+        requireManagedProduct(operator, productId);
         validateSpecs(request.specsJson());
         ensureSkuCodeAvailable(null, request.skuCode());
         ProductSku sku = new ProductSku();
@@ -217,8 +245,8 @@ public class CatalogService {
 
     @Transactional
     @OperationLogAction(module = "SKU管理", action = "修改SKU")
-    public SkuResponse updateSku(Long id, SkuRequest request) {
-        ProductSku sku = requireSku(id);
+    public SkuResponse updateSku(LoginUser operator, Long id, SkuRequest request) {
+        ProductSku sku = requireManagedSku(operator, id);
         validateSpecs(request.specsJson());
         ensureSkuCodeAvailable(id, request.skuCode());
         String targetStatus = request.status() == null ? sku.getStatus() : request.status();
@@ -230,8 +258,8 @@ public class CatalogService {
 
     @Transactional
     @OperationLogAction(module = "SKU管理", action = "调整库存")
-    public SkuResponse updateStock(Long id, int stock) {
-        ProductSku sku = requireSku(id);
+    public SkuResponse updateStock(LoginUser operator, Long id, int stock) {
+        ProductSku sku = requireManagedSku(operator, id);
         sku.setStock(stock);
         skuMapper.updateById(sku);
         return toSkuResponse(sku);
@@ -239,9 +267,9 @@ public class CatalogService {
 
     @Transactional
     @OperationLogAction(module = "SKU管理", action = "删除SKU")
-    public void deleteSku(Long id) {
-        ProductSku sku = requireSku(id);
-        Product product = requireProduct(sku.getProductId());
+    public void deleteSku(LoginUser operator, Long id) {
+        ProductSku sku = requireManagedSku(operator, id);
+        Product product = requireManagedProduct(operator, sku.getProductId());
         if ("ON_SALE".equals(product.getStatus())) {
             throw new BusinessException(ErrorCode.PRODUCT_MUST_BE_OFF_SALE);
         }
@@ -261,12 +289,30 @@ public class CatalogService {
         return product;
     }
 
+    private Product requireManagedProduct(LoginUser operator, Long id) {
+        Product product = requireProduct(id);
+        if (isSeller(operator) && !operator.getUserId().equals(product.getSellerId())) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return product;
+    }
+
     public ProductSku requireSku(Long id) {
         ProductSku sku = skuMapper.selectById(id);
         if (sku == null) {
             throw new BusinessException(ErrorCode.SKU_NOT_FOUND);
         }
         return sku;
+    }
+
+    private ProductSku requireManagedSku(LoginUser operator, Long id) {
+        ProductSku sku = requireSku(id);
+        requireManagedProduct(operator, sku.getProductId());
+        return sku;
+    }
+
+    private boolean isSeller(LoginUser operator) {
+        return operator != null && "SELLER".equals(operator.getRole());
     }
 
     private Category requireCategory(Long id) {

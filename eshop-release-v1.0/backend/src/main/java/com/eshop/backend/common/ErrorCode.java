@@ -50,6 +50,7 @@ public enum ErrorCode {
     BROWSE_HISTORY_NOT_FOUND(40418, "浏览记录不存在"),
     SELF_ROLE_CHANGE_NOT_ALLOWED(40931, "不能修改当前登录账号的角色"),
     ADMIN_ACCOUNT_PROTECTED(40932, "平台管理员账号受保护，不能在账号管理中修改"),
+    MIXED_SELLER_CART(40933, "所选商品属于不同商家，请分开结算"),
     INTERNAL_ERROR(50000, "系统异常，请稍后重试"),
     FILE_SAVE_FAILED(50001, "文件保存失败");
 

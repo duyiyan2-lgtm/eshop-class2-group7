@@ -28,8 +28,12 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
                 review.updated_at AS updated_at
             FROM product_review review
             INNER JOIN order_item item ON item.id = review.order_item_id
+            INNER JOIN product reviewed_product ON reviewed_product.id = review.product_id
             LEFT JOIN sys_user reviewer ON reviewer.id = review.user_id
             WHERE 1 = 1
+            <if test="sellerId != null">
+              AND reviewed_product.seller_id = #{sellerId}
+            </if>
             <if test="status != null and status != ''">
               AND review.status = #{status}
             </if>
@@ -51,7 +55,8 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
             Page<ProductReviewRow> page,
             @Param("keyword") String keyword,
             @Param("rating") Integer rating,
-            @Param("status") String status);
+            @Param("status") String status,
+            @Param("sellerId") Long sellerId);
 
     @Select("""
             SELECT

@@ -2,6 +2,7 @@ package com.eshop.backend.admin.inventory;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.eshop.backend.common.PageResult;
+import com.eshop.backend.security.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ public class InventoryAlertService {
 
     @Transactional(readOnly = true)
     public PageResult<InventoryAlertResponse> page(
+            LoginUser operator,
             long current,
             long size,
             int threshold,
@@ -26,6 +28,13 @@ public class InventoryAlertService {
         return PageResult.from(inventoryAlertMapper.selectAlertPage(
                 page,
                 safeThreshold,
-                normalizedKeyword));
+                normalizedKeyword,
+                sellerId(operator)));
+    }
+
+    private Long sellerId(LoginUser operator) {
+        return operator != null && "SELLER".equals(operator.getRole())
+                ? operator.getUserId()
+                : null;
     }
 }

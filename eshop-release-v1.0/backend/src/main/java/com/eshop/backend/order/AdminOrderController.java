@@ -26,21 +26,26 @@ public class AdminOrderController {
 
     @GetMapping
     public ApiResponse<PageResult<OrderResponse>> page(
+            @AuthenticationPrincipal LoginUser operator,
             @RequestParam(defaultValue = "1") long current,
             @RequestParam(defaultValue = "20") long size,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String orderNo) {
-        return ApiResponse.success(orderService.pageAdminOrders(current, size, status, orderNo));
+        return ApiResponse.success(orderService.pageAdminOrders(operator, current, size, status, orderNo));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<OrderResponse> detail(@PathVariable Long id) {
-        return ApiResponse.success(orderService.getAdminOrder(id));
+    public ApiResponse<OrderResponse> detail(
+            @AuthenticationPrincipal LoginUser operator,
+            @PathVariable Long id) {
+        return ApiResponse.success(orderService.getAdminOrder(operator, id));
     }
 
     @GetMapping("/{id}/logs")
-    public ApiResponse<List<OrderStatusLogResponse>> statusLogs(@PathVariable Long id) {
-        return ApiResponse.success(orderService.getAdminOrderLogs(id));
+    public ApiResponse<List<OrderStatusLogResponse>> statusLogs(
+            @AuthenticationPrincipal LoginUser operator,
+            @PathVariable Long id) {
+        return ApiResponse.success(orderService.getAdminOrderLogs(operator, id));
     }
 
     @PostMapping("/{id}/ship")

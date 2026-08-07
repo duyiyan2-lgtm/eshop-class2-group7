@@ -33,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -65,6 +66,8 @@ public class OrderService {
 
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
+        Long sellerId = null;
+        boolean sellerResolved = false;
         for (CartItem cartItem : cartItems) {
             ProductSku sku = skuMapper.selectById(cartItem.getSkuId());
             if (sku == null) {
@@ -73,6 +76,12 @@ public class OrderService {
             Product product = productMapper.selectById(sku.getProductId());
             if (product == null || !"ON_SALE".equals(product.getStatus()) || !"ENABLED".equals(sku.getStatus())) {
                 throw new BusinessException(ErrorCode.PRODUCT_NOT_ON_SALE);
+            }
+            if (!sellerResolved) {
+                sellerId = product.getSellerId();
+                sellerResolved = true;
+            } else if (!Objects.equals(sellerId, product.getSellerId())) {
+                throw new BusinessException(ErrorCode.MIXED_SELLER_CART);
             }
             if (skuMapper.decrementStock(sku.getId(), cartItem.getQuantity()) != 1) {
                 throw new BusinessException(ErrorCode.OUT_OF_STOCK);
@@ -95,6 +104,7 @@ public class OrderService {
         ShopOrder order = new ShopOrder();
         order.setOrderNo(generateNumber("E"));
         order.setUserId(user.getUserId());
+        order.setSellerId(sellerId);
         order.setTotalAmount(total);
         order.setStatus(PENDING_PAYMENT);
         order.setReceiverName(address.getReceiverName());
@@ -132,6 +142,7 @@ public class OrderService {
         ShopOrder order = new ShopOrder();
         order.setOrderNo(generateNumber("E"));
         order.setUserId(user.getUserId());
+        order.setSellerId(product.getSellerId());
         order.setTotalAmount(subtotal);
         order.setStatus(PENDING_PAYMENT);
         order.setReceiverName(address.getReceiverName());
@@ -173,11 +184,12 @@ public class OrderService {
     }
 
     public PageResult<OrderResponse> pageAdminOrders(
-            long current, long size, String status, String orderNo) {
+            LoginUser operator, long current, long size, String status, String orderNo) {
         validateStatusFilter(status);
         Page<ShopOrder> page = orderMapper.selectPage(
                 new Page<>(Math.max(current, 1), Math.min(Math.max(size, 1), 100)),
                 new LambdaQueryWrapper<ShopOrder>()
+                        .eq(isSeller(operator), ShopOrder::getSellerId, operator.getUserId())
                         .eq(StringUtils.hasText(status), ShopOrder::getStatus, status)
                         .like(StringUtils.hasText(orderNo), ShopOrder::getOrderNo, orderNo)
                         .orderByDesc(ShopOrder::getCreatedAt));
@@ -192,8 +204,8 @@ public class OrderService {
         return toResponse(requireOwnedOrder(userId, id));
     }
 
-    public OrderResponse getAdminOrder(Long id) {
-        return toResponse(requireOrder(id));
+    public OrderResponse getAdminOrder(LoginUser operator, Long id) {
+        return toResponse(requireManagedOrder(operator, id));
     }
 
     public List<OrderStatusLogResponse> getUserOrderLogs(Long userId, Long id) {
@@ -201,8 +213,8 @@ public class OrderService {
         return listStatusLogs(id);
     }
 
-    public List<OrderStatusLogResponse> getAdminOrderLogs(Long id) {
-        requireOrder(id);
+    public List<OrderStatusLogResponse> getAdminOrderLogs(LoginUser operator, Long id) {
+        requireManagedOrder(operator, id);
         return listStatusLogs(id);
     }
 
@@ -287,19 +299,19 @@ public class OrderService {
     @Transactional
     @OperationLogAction(module = "订单管理", action = "管理员取消订单")
     public OrderResponse cancelByAdmin(LoginUser admin, Long id) {
-        ShopOrder order = requireOrder(id);
+        ShopOrder order = requireManagedOrder(admin, id);
         transition(order, PENDING_PAYMENT, CANCELED, admin, "管理员取消待支付订单");
         restoreStock(id);
-        return toResponse(requireOrder(id));
+        return toResponse(requireManagedOrder(admin, id));
     }
 
     @Transactional
     @OperationLogAction(module = "订单管理", action = "订单发货")
     public OrderResponse ship(LoginUser operator, Long id) {
-        ShopOrder order = requireOrder(id);
+        ShopOrder order = requireManagedOrder(operator, id);
         String message = "SELLER".equals(operator.getRole()) ? "商家发货" : "管理员发货";
         transition(order, PAID, SHIPPED, operator, message);
-        return toResponse(requireOrder(id));
+        return toResponse(requireManagedOrder(operator, id));
     }
 
     @Transactional
@@ -355,6 +367,18 @@ public class OrderService {
             throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
         }
         return order;
+    }
+
+    private ShopOrder requireManagedOrder(LoginUser operator, Long id) {
+        ShopOrder order = requireOrder(id);
+        if (isSeller(operator) && !operator.getUserId().equals(order.getSellerId())) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+        return order;
+    }
+
+    private boolean isSeller(LoginUser operator) {
+        return operator != null && "SELLER".equals(operator.getRole());
     }
 
     private void appendStatusLog(

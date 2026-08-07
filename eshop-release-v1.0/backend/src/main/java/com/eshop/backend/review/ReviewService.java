@@ -20,6 +20,7 @@ import com.eshop.backend.review.dto.MyReviewResponse;
 import com.eshop.backend.review.dto.ProductReviewResponse;
 import com.eshop.backend.review.dto.ProductReviewRow;
 import com.eshop.backend.review.dto.ProductReviewSummaryResponse;
+import com.eshop.backend.security.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -117,6 +118,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public PageResult<AdminReviewResponse> pageAdmin(
+            LoginUser operator,
             long current,
             long size,
             String keyword,
@@ -137,13 +139,14 @@ public class ReviewService {
                 page,
                 normalizedKeyword,
                 rating,
-                normalizedStatus);
+                normalizedStatus,
+                sellerId(operator));
         return mapPage(result, this::toAdminResponse);
     }
 
     @Transactional
     @OperationLogAction(module = "评价管理", action = "修改评价状态")
-    public AdminReviewResponse updateStatus(Long id, String status) {
+    public AdminReviewResponse updateStatus(LoginUser operator, Long id, String status) {
         String normalizedStatus = StringUtils.hasText(status) ? status.trim().toUpperCase() : "";
         if (!ADMIN_STATUSES.contains(normalizedStatus)) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
@@ -152,6 +155,7 @@ public class ReviewService {
         if (review == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
+        requireManagedProduct(operator, review.getProductId());
         if (!normalizedStatus.equals(review.getStatus())) {
             review.setStatus(normalizedStatus);
             review.setUpdatedAt(LocalDateTime.now());
@@ -159,6 +163,24 @@ public class ReviewService {
         }
         ProductReviewRow row = reviewMapper.selectAdminReviewById(id);
         return toAdminResponse(row);
+    }
+
+    private void requireManagedProduct(LoginUser operator, Long productId) {
+        if (!isSeller(operator)) {
+            return;
+        }
+        Product product = productMapper.selectById(productId);
+        if (product == null || !operator.getUserId().equals(product.getSellerId())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        }
+    }
+
+    private Long sellerId(LoginUser operator) {
+        return isSeller(operator) ? operator.getUserId() : null;
+    }
+
+    private boolean isSeller(LoginUser operator) {
+        return operator != null && "SELLER".equals(operator.getRole());
     }
 
     private MyReviewResponse toMyResponse(ProductReview review, OrderItem item) {

@@ -11,8 +11,11 @@ import com.eshop.backend.catalog.dto.StockUpdateRequest;
 import com.eshop.backend.catalog.entity.Category;
 import com.eshop.backend.common.ApiResponse;
 import com.eshop.backend.common.PageResult;
+import com.eshop.backend.security.LoginUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,6 +32,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
 public class AdminCatalogController {
     private final CatalogService catalogService;
 
@@ -38,11 +42,13 @@ public class AdminCatalogController {
     }
 
     @PostMapping("/categories")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Category> createCategory(@Valid @RequestBody CategoryRequest request) {
         return ApiResponse.success(catalogService.createCategory(request));
     }
 
     @PutMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Category> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody CategoryRequest request) {
@@ -50,6 +56,7 @@ public class AdminCatalogController {
     }
 
     @PatchMapping("/categories/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Category> updateCategoryStatus(
             @PathVariable Long id,
             @Valid @RequestBody StatusRequest request) {
@@ -57,6 +64,7 @@ public class AdminCatalogController {
     }
 
     @DeleteMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> deleteCategory(@PathVariable Long id) {
         catalogService.deleteCategory(id);
         return ApiResponse.success();
@@ -64,67 +72,82 @@ public class AdminCatalogController {
 
     @GetMapping("/products")
     public ApiResponse<PageResult<ProductSummaryResponse>> products(
+            @AuthenticationPrincipal LoginUser operator,
             @RequestParam(defaultValue = "1") long current,
             @RequestParam(defaultValue = "20") long size,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyword) {
-        return ApiResponse.success(catalogService.pageProducts(current, size, categoryId, keyword, false));
+        return ApiResponse.success(catalogService.pageManagedProducts(
+                operator, current, size, categoryId, keyword));
     }
 
     @GetMapping("/products/{id}")
-    public ApiResponse<ProductDetailResponse> product(@PathVariable Long id) {
-        return ApiResponse.success(catalogService.getProduct(id, false));
+    public ApiResponse<ProductDetailResponse> product(
+            @AuthenticationPrincipal LoginUser operator,
+            @PathVariable Long id) {
+        return ApiResponse.success(catalogService.getManagedProduct(operator, id));
     }
 
     @PostMapping("/products")
-    public ApiResponse<ProductDetailResponse> createProduct(@Valid @RequestBody ProductRequest request) {
-        return ApiResponse.success(catalogService.createProduct(request));
+    public ApiResponse<ProductDetailResponse> createProduct(
+            @AuthenticationPrincipal LoginUser operator,
+            @Valid @RequestBody ProductRequest request) {
+        return ApiResponse.success(catalogService.createProduct(operator, request));
     }
 
     @PutMapping("/products/{id}")
     public ApiResponse<ProductDetailResponse> updateProduct(
+            @AuthenticationPrincipal LoginUser operator,
             @PathVariable Long id,
             @Valid @RequestBody ProductRequest request) {
-        return ApiResponse.success(catalogService.updateProduct(id, request));
+        return ApiResponse.success(catalogService.updateProduct(operator, id, request));
     }
 
     @PatchMapping("/products/{id}/status")
     public ApiResponse<ProductDetailResponse> updateProductStatus(
+            @AuthenticationPrincipal LoginUser operator,
             @PathVariable Long id,
             @Valid @RequestBody StatusRequest request) {
-        return ApiResponse.success(catalogService.updateProductStatus(id, request.status()));
+        return ApiResponse.success(catalogService.updateProductStatus(operator, id, request.status()));
     }
 
     @DeleteMapping("/products/{id}")
-    public ApiResponse<Void> deleteProduct(@PathVariable Long id) {
-        catalogService.deleteProduct(id);
+    public ApiResponse<Void> deleteProduct(
+            @AuthenticationPrincipal LoginUser operator,
+            @PathVariable Long id) {
+        catalogService.deleteProduct(operator, id);
         return ApiResponse.success();
     }
 
     @PostMapping("/products/{productId}/skus")
     public ApiResponse<SkuResponse> createSku(
+            @AuthenticationPrincipal LoginUser operator,
             @PathVariable Long productId,
             @Valid @RequestBody SkuRequest request) {
-        return ApiResponse.success(catalogService.createSku(productId, request));
+        return ApiResponse.success(catalogService.createSku(operator, productId, request));
     }
 
     @PutMapping("/skus/{id}")
     public ApiResponse<SkuResponse> updateSku(
+            @AuthenticationPrincipal LoginUser operator,
             @PathVariable Long id,
             @Valid @RequestBody SkuRequest request) {
-        return ApiResponse.success(catalogService.updateSku(id, request));
+        return ApiResponse.success(catalogService.updateSku(operator, id, request));
     }
 
     @PatchMapping("/skus/{id}/stock")
     public ApiResponse<SkuResponse> updateStock(
+            @AuthenticationPrincipal LoginUser operator,
             @PathVariable Long id,
             @Valid @RequestBody StockUpdateRequest request) {
-        return ApiResponse.success(catalogService.updateStock(id, request.stock()));
+        return ApiResponse.success(catalogService.updateStock(operator, id, request.stock()));
     }
 
     @DeleteMapping("/skus/{id}")
-    public ApiResponse<Void> deleteSku(@PathVariable Long id) {
-        catalogService.deleteSku(id);
+    public ApiResponse<Void> deleteSku(
+            @AuthenticationPrincipal LoginUser operator,
+            @PathVariable Long id) {
+        catalogService.deleteSku(operator, id);
         return ApiResponse.success();
     }
 }

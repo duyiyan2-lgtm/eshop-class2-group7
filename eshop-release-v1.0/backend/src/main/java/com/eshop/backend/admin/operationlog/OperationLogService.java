@@ -29,11 +29,16 @@ public class OperationLogService {
         operationLogMapper.insert(log);
     }
 
-    public PageResult<OperationLog> page(long current, long size) {
+    public PageResult<OperationLog> page(LoginUser operator, long current, long size) {
         Page<OperationLog> page = operationLogMapper.selectPage(
                 new Page<>(current, Math.min(Math.max(size, 1), 100)),
                 com.baomidou.mybatisplus.core.toolkit.Wrappers.<OperationLog>lambdaQuery()
+                        .eq(isSeller(operator), OperationLog::getOperatorId, operator.getUserId())
                         .orderByDesc(OperationLog::getCreatedAt));
         return PageResult.from(page);
+    }
+
+    private boolean isSeller(LoginUser operator) {
+        return operator != null && "SELLER".equals(operator.getRole());
     }
 }
