@@ -300,6 +300,12 @@ try {
         role = "SELLER"
     } $adminToken
     Assert-Equal $sellerRestored.Body.data.role "SELLER" "administrator restores seller role"
+    $sellerCategoryForbidden = Invoke-Api POST "admin/categories" @{
+        name = "Forbidden Seller Category $suffix"
+        sortOrder = 999
+        status = "ENABLED"
+    } $sellerToken @(403)
+    Assert-Equal $sellerCategoryForbidden.Body.code 40301 "seller cannot mutate shared categories"
 
     $duplicate = Invoke-Api POST "auth/register" @{
         username = $userA
@@ -391,7 +397,7 @@ try {
         mainImage = "/api/demo/phone.svg"
         detail = "Only used by the automated smoke test"
         status = "DRAFT"
-    } $adminToken
+    } $sellerToken
     $productId = $product.Body.data.id
 
     $draftFavorite = Invoke-Api POST "favorites/$productId" $null $tokenA @(409)
@@ -403,7 +409,7 @@ try {
         price = 12.34
         stock = 10
         status = "ENABLED"
-    } $adminToken @(400)
+    } $sellerToken @(400)
     Assert-Equal $invalidSku.Body.code 40022 "invalid SKU JSON rejected"
 
     $sku = Invoke-Api POST "admin/products/$productId/skus" @{
@@ -412,12 +418,12 @@ try {
         price = 12.34
         stock = 10
         status = "ENABLED"
-    } $adminToken
+    } $sellerToken
     $skuId = $sku.Body.data.id
 
     $onSale = Invoke-Api PATCH "admin/products/$productId/status" @{
         status = "ON_SALE"
-    } $adminToken
+    } $sellerToken
     Assert-Equal $onSale.Body.data.status "ON_SALE" "put product on sale"
 
     $inventoryAlerts = Invoke-Api GET (
