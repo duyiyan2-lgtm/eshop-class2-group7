@@ -12,7 +12,9 @@ const loggingOut = ref(false)
 const cartCount = ref(0)
 let cartRequestSequence = 0
 
-const pageTitle = computed(() => route.meta.title || 'E-Shop')
+const pageTitle = computed(() => (
+  route.name === 'mobile-products' ? 'E-Shop 手机商城' : route.meta.title || 'E-Shop'
+))
 const showTabbar = computed(() => Boolean(route.meta.mobileTabbar))
 const cartBadge = computed(() => {
   if (cartCount.value <= 0) return ''

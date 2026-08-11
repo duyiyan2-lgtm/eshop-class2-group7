@@ -19,6 +19,7 @@ body:has(.mobile-shell) {
 }
 
 .mobile-shell {
+  --van-nav-bar-height: 54px;
   position: relative;
   width: 100%;
   max-width: var(--eshop-mobile-frame-width);
@@ -53,19 +54,85 @@ body:has(.mobile-shell) {
 }
 
 .mobile-shell .van-nav-bar {
-  background: #fff;
-  box-shadow: 0 1px 0 rgba(226, 232, 240, .95), 0 7px 18px rgba(15, 23, 42, .08);
+  background:
+    radial-gradient(circle at 50% -90%, rgba(96, 165, 250, .24), transparent 58%),
+    rgba(7, 17, 31, .98);
+  border-bottom: 1px solid rgba(96, 165, 250, .16);
+  box-shadow: 0 9px 24px rgba(2, 8, 23, .24);
   backdrop-filter: blur(16px);
 }
 
 .mobile-shell .van-nav-bar__title {
-  color: #0f172a;
+  color: #f8fafc;
   font-size: 17px;
   font-weight: 800;
   letter-spacing: -.01em;
 }
 
-.mobile-shell .van-nav-bar .van-icon { color: #0f172a; }
+.mobile-shell .van-nav-bar__title::before {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(96, 165, 250, .72);
+  vertical-align: 2px;
+  content: '';
+}
+
+.mobile-shell .van-nav-bar .van-icon { color: #dbeafe; }
+
+.mobile-shell .mobile-nav-actions {
+  gap: 6px;
+}
+
+.mobile-shell .mobile-nav-actions .workspace-switch-link,
+.mobile-shell .mobile-login-link {
+  padding: 5px 8px;
+  color: #bfdbfe;
+  background: rgba(37, 99, 235, .12);
+  border: 1px solid rgba(96, 165, 250, .24);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.mobile-shell .mobile-nav-actions .van-button {
+  height: 27px;
+  padding: 0 9px;
+  color: #bfdbfe;
+  background: rgba(37, 99, 235, .12);
+  border-color: rgba(96, 165, 250, .3);
+  border-radius: 999px;
+}
+
+/* Keep the marketplace search field light and readable. The site-wide dark
+   Vant theme otherwise colours the inner field body as a long grey block. */
+.mobile-shell .search-bar .van-search {
+  background: transparent !important;
+}
+
+.mobile-shell .search-bar .van-search__content {
+  background: #fff !important;
+}
+
+.mobile-shell .search-bar .van-search__field,
+.mobile-shell .search-bar .van-field__body,
+.mobile-shell .search-bar .van-field__control {
+  color: #0f172a !important;
+  background: transparent !important;
+}
+
+.mobile-shell .search-bar .van-field__control::placeholder {
+  color: #94a3b8 !important;
+}
+
+.mobile-shell .search-bar .van-icon-search,
+.mobile-shell .search-bar .van-field__clear {
+  color: #64748b;
+}
 
 .mobile-shell .mobile-main {
   width: 100%;
@@ -262,6 +329,7 @@ body .mobile-shell .mobile-detail .sku-option:not(.active, .disabled) {
   }
 
   .mobile-shell {
+    --van-nav-bar-height: 66px;
     width: 100%;
     max-width: none;
     margin: 0;
@@ -274,6 +342,19 @@ body .mobile-shell .mobile-detail .sku-option:not(.active, .disabled) {
     left: 0;
     width: 100%;
     transform: none;
+  }
+
+  .mobile-shell .van-nav-bar__title {
+    right: auto;
+    left: 30px;
+    max-width: none;
+    font-size: 20px;
+    letter-spacing: .01em;
+    transform: none;
+  }
+
+  .mobile-shell .van-nav-bar__right {
+    right: 30px;
   }
 
   body .mobile-shell .mobile-main > :not(.mobile-products) {

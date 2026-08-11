@@ -311,14 +311,18 @@ onActivated(() => {
 }
 
 .search-bar :deep(.van-search) {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
   padding: 0;
 }
 
 .search-bar :deep(.van-search__content) {
-  height: 42px;
+  height: 44px;
   background: #fff;
   border: 1px solid rgba(203, 213, 225, .75);
-  box-shadow: 0 7px 20px rgba(15, 23, 42, .05);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(2, 8, 23, .14);
 }
 
 .market-hero {
@@ -568,7 +572,7 @@ onActivated(() => {
   }
 
   .search-bar {
-    padding: 12px 20px;
+    padding: 14px 28px 16px;
   }
 
   .market-hero {
