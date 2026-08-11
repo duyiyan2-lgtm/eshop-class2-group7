@@ -246,21 +246,22 @@ body .mobile-shell .mobile-detail .sku-option:not(.active, .disabled) {
 
 @media (min-width: 769px) {
   :root {
-    --eshop-mobile-frame-width: 1180px;
+    --eshop-mobile-frame-width: 100vw;
   }
 
   .mobile-shell {
-    width: calc(100% - 40px);
-    border-right: 1px solid rgba(148, 163, 184, .2);
-    border-left: 1px solid rgba(148, 163, 184, .2);
-    box-shadow:
-      0 0 0 1px rgba(96, 165, 250, .05),
-      0 28px 90px rgba(0, 0, 0, .42);
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
   }
 
   .mobile-shell .van-nav-bar--fixed,
   .mobile-shell .van-tabbar--fixed {
-    width: min(calc(100vw - 40px), var(--eshop-mobile-frame-width));
+    left: 0;
+    width: 100%;
+    transform: none;
   }
 
   body .mobile-shell .mobile-main > :not(.mobile-products) {
@@ -289,9 +290,9 @@ body .mobile-shell .mobile-detail .sku-option:not(.active, .disabled) {
 
   body:has(.mobile-shell) .van-overlay.eshop-mobile-dialog-overlay {
     right: auto;
-    left: 50%;
-    width: min(calc(100vw - 40px), var(--eshop-mobile-frame-width));
-    transform: translateX(-50%);
+    left: 0;
+    width: 100%;
+    transform: none;
   }
 }
 
