@@ -117,6 +117,24 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
+    public Set<Long> reviewedOrderItemIds(Long userId, List<Long> orderItemIds) {
+        List<Long> normalizedIds = orderItemIds == null
+                ? List.of()
+                : orderItemIds.stream()
+                        .filter(java.util.Objects::nonNull)
+                        .filter(id -> id > 0)
+                        .distinct()
+                        .toList();
+        if (normalizedIds.isEmpty()) {
+            return Set.of();
+        }
+        if (normalizedIds.size() > 100) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+        }
+        return Set.copyOf(reviewMapper.selectReviewedOrderItemIds(userId, normalizedIds));
+    }
+
+    @Transactional(readOnly = true)
     public PageResult<AdminReviewResponse> pageAdmin(
             LoginUser operator,
             long current,

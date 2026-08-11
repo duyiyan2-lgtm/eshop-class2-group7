@@ -49,10 +49,21 @@ http.interceptors.response.use(
     const requestUrl = error.config?.url || ''
     const isAuthenticationRequest = requestUrl.includes('/auth/login')
       || requestUrl.includes('/auth/logout')
-    if (error.response?.status === 401 && !isAuthenticationRequest) {
+    if (error.response?.status === 401 && !isAuthenticationRequest && !error.config?.skipAuthRedirect) {
       redirectToLogin()
     }
-    const message = error.response?.data?.message || error.message || '网络异常，请稍后重试'
+    const status = error.response?.status
+    let message = error.response?.data?.message
+    if (!message && !error.response) {
+      message = error.code === 'ECONNABORTED' || String(error.message).toLowerCase().includes('timeout')
+        ? '请求超时，请检查网络后重试'
+        : '网络连接失败，请检查网络后重试'
+    }
+    if (!message && status === 403) message = '当前账号没有执行此操作的权限'
+    if (!message && status === 429) message = '操作过于频繁，请稍后再试'
+    if (!message && status === 413) message = '上传文件过大，请选择不超过 5 MB 的图片'
+    if (!message && [502, 503, 504].includes(status)) message = '服务暂时不可用，请稍后重试'
+    message ||= error.message || '请求失败，请稍后重试'
     return Promise.reject(new Error(message))
   },
 )

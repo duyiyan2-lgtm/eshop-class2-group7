@@ -8,6 +8,8 @@ import com.eshop.backend.review.dto.ProductReviewSummaryResponse;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 public interface ProductReviewMapper extends BaseMapper<ProductReview> {
 
     @Select("""
@@ -125,6 +127,21 @@ public interface ProductReviewMapper extends BaseMapper<ProductReview> {
     IPage<ProductReviewRow> selectMyReviewPage(
             Page<ProductReviewRow> page,
             @Param("userId") Long userId);
+
+    @Select("""
+            <script>
+            SELECT order_item_id
+            FROM product_review
+            WHERE user_id = #{userId}
+              AND order_item_id IN
+              <foreach collection="orderItemIds" item="orderItemId" open="(" separator="," close=")">
+                #{orderItemId}
+              </foreach>
+            </script>
+            """)
+    List<Long> selectReviewedOrderItemIds(
+            @Param("userId") Long userId,
+            @Param("orderItemIds") List<Long> orderItemIds);
 
     @Select("""
             SELECT

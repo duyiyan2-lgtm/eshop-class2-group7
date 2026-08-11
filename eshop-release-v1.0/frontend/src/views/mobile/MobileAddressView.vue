@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { showConfirmDialog, showToast } from 'vant'
+import { useRoute, useRouter } from 'vue-router'
 import {
   createAddress,
   getAddresses,
@@ -9,6 +10,8 @@ import {
   updateAddress,
 } from '../../api/address'
 
+const route = useRoute()
+const router = useRouter()
 const addresses = ref([])
 const loading = ref(false)
 const refreshing = ref(false)
@@ -30,6 +33,15 @@ const blankForm = () => ({
 
 const form = reactive(blankForm())
 const formTitle = computed(() => (editingId.value ? '编辑收货地址' : '新增收货地址'))
+const returnPath = computed(() => {
+  const raw = Array.isArray(route.query.redirect) ? route.query.redirect[0] : route.query.redirect
+  if (typeof raw !== 'string') return ''
+  return /^\/m\/checkout(?:[/?#]|$)/.test(raw) ? raw : ''
+})
+
+const returnToCheckout = () => {
+  if (returnPath.value) router.replace(returnPath.value)
+}
 
 const loadAddresses = async () => {
   if (loading.value) return false
@@ -121,6 +133,10 @@ const saveAddress = async () => {
       showToast('地址已新增')
     }
     await loadAddresses()
+    if (returnPath.value) {
+      showToast('地址已保存，正在返回订单确认')
+      await router.replace(returnPath.value)
+    }
     return true
   } catch (error) {
     showToast({ type: 'fail', message: error.message || '保存失败' })
@@ -176,6 +192,16 @@ onMounted(loadAddresses)
 
 <template>
   <section class="mobile-addresses">
+    <div v-if="returnPath" class="checkout-return-card">
+      <div>
+        <strong>正在为本次订单选择地址</strong>
+        <span>管理完成后可返回订单确认页继续结算</span>
+      </div>
+      <van-button size="small" type="primary" plain @click="returnToCheckout">
+        返回结算
+      </van-button>
+    </div>
+
     <van-notice-bar
       v-if="errorMessage"
       color="#dc2626"
@@ -346,6 +372,26 @@ onMounted(loadAddresses)
   padding-bottom: 30px;
   background: #f7f8fa;
 }
+
+.checkout-return-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px;
+  padding: 14px 15px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+
+.checkout-return-card > div {
+  display: grid;
+  gap: 4px;
+}
+
+.checkout-return-card strong { color: #1e3a8a; font-size: 14px; }
+.checkout-return-card span { color: #64748b; font-size: 12px; line-height: 1.45; }
 
 .notice-action {
   margin-left: 8px;

@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: localStorage.getItem('eshop_token') || '',
     user: readUser(),
+    initialized: false,
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
@@ -32,6 +33,7 @@ export const useAuthStore = defineStore('auth', {
       }
       localStorage.setItem('eshop_token', this.token)
       localStorage.setItem('eshop_user', JSON.stringify(this.user))
+      this.initialized = true
       return data
     },
     async signUp(payload) {
@@ -43,6 +45,27 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem('eshop_user', JSON.stringify(data))
       return data
     },
+    clearSession() {
+      this.token = ''
+      this.user = null
+      localStorage.removeItem('eshop_token')
+      localStorage.removeItem('eshop_user')
+    },
+    async initialize() {
+      if (this.initialized) return this.user
+      try {
+        if (!this.token) return null
+        const data = await authApi.getCurrentUser({ skipAuthRedirect: true })
+        this.user = data
+        localStorage.setItem('eshop_user', JSON.stringify(data))
+        return data
+      } catch {
+        this.clearSession()
+        return null
+      } finally {
+        this.initialized = true
+      }
+    },
     async signOut() {
       let remoteLogoutSucceeded = true
       try {
@@ -50,10 +73,8 @@ export const useAuthStore = defineStore('auth', {
       } catch {
         remoteLogoutSucceeded = false
       } finally {
-        this.token = ''
-        this.user = null
-        localStorage.removeItem('eshop_token')
-        localStorage.removeItem('eshop_user')
+        this.clearSession()
+        this.initialized = true
       }
       return remoteLogoutSucceeded
     },

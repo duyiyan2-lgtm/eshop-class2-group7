@@ -55,6 +55,10 @@ class ReviewIntegrationTest {
         mockMvc.perform(get("/reviews/mine"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(40101));
+        mockMvc.perform(get("/reviews/mine/order-items")
+                        .param("orderItemIds", "1"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(40101));
 
         String suffix = String.valueOf(System.nanoTime());
         UserSession owner = registerAndLogin("review_owner_" + suffix, "评价用户");
@@ -198,6 +202,18 @@ class ReviewIntegrationTest {
                         .header("Authorization", bearer(other.token())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.total").value(0));
+
+        mockMvc.perform(get("/reviews/mine/order-items")
+                        .param("orderItemIds", itemId + ",999999999")
+                        .header("Authorization", bearer(owner.token())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0]").value(itemId));
+        mockMvc.perform(get("/reviews/mine/order-items")
+                        .param("orderItemIds", String.valueOf(itemId))
+                        .header("Authorization", bearer(other.token())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(0));
 
         jdbcTemplate.update("UPDATE product SET status = 'OFF_SALE' WHERE id = ?", productId);
         mockMvc.perform(get("/products/{productId}/reviews", productId))

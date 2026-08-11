@@ -30,6 +30,8 @@ const detailVisible = ref(false)
 const detailLoading = ref(false)
 const detailOrder = ref(null)
 const detailLogs = ref([])
+const detailLogError = ref('')
+const detailLogLoading = ref(false)
 
 const statusOptions = computed(() => (
   Object.entries(ORDER_STATUS).map(([value, info]) => ({ value, label: info.label }))
@@ -76,13 +78,20 @@ const changePage = (page) => {
 
 const loadDetail = async (id) => {
   detailLoading.value = true
+  detailLogError.value = ''
   try {
-    const [order, logs] = await Promise.all([
+    const [orderResult, logResult] = await Promise.allSettled([
       getAdminOrder(id),
       getAdminOrderLogs(id),
     ])
-    detailOrder.value = order
-    detailLogs.value = logs || []
+    if (orderResult.status === 'rejected') throw orderResult.reason
+    detailOrder.value = orderResult.value
+    if (logResult.status === 'fulfilled') {
+      detailLogs.value = logResult.value || []
+    } else {
+      detailLogs.value = []
+      detailLogError.value = logResult.reason?.message || '状态日志加载失败'
+    }
   } catch (error) {
     ElMessage.error(error.message || '订单详情加载失败')
   } finally {
@@ -90,9 +99,23 @@ const loadDetail = async (id) => {
   }
 }
 
+const reloadDetailLogs = async () => {
+  if (!detailOrder.value?.id || detailLogLoading.value) return
+  detailLogLoading.value = true
+  detailLogError.value = ''
+  try {
+    detailLogs.value = await getAdminOrderLogs(detailOrder.value.id)
+  } catch (error) {
+    detailLogError.value = error.message || '状态日志加载失败'
+  } finally {
+    detailLogLoading.value = false
+  }
+}
+
 const openDetail = async (row) => {
   detailOrder.value = null
   detailLogs.value = []
+  detailLogError.value = ''
   detailVisible.value = true
   await loadDetail(row.id)
 }
@@ -470,6 +493,12 @@ onMounted(loadOrders)
 
             <section class="detail-card timeline-card">
               <h3>状态日志</h3>
+              <div v-if="detailLogError" class="timeline-error">
+                <el-alert :title="detailLogError" type="warning" show-icon :closable="false" />
+                <el-button size="small" :loading="detailLogLoading" @click="reloadDetailLogs">
+                  重新加载日志
+                </el-button>
+              </div>
               <el-timeline>
                 <el-timeline-item
                   v-for="log in [...detailLogs].reverse()"
@@ -483,7 +512,11 @@ onMounted(loadOrders)
                   <span v-if="log.operatorName">操作人：{{ log.operatorName }}</span>
                 </el-timeline-item>
               </el-timeline>
-              <el-empty v-if="!detailLogs.length" description="暂无状态日志" :image-size="70" />
+              <el-empty
+                v-if="!detailLogs.length && !detailLogError"
+                description="暂无状态日志"
+                :image-size="70"
+              />
             </section>
           </div>
         </template>
@@ -529,6 +562,7 @@ onMounted(loadOrders)
 .info-list dt { color: #94a3b8; font-size: 13px; }
 .info-list dd { margin: 0; color: #334155; font-size: 13px; line-height: 1.5; word-break: break-all; }
 .timeline-card :deep(.el-timeline) { padding-left: 7px; }
+.timeline-error { display: grid; gap: 10px; margin-bottom: 16px; }
 .timeline-card b { color: #0f172a; font-size: 13px; }
 .timeline-card p { margin: 5px 0; color: #64748b; font-size: 12px; }
 .timeline-card span { color: #94a3b8; font-size: 11px; }

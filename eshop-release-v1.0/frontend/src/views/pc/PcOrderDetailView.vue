@@ -24,6 +24,8 @@ const logs = ref([])
 const loading = ref(false)
 const operating = ref(false)
 const errorMessage = ref('')
+const logErrorMessage = ref('')
+const logLoading = ref(false)
 const reviewedItemIds = ref(new Set())
 const reviewLookupLoading = ref(false)
 const reviewLookupError = ref('')
@@ -37,6 +39,7 @@ const reviewForm = reactive({
 })
 const reviewUploading = ref(false)
 let reviewRequestSequence = 0
+let detailRequestSequence = 0
 const status = computed(() => orderStatusInfo(order.value?.status))
 
 const loadReviewStatus = async (items = []) => {
@@ -60,8 +63,12 @@ const loadReviewStatus = async (items = []) => {
 }
 
 const loadDetail = async () => {
+  const requestId = ++detailRequestSequence
   loading.value = true
   errorMessage.value = ''
+  logErrorMessage.value = ''
+  order.value = null
+  logs.value = []
   reviewRequestSequence += 1
   reviewedItemIds.value = new Set()
   reviewLookupLoading.value = false
@@ -69,16 +76,38 @@ const loadDetail = async () => {
   try {
     const id = Number(route.params.id)
     if (!Number.isInteger(id) || id <= 0) throw new Error('订单编号不正确')
-    const [orderData, logData] = await Promise.all([getOrder(id), getOrderLogs(id)])
-    order.value = orderData
-    logs.value = logData
-    if (orderData.status === 'COMPLETED') {
-      void loadReviewStatus(orderData.items || [])
+    const [orderResult, logResult] = await Promise.allSettled([getOrder(id), getOrderLogs(id)])
+    if (requestId !== detailRequestSequence) return
+    if (orderResult.status === 'rejected') throw orderResult.reason
+
+    order.value = orderResult.value
+    if (orderResult.value.status === 'COMPLETED') {
+      void loadReviewStatus(orderResult.value.items || [])
+    }
+    if (logResult.status === 'fulfilled') {
+      logs.value = logResult.value || []
+    } else {
+      logErrorMessage.value = logResult.reason?.message || '订单进度加载失败'
     }
   } catch (error) {
+    if (requestId !== detailRequestSequence) return
     errorMessage.value = error.message || '订单详情加载失败'
   } finally {
-    loading.value = false
+    if (requestId === detailRequestSequence) loading.value = false
+  }
+}
+
+const reloadLogs = async () => {
+  const id = Number(route.params.id)
+  if (!Number.isInteger(id) || id <= 0 || logLoading.value) return
+  logLoading.value = true
+  logErrorMessage.value = ''
+  try {
+    logs.value = await getOrderLogs(id)
+  } catch (error) {
+    logErrorMessage.value = error.message || '订单进度加载失败'
+  } finally {
+    logLoading.value = false
   }
 }
 
@@ -333,6 +362,10 @@ watch(() => route.params.id, loadDetail, { immediate: true })
 
         <aside class="detail-card timeline-card">
           <h2>订单进度</h2>
+          <div v-if="logErrorMessage" class="timeline-error">
+            <el-alert :title="logErrorMessage" type="warning" show-icon :closable="false" />
+            <el-button size="small" :loading="logLoading" @click="reloadLogs">重新加载</el-button>
+          </div>
           <el-timeline>
             <el-timeline-item
               v-for="log in [...logs].reverse()"
@@ -449,6 +482,7 @@ watch(() => route.params.id, loadDetail, { immediate: true })
 .info-card dt { color: #94a3b8; }
 .info-card dd { margin: 0; color: #334155; }
 .timeline-card { align-self: start; margin-bottom: 0; }
+.timeline-error { display: grid; gap: 10px; margin-bottom: 18px; }
 .timeline-card :deep(.el-timeline) { padding-left: 6px; }
 .timeline-card b { color: #0f172a; }
 .timeline-card p { margin: 6px 0; color: #64748b; font-size: 13px; }

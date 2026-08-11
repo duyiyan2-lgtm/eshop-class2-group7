@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Set;
+
 @RestController
 @RequiredArgsConstructor
 public class ReviewController {
@@ -49,5 +52,12 @@ public class ReviewController {
             @RequestParam(defaultValue = "1") long current,
             @RequestParam(defaultValue = "10") long size) {
         return ApiResponse.success(reviewService.pageMine(user.getUserId(), current, size));
+    }
+
+    @GetMapping("/reviews/mine/order-items")
+    public ApiResponse<Set<Long>> reviewedOrderItems(
+            @AuthenticationPrincipal LoginUser user,
+            @RequestParam List<Long> orderItemIds) {
+        return ApiResponse.success(reviewService.reviewedOrderItemIds(user.getUserId(), orderItemIds));
     }
 }

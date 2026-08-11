@@ -303,8 +303,11 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore(pinia)
+  if (auth.token && !auth.initialized) {
+    await auth.initialize()
+  }
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     if (to.path.startsWith('/admin')) {
       return { name: 'admin-login' }

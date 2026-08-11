@@ -13,10 +13,13 @@ const errorMessage = ref('')
 const summary = ref(null)
 const hotLoading = ref(false)
 const hotProducts = ref([])
+const hotError = ref('')
 const trendLoading = ref(false)
 const salesTrend = ref([])
+const trendError = ref('')
 const topLoading = ref(false)
 const topProducts = ref([])
+const topError = ref('')
 
 const maxTrendOrders = computed(() => (
   Math.max(1, ...salesTrend.value.map((point) => Number(point.orderCount) || 0), 1)
@@ -38,11 +41,13 @@ const loadSummary = async () => {
 const loadSalesTrend = async () => {
   if (trendLoading.value) return
   trendLoading.value = true
+  trendError.value = ''
   try {
     const data = await getDashboardSalesTrend(7)
     salesTrend.value = Array.isArray(data?.points) ? data.points : []
-  } catch {
+  } catch (error) {
     salesTrend.value = []
+    trendError.value = error.message || '销售趋势加载失败'
   } finally {
     trendLoading.value = false
   }
@@ -51,11 +56,13 @@ const loadSalesTrend = async () => {
 const loadTopProducts = async () => {
   if (topLoading.value) return
   topLoading.value = true
+  topError.value = ''
   try {
     const data = await getDashboardTopProducts(10)
     topProducts.value = Array.isArray(data?.items) ? data.items : []
-  } catch {
+  } catch (error) {
     topProducts.value = []
+    topError.value = error.message || '销量排行加载失败'
   } finally {
     topLoading.value = false
   }
@@ -64,10 +71,12 @@ const loadTopProducts = async () => {
 const loadHotProducts = async () => {
   if (hotLoading.value) return
   hotLoading.value = true
+  hotError.value = ''
   try {
     hotProducts.value = await getHotProducts({ days: 30, limit: 5 })
-  } catch {
+  } catch (error) {
     hotProducts.value = []
+    hotError.value = error.message || '热销商品加载失败'
   } finally {
     hotLoading.value = false
   }
@@ -222,6 +231,10 @@ onMounted(refreshAll)
         </div>
       </div>
       <div v-loading="trendLoading" class="trend-table">
+        <div v-if="trendError" class="panel-error" role="alert">
+          <span>{{ trendError }}</span>
+          <el-button text type="primary" @click="loadSalesTrend">重试</el-button>
+        </div>
         <div v-for="point in salesTrend" :key="point.date" class="trend-row">
           <span class="trend-date">{{ point.date }}</span>
           <div class="trend-bar-wrap" :title="`订单 ${point.orderCount}`">
@@ -231,7 +244,7 @@ onMounted(refreshAll)
           <span><small>销售额</small><strong>{{ formatMoney(point.salesAmount) }}</strong></span>
         </div>
         <el-empty
-          v-if="!trendLoading && !salesTrend.length"
+          v-if="!trendLoading && !trendError && !salesTrend.length"
           description="暂无趋势数据"
           :image-size="70"
         />
@@ -247,6 +260,10 @@ onMounted(refreshAll)
         <RouterLink to="/seller/products">管理商品 →</RouterLink>
       </div>
       <div v-loading="topLoading" class="hot-table">
+        <div v-if="topError" class="panel-error" role="alert">
+          <span>{{ topError }}</span>
+          <el-button text type="primary" @click="loadTopProducts">重试</el-button>
+        </div>
         <div v-for="(product, index) in topProducts" :key="product.productId" class="hot-row hot-row--top">
           <b>{{ index + 1 }}</b>
           <span>
@@ -257,7 +274,7 @@ onMounted(refreshAll)
           <span><small>销售额</small><strong>{{ formatMoney(product.salesAmount) }}</strong></span>
         </div>
         <el-empty
-          v-if="!topLoading && !topProducts.length"
+          v-if="!topLoading && !topError && !topProducts.length"
           description="暂无销量排行"
           :image-size="70"
         />
@@ -273,6 +290,10 @@ onMounted(refreshAll)
         <RouterLink to="/seller/products">管理商品 →</RouterLink>
       </div>
       <div v-loading="hotLoading" class="hot-table">
+        <div v-if="hotError" class="panel-error" role="alert">
+          <span>{{ hotError }}</span>
+          <el-button text type="primary" @click="loadHotProducts">重试</el-button>
+        </div>
         <div v-for="(product, index) in hotProducts" :key="product.productId" class="hot-row hot-row--selling">
           <b>{{ index + 1 }}</b>
           <span>
@@ -284,7 +305,7 @@ onMounted(refreshAll)
           <span><small>可售库存</small><strong>{{ product.totalStock }}</strong></span>
         </div>
         <el-empty
-          v-if="!hotLoading && !hotProducts.length"
+          v-if="!hotLoading && !hotError && !hotProducts.length"
           description="暂无有效销售数据"
           :image-size="70"
         />
@@ -339,6 +360,19 @@ onMounted(refreshAll)
 .trend-table {
   display: grid;
   gap: 12px;
+}
+
+.panel-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  font-size: 13px;
 }
 
 .trend-row {
