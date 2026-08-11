@@ -595,6 +595,10 @@ body :is(.pc-main, .admin-main, .mobile-main) :is(
   color: var(--eshop-text) !important;
 }
 
+body .mobile-main :is(.recommend-heading strong, .result-heading strong) {
+  color: var(--eshop-text) !important;
+}
+
 body :is(.pc-main, .admin-main, .mobile-main) :is(
   .page-heading p,
   .product-content p,

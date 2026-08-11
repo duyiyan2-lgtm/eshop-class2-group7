@@ -560,4 +560,86 @@ onActivated(() => {
 .empty-block {
   padding: 40px 0;
 }
+
+@media (min-width: 769px) {
+  .mobile-products {
+    padding-bottom: 36px;
+  }
+
+  .search-bar {
+    padding: 12px 20px;
+  }
+
+  .market-hero {
+    min-height: 190px;
+    margin: 8px 20px 0;
+    padding: 34px 40px;
+    border-radius: 26px;
+  }
+
+  .market-hero h1 {
+    margin-top: 10px;
+    font-size: 34px;
+  }
+
+  .market-hero p {
+    font-size: 14px;
+  }
+
+  .hero-mark {
+    width: 92px;
+    height: 92px;
+    border-radius: 26px;
+    font-size: 48px;
+  }
+
+  .service-strip {
+    margin: 14px 20px 4px;
+    padding: 14px 12px;
+    font-size: 13px;
+  }
+
+  .category-bar {
+    flex-wrap: wrap;
+    padding: 16px 20px 10px;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .recommend-heading,
+  .result-heading {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+
+  .product-list {
+    padding: 12px 20px 28px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+  }
+
+  .product-card {
+    border-radius: 18px;
+  }
+
+  .product-thumb {
+    aspect-ratio: 1 / .82;
+  }
+
+  .product-content {
+    min-height: 132px;
+    padding: 14px;
+  }
+
+  .product-name {
+    font-size: 15px;
+  }
+
+  .product-subtitle {
+    font-size: 12px;
+  }
+}
 </style>

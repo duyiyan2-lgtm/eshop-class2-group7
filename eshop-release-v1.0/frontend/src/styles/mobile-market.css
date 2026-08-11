@@ -213,49 +213,6 @@ body .mobile-shell .action-bar {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Shared review components used viewport media queries. When the H5 route is
-   opened in a wide desktop browser those queries do not fire, even though the
-   component itself still lives inside a phone-sized canvas. Scope the compact
-   layout to the mobile shell so both real phones and desktop previews match. */
-body .mobile-shell .product-reviews {
-  margin-top: 12px;
-  padding: 18px 16px;
-  border: 0;
-  border-radius: 12px;
-  box-shadow: none;
-}
-
-body .mobile-shell .product-reviews > header,
-body .mobile-shell .product-reviews .review-meta {
-  align-items: flex-start;
-}
-
-body .mobile-shell .product-reviews .review-meta > div {
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 4px;
-}
-
-body .mobile-shell .product-reviews .review-meta time {
-  white-space: nowrap;
-}
-
-body .mobile-shell .product-reviews .review-summary {
-  grid-template-columns: 1fr;
-  gap: 16px;
-  padding: 16px;
-}
-
-body .mobile-shell .product-reviews .average-rating {
-  padding: 0 0 14px;
-  border-right: 0;
-  border-bottom: 1px solid #fde68a;
-}
-
-body .mobile-shell .product-reviews .review-pagination {
-  gap: 8px;
-}
-
 body:has(.mobile-shell) .van-toast.eshop-mobile-toast {
   max-width: min(
     calc(100vw - 32px),
@@ -289,10 +246,11 @@ body .mobile-shell .mobile-detail .sku-option:not(.active, .disabled) {
 
 @media (min-width: 769px) {
   :root {
-    --eshop-mobile-frame-width: 430px;
+    --eshop-mobile-frame-width: 1180px;
   }
 
   .mobile-shell {
+    width: calc(100% - 40px);
     border-right: 1px solid rgba(148, 163, 184, .2);
     border-left: 1px solid rgba(148, 163, 184, .2);
     box-shadow:
@@ -300,10 +258,39 @@ body .mobile-shell .mobile-detail .sku-option:not(.active, .disabled) {
       0 28px 90px rgba(0, 0, 0, .42);
   }
 
+  .mobile-shell .van-nav-bar--fixed,
+  .mobile-shell .van-tabbar--fixed {
+    width: min(calc(100vw - 40px), var(--eshop-mobile-frame-width));
+  }
+
+  body .mobile-shell .mobile-main > :not(.mobile-products) {
+    width: min(100%, 760px);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  body .mobile-shell .van-submit-bar,
+  body .mobile-shell .action-bar {
+    width: min(calc(100vw - 40px), 760px) !important;
+  }
+
+  body .mobile-shell .hot-ranking.mobile .ranking-list,
+  body .mobile-shell .hot-ranking.mobile .loading-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    overflow: visible;
+  }
+
+  body .mobile-shell .hot-ranking.mobile .ranking-card,
+  body .mobile-shell .hot-ranking.mobile .loading-list span {
+    min-width: 0;
+    flex: initial;
+  }
+
   body:has(.mobile-shell) .van-overlay.eshop-mobile-dialog-overlay {
     right: auto;
     left: 50%;
-    width: var(--eshop-mobile-frame-width);
+    width: min(calc(100vw - 40px), var(--eshop-mobile-frame-width));
     transform: translateX(-50%);
   }
 }
