@@ -303,9 +303,10 @@ onActivated(() => {
 .search-bar {
   position: sticky;
   z-index: 8;
-  top: 0;
+  top: calc(var(--van-nav-bar-height, 46px) + env(safe-area-inset-top));
   padding: 9px 12px;
-  background: rgba(243, 245, 249, .94);
+  background: rgba(7, 17, 31, .96);
+  box-shadow: 0 8px 18px rgba(2, 8, 23, .2);
   backdrop-filter: blur(12px);
 }
 

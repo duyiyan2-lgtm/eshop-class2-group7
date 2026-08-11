@@ -25,7 +25,10 @@ body:has(.mobile-shell) {
   min-width: 0;
   min-height: 100dvh;
   margin: 0 auto;
-  overflow: hidden;
+  /* `overflow: hidden` makes this wrapper the sticky containing block even
+     though the page itself scrolls. Use clip so the search bar can stick to
+     the viewport without reintroducing horizontal overflow. */
+  overflow-x: clip;
   color: var(--eshop-mobile-text);
   background: var(--eshop-mobile-bg);
   box-shadow: 0 0 45px rgba(15, 23, 42, .12);
@@ -41,9 +44,17 @@ body:has(.mobile-shell) {
   transform: translateX(-50%);
 }
 
+.mobile-shell .van-nav-bar--fixed {
+  z-index: 30;
+}
+
+.mobile-shell .van-tabbar--fixed {
+  z-index: 30;
+}
+
 .mobile-shell .van-nav-bar {
-  background: rgba(255, 255, 255, .96);
-  box-shadow: 0 1px 0 rgba(226, 232, 240, .9);
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(226, 232, 240, .95), 0 7px 18px rgba(15, 23, 42, .08);
   backdrop-filter: blur(16px);
 }
 
@@ -62,6 +73,7 @@ body:has(.mobile-shell) {
   min-height: calc(100dvh - 96px);
   padding: 0;
   overflow-x: clip;
+  scroll-padding-top: calc(var(--van-nav-bar-height, 46px) + env(safe-area-inset-top));
   background: var(--eshop-mobile-bg);
 }
 
