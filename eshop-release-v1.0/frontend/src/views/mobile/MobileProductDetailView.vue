@@ -669,7 +669,7 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
   z-index: 10;
   display: flex;
   gap: 8px;
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  padding: 8px 12px calc(8px + var(--app-safe-bottom));
   background: #fff;
   border-top: 1px solid #e2e8f0;
   box-shadow: 0 -4px 18px rgba(15, 23, 42, .06);

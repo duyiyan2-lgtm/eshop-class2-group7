@@ -10,8 +10,17 @@ import './styles/mobile-market.css'
 import App from './App.vue'
 import { pinia } from './pinia'
 import router from './router'
+import { initializeNativeRuntime } from './native/runtime'
 
-createApp(App)
+// Android 构建在 Vue 首次绘制前就带上平台标记，避免启动时先闪现 H5 布局。
+if (import.meta.env.VITE_APP_PLATFORM === 'android') {
+  document.documentElement.classList.add('is-native-app')
+}
+
+const app = createApp(App)
   .use(pinia)
   .use(router)
-  .mount('#app')
+
+app.mount('#app')
+
+router.isReady().then(() => initializeNativeRuntime(router))

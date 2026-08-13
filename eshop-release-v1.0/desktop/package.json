@@ -1,0 +1,59 @@
+{
+  "name": "eshop-pc-desktop",
+  "version": "1.1.1",
+  "description": "E-Shop PC 消费者商城 Windows 桌面客户端",
+  "main": "main.cjs",
+  "private": true,
+  "author": "24级全栈2班第7组",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "check": "node --check main.cjs && node --check offline.js",
+    "dist:win": "electron-builder --win portable",
+    "dist:win:installer": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "43.3.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "top.zhuyiyuan9.eshop.pc",
+    "productName": "E-Shop PC",
+    "copyright": "Copyright © 2026 24级全栈2班第7组",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "splash.html",
+      "offline.html",
+      "offline.js",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/app-icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "E-Shop-PC-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "E-Shop PC",
+      "installerIcon": "assets/app-icon.ico",
+      "uninstallerIcon": "assets/app-icon.ico",
+      "installerHeaderIcon": "assets/app-icon.ico",
+      "artifactName": "E-Shop-PC-Setup-${version}-${arch}.${ext}"
+    }
+  }
+}

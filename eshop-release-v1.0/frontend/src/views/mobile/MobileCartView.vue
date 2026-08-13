@@ -11,6 +11,7 @@ const items = ref([])
 const loading = ref(false)
 const refreshing = ref(false)
 const bulkUpdating = ref(false)
+const manageMode = ref(false)
 const errorMessage = ref('')
 const updatingIds = ref(new Set())
 const failedImages = ref(new Set())
@@ -169,6 +170,22 @@ onMounted(loadCart)
 
 <template>
   <section class="mobile-cart">
+    <header class="native-cart-header android-only">
+      <div>
+        <span>SHOPPING BAG</span>
+        <strong>购物车 <small>({{ items.length }})</small></strong>
+      </div>
+      <button type="button" @click="manageMode = !manageMode">
+        {{ manageMode ? '完成' : '管理' }}
+      </button>
+    </header>
+
+    <nav class="native-cart-tools android-only" aria-label="购物车工具">
+      <button type="button" @click="showToast('优惠活动将在结算时自动计算')"><van-icon name="coupon-o" /> 优惠活动</button>
+      <button type="button" @click="showToast('库存与价格已为你实时更新')"><van-icon name="discount" /> 价格提醒</button>
+      <button type="button" @click="router.push({ name: 'mobile-addresses' })"><van-icon name="location-o" /> 收货地址</button>
+    </nav>
+
     <van-notice-bar
       v-if="errorMessage"
       color="#dc2626"
@@ -202,6 +219,16 @@ onMounted(loadCart)
 
       <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
         <div class="cart-list">
+          <header class="cart-store-heading">
+            <van-checkbox
+              :model-value="allSelected"
+              :disabled="hasPendingUpdate"
+              @click="toggleAll"
+            />
+            <van-icon name="shop-o" />
+            <strong>E-Shop 自营商城</strong>
+            <span>官方品质保障</span>
+          </header>
           <article
             v-for="item in items"
             :key="item.id"
@@ -224,7 +251,7 @@ onMounted(loadCart)
                     :alt="item.productName"
                     @error="markImageFailed(item.id)"
                   />
-                  <span v-else>暂无图片</span>
+                  <img v-else src="/product-placeholder.svg" alt="商品暂无图片" />
                 </div>
                 <div class="item-info">
                   <div class="item-name">{{ item.productName }}</div>
@@ -257,6 +284,7 @@ onMounted(loadCart)
                   :loading="isItemUpdating(item.id)"
                   :disabled="bulkUpdating"
                   aria-label="删除商品"
+                  :class="{ 'manage-visible': manageMode }"
                   @click="removeItem(item)"
                 />
               </div>
@@ -269,7 +297,7 @@ onMounted(loadCart)
     <van-submit-bar
       v-if="items.length"
       :price="Math.round(Number(totalAmount) * 100)"
-      button-text="去结算"
+      :button-text="`结算 (${selectedCount})`"
       :disabled="!canCheckout"
       :loading="loading || bulkUpdating"
       label="合计"
@@ -294,6 +322,31 @@ onMounted(loadCart)
   background: #f7f8fa;
 }
 
+.native-cart-header {
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: calc(8px + var(--app-safe-top)) 18px 10px;
+  color: #f8fafc;
+  background: linear-gradient(145deg, #0a1729, #10254a);
+}
+
+.native-cart-header > div { display: grid; gap: 2px; }
+.native-cart-header span { color: #2563eb; font-size: 9px; font-weight: 900; letter-spacing: .14em; }
+.native-cart-header strong { font-size: 25px; line-height: 1.2; }
+.native-cart-header small { color: #94a3b8; font-size: 14px; }
+.native-cart-header button { padding: 8px 13px; color: #bfdbfe; font: inherit; font-size: 13px; font-weight: 700; background: rgba(37, 99, 235, .14); border: 1px solid rgba(96, 165, 250, .3); border-radius: 999px; }
+
+.native-cart-tools {
+  gap: 8px;
+  padding: 2px 12px 12px;
+  overflow-x: auto;
+  background: #10254a;
+  scrollbar-width: none;
+}
+
+.native-cart-tools button { display: flex; flex: 0 0 auto; align-items: center; gap: 5px; padding: 8px 12px; color: #cbd5e1; font: inherit; font-size: 12px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(147, 197, 253, .18); border-radius: 11px; }
+.native-cart-tools :deep(.van-icon) { color: #2563eb; font-size: 16px; }
+
 .notice-action {
   margin-left: 8px;
   padding: 0;
@@ -311,6 +364,20 @@ onMounted(loadCart)
 .cart-list {
   padding: 12px 12px 0;
 }
+
+.cart-store-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 13px 14px 4px;
+  color: #0f172a;
+  background: #fff;
+  border-radius: 18px 18px 0 0;
+}
+
+.cart-store-heading > :deep(.van-icon) { color: #2563eb; font-size: 18px; }
+.cart-store-heading strong { font-size: 14px; }
+.cart-store-heading span { margin-left: auto; color: #94a3b8; font-size: 10px; }
 
 .cart-item {
   display: flex;
@@ -432,5 +499,20 @@ onMounted(loadCart)
 
 :deep(.van-submit-bar__checkbox) {
   flex: 1;
+}
+
+:global(.is-native-app) .mobile-cart {
+  min-height: calc(100dvh - var(--native-tabbar-height));
+  background: #07111f;
+}
+
+:global(.is-native-app) .mobile-cart :deep(.van-empty) {
+  min-height: calc(100dvh - var(--native-tabbar-height) - 148px - var(--app-safe-top));
+  justify-content: center;
+  padding: 22px 0 60px;
+}
+
+:global(.is-native-app) .mobile-cart :deep(.van-empty__description) {
+  color: #cbd5e1;
 }
 </style>

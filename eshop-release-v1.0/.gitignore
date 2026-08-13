@@ -5,10 +5,13 @@ backend/target/
 # Node.js
 frontend/node_modules/
 frontend/dist/
+desktop/node_modules/
+desktop/dist/
 
 # Runtime data and local secrets
 data/
 .env
+.secrets-rotated.txt
 
 # IDE
 .idea/

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getCart } from '../api/cart'
 import { useAuthStore } from '../stores/auth'
 import { CART_UPDATED_EVENT } from '../utils/cartBadge'
+import { nativeState } from '../native/runtime'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +17,10 @@ const pageTitle = computed(() => (
   route.name === 'mobile-products' ? 'E-Shop 手机商城' : route.meta.title || 'E-Shop'
 ))
 const showTabbar = computed(() => Boolean(route.meta.mobileTabbar))
+const nativeTopLevelPage = computed(() => (
+  (nativeState.isNative || import.meta.env.VITE_APP_PLATFORM === 'android')
+  && ['mobile-products', 'mobile-cart', 'mobile-profile'].includes(String(route.name || ''))
+))
 const cartBadge = computed(() => {
   if (cartCount.value <= 0) return ''
   return cartCount.value > 99 ? '99+' : cartCount.value
@@ -87,7 +92,9 @@ watch(
 
 <template>
   <div class="mobile-shell">
+    <div v-if="nativeState.isNative" class="native-status-scrim" aria-hidden="true" />
     <van-nav-bar
+      v-if="!nativeTopLevelPage"
       :title="pageTitle"
       :left-arrow="!showTabbar"
       fixed
@@ -97,7 +104,7 @@ watch(
     >
       <template #right>
         <div class="mobile-nav-actions">
-          <RouterLink class="workspace-switch-link" to="/">切换</RouterLink>
+          <RouterLink v-if="!nativeState.isNative" class="workspace-switch-link" to="/">切换</RouterLink>
           <van-button
             v-if="auth.isLoggedIn"
             :loading="loggingOut"
@@ -119,8 +126,8 @@ watch(
       class="mobile-tabbar"
       route
       fixed
-      placeholder
-      safe-area-inset-bottom
+      :placeholder="!nativeState.isNative"
+      :safe-area-inset-bottom="!nativeState.isNative"
     >
       <van-tabbar-item replace to="/m/products" icon="home-o">首页</van-tabbar-item>
       <van-tabbar-item replace to="/m/cart" icon="cart-o" :badge="cartBadge">购物车</van-tabbar-item>

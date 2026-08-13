@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732">
+  <defs>
+    <linearGradient id="bg" x1="220" y1="160" x2="2500" y2="2580" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#020617"/>
+      <stop offset="0.55" stop-color="#07111F"/>
+      <stop offset="1" stop-color="#111B3F"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="1020" y1="980" x2="1740" y2="1770" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D74F5"/>
+      <stop offset="0.55" stop-color="#3B5BFF"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="44" stdDeviation="40" flood-color="#000000" flood-opacity="0.48"/>
+    </filter>
+  </defs>
+  <rect width="2732" height="2732" fill="url(#bg)"/>
+  <rect x="1026" y="912" width="680" height="680" rx="154" fill="url(#brand)" filter="url(#shadow)"/>
+  <path d="M1194 1078h354v96h-256v91h222v92h-222v101h265v96h-363v-476Z" fill="#FFFFFF"/>
+  <text x="1366" y="1785" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="118" font-weight="700" letter-spacing="3">E-Shop</text>
+  <text x="1366" y="1878" text-anchor="middle" fill="#94A3B8" font-family="Arial, sans-serif" font-size="52" letter-spacing="8">手机商城</text>
+</svg>

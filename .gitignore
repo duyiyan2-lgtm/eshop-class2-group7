@@ -3,3 +3,7 @@
 
 # Local handoff archive; the tracked source directory is the deliverable
 /eshop-release-v1.0.zip
+
+# Office temporary files and generated presentation inspection cache
+~$*.pptx
+*.pptx.inspect.ndjson

@@ -81,7 +81,7 @@ onMounted(load)
             loading="lazy"
             @error="product.imageFailed = true"
           />
-          <span v-else>E-Shop</span>
+          <img v-else src="/product-placeholder.svg" alt="商品暂无图片" />
         </span>
         <span class="product-info">
           <strong>{{ product.name }}</strong>

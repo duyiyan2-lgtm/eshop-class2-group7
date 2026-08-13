@@ -49,6 +49,26 @@ const activeCategoryName = computed(() => (
   categoryOptions.value.find((item) => item.id === categoryId.value)?.name || '全部商品'
 ))
 
+const nativeDiscoveryTabs = computed(() => [
+  { id: undefined, label: '推荐' },
+  ...categoryOptions.value.slice(0, 4).map((item) => ({ id: item.id, label: item.name })),
+])
+
+const nativeShortcuts = computed(() => {
+  const categoryEntries = categoryOptions.value.slice(0, 4).map((item, index) => ({
+    id: item.id,
+    label: item.name,
+    icon: ['phone-o', 'desktop-o', 'shop-o', 'gift-o'][index],
+  }))
+  return [
+    { label: '全部分类', icon: 'apps-o' },
+    ...categoryEntries,
+    { label: '我的订单', icon: 'orders-o', routeName: 'mobile-orders' },
+    { label: '我的收藏', icon: 'like-o', routeName: 'mobile-favorites' },
+    { label: '浏览足迹', icon: 'clock-o', routeName: 'mobile-history' },
+  ].slice(0, 8)
+})
+
 let requestSequence = 0
 
 const loadCategories = async () => {
@@ -140,6 +160,14 @@ const openProduct = (id) => {
   router.push({ name: 'mobile-product-detail', params: { id } })
 }
 
+const openShortcut = (entry) => {
+  if (entry.routeName) {
+    router.push({ name: entry.routeName })
+    return
+  }
+  selectCategory(entry.id)
+}
+
 const handleImageError = (product) => {
   product.imageFailed = true
 }
@@ -168,6 +196,26 @@ onActivated(() => {
 
 <template>
   <section class="mobile-products">
+    <header class="native-home-header android-only">
+      <div>
+        <span>E-SHOP SELECT</span>
+        <strong>发现今日好物</strong>
+      </div>
+      <RouterLink to="/m/profile" aria-label="进入个人中心"><van-icon name="user-circle-o" /></RouterLink>
+    </header>
+
+    <nav class="native-discovery-tabs android-only" aria-label="商品频道">
+      <button
+        v-for="tab in nativeDiscoveryTabs"
+        :key="tab.id || 'recommend'"
+        type="button"
+        :class="{ active: categoryId === tab.id || (!categoryId && tab.id === undefined) }"
+        @click="selectCategory(tab.id)"
+      >
+        {{ tab.label }}
+      </button>
+    </nav>
+
     <div class="search-bar">
       <van-search
         v-model="keywordInput"
@@ -179,6 +227,18 @@ onActivated(() => {
         @clear="search"
       />
     </div>
+
+    <section class="native-shortcuts android-only" aria-label="商城快捷入口">
+      <button
+        v-for="entry in nativeShortcuts"
+        :key="`${entry.label}-${entry.id || entry.routeName || 'all'}`"
+        type="button"
+        @click="openShortcut(entry)"
+      >
+        <span><van-icon :name="entry.icon" /></span>
+        <small>{{ entry.label }}</small>
+      </button>
+    </section>
 
     <section class="market-hero" aria-label="商城活动">
       <div>
@@ -262,7 +322,7 @@ onActivated(() => {
                 loading="lazy"
                 @error="handleImageError(product)"
               />
-              <span v-else class="image-placeholder">E-Shop</span>
+              <img v-else class="placeholder-image" src="/product-placeholder.svg" alt="商品暂无图片" />
               <span v-if="product.totalStock <= 0" class="stock-badge sold-out">暂时缺货</span>
               <span v-else class="stock-badge">库存 {{ product.totalStock }}</span>
             </span>
@@ -300,10 +360,53 @@ onActivated(() => {
   background: #f3f5f9;
 }
 
+.native-home-header {
+  align-items: center;
+  gap: 10px;
+  padding: calc(8px + var(--app-safe-top)) 16px 6px;
+  color: #f8fafc;
+  background: linear-gradient(145deg, #0a1729, #10254a);
+}
+
+.native-home-header > div { display: grid; flex: 1; gap: 2px; }
+.native-home-header span { color: #2563eb; font-size: 9px; font-weight: 900; letter-spacing: .14em; }
+.native-home-header strong { font-size: 20px; letter-spacing: -.02em; }
+.native-home-header > a { display: grid; width: 36px; height: 36px; place-items: center; color: #dbeafe; background: rgba(255, 255, 255, .08); border: 1px solid rgba(147, 197, 253, .25); border-radius: 12px; font-size: 19px; }
+
+.native-discovery-tabs {
+  gap: 22px;
+  padding: 0 16px 7px;
+  overflow-x: auto;
+  background: linear-gradient(145deg, #0a1729, #10254a);
+  scrollbar-width: none;
+}
+
+.native-discovery-tabs::-webkit-scrollbar { display: none; }
+.native-discovery-tabs button { position: relative; flex: 0 0 auto; padding: 6px 0; color: #94a3b8; font: inherit; font-size: 14px; font-weight: 700; background: transparent; border: 0; }
+.native-discovery-tabs button.active { color: #f8fafc; }
+.native-discovery-tabs button.active::after { position: absolute; right: 25%; bottom: 0; left: 25%; height: 3px; background: linear-gradient(90deg, #2563eb, #7c3aed); border-radius: 999px; content: ''; }
+
+.native-shortcuts {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 8px;
+  margin: 10px 12px 12px;
+  padding: 15px 10px;
+  background: #fff;
+  border: 1px solid #e8edf5;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+}
+
+.native-shortcuts button { display: grid; min-width: 0; justify-items: center; gap: 7px; padding: 0; color: #334155; font: inherit; background: transparent; border: 0; }
+.native-shortcuts button > span { display: grid; width: 45px; height: 45px; place-items: center; color: #fff; background: linear-gradient(145deg, #2563eb, #7c3aed); border-radius: 15px; box-shadow: 0 7px 14px rgba(37, 99, 235, .2); font-size: 22px; }
+.native-shortcuts button:nth-child(2n) > span { background: linear-gradient(145deg, #0ea5e9, #2563eb); }
+.native-shortcuts button:nth-child(3n) > span { background: linear-gradient(145deg, #10b981, #0ea5e9); }
+.native-shortcuts small { max-width: 100%; overflow: hidden; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+
 .search-bar {
   position: sticky;
   z-index: 8;
-  top: calc(var(--van-nav-bar-height, 46px) + env(safe-area-inset-top));
+  top: calc(var(--van-nav-bar-height, 46px) + var(--app-safe-top));
   padding: 9px 12px;
   background: rgba(7, 17, 31, .96);
   box-shadow: 0 8px 18px rgba(2, 8, 23, .2);
@@ -502,6 +605,12 @@ onActivated(() => {
   min-width: 0;
   min-height: 120px;
   padding: 11px 12px 12px;
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .quality-tag { align-self: flex-start; margin-bottom: 6px; padding: 2px 6px; color: #1d4ed8; background: #eff6ff; border-radius: 5px; font-size: 9px; font-weight: 700; }

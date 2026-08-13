@@ -1,4 +1,8 @@
 :root {
+  --app-safe-top: env(safe-area-inset-top, 0px);
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --mobile-sticky-offset: calc(var(--van-nav-bar-height, 54px) + var(--app-safe-top));
+  --native-tabbar-height: calc(58px + var(--app-safe-bottom));
   --eshop-mobile-bg: #f3f5f9;
   --eshop-mobile-card: #ffffff;
   --eshop-mobile-text: #0f172a;
@@ -8,6 +12,21 @@
   --eshop-mobile-radius: 18px;
   --eshop-mobile-shadow: 0 10px 28px rgba(15, 23, 42, .07);
   --eshop-mobile-frame-width: 540px;
+}
+
+.android-only {
+  display: none !important;
+}
+
+.is-native-app .native-home-header,
+.is-native-app .native-discovery-tabs,
+.is-native-app .native-cart-header,
+.is-native-app .native-cart-tools {
+  display: flex !important;
+}
+
+.is-native-app .native-shortcuts {
+  display: grid !important;
 }
 
 body:has(.mobile-shell) {
@@ -140,8 +159,155 @@ body:has(.mobile-shell) {
   min-height: calc(100dvh - 96px);
   padding: 0;
   overflow-x: clip;
-  scroll-padding-top: calc(var(--van-nav-bar-height, 46px) + env(safe-area-inset-top));
+  scroll-padding-top: var(--mobile-sticky-offset);
   background: var(--eshop-mobile-bg);
+}
+
+html.is-native-app body,
+body:has(.is-native-app) {
+  overscroll-behavior-y: none;
+  background: var(--eshop-mobile-bg);
+}
+
+.is-native-app .mobile-shell {
+  max-width: none;
+  background: #07111f;
+  box-shadow: none;
+}
+
+.is-native-app .mobile-shell .mobile-main {
+  padding-top: 0;
+  padding-bottom: var(--native-tabbar-height);
+  background: #07111f;
+}
+
+.is-native-app .native-status-scrim {
+  position: fixed;
+  z-index: 60;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: var(--app-safe-top);
+  pointer-events: none;
+  background: #0a1729;
+}
+
+.is-native-app .mobile-products .search-bar {
+  z-index: 45;
+  top: var(--app-safe-top);
+  padding: 6px 12px 8px;
+  background: rgba(10, 23, 41, .96);
+  border-bottom: 1px solid rgba(96, 165, 250, .14);
+  box-shadow: 0 9px 22px rgba(2, 8, 23, .24);
+  backdrop-filter: blur(18px);
+}
+
+.is-native-app .mobile-products .search-bar .van-search__content {
+  height: 42px;
+  border: 1px solid rgba(96, 165, 250, .55);
+  border-radius: 14px;
+  box-shadow: 0 7px 18px rgba(2, 8, 23, .18);
+}
+
+.is-native-app .market-hero {
+  margin-top: 0;
+}
+
+.is-native-app .mobile-tabbar {
+  height: var(--native-tabbar-height);
+  padding-top: 4px;
+  padding-bottom: var(--app-safe-bottom);
+}
+
+.is-native-app .mobile-cart {
+  padding-bottom: calc(118px + var(--app-safe-bottom));
+}
+
+.is-native-app .mobile-cart .cart-addr-bar {
+  margin-top: 0;
+}
+
+.is-native-app .mobile-cart .cart-list {
+  padding-top: 4px;
+}
+
+.is-native-app .mobile-cart .cart-item {
+  margin-bottom: 0;
+  padding-top: 12px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.is-native-app .mobile-cart .cart-item + .cart-item {
+  border-top: 1px solid #f0f3f7;
+}
+
+.is-native-app .mobile-cart .cart-item:last-child {
+  border-radius: 0 0 18px 18px;
+}
+
+.is-native-app .mobile-cart .del-btn {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.is-native-app .mobile-cart .del-btn.manage-visible {
+  width: 32px;
+  padding: 4px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.is-native-app .mobile-cart .item-img {
+  width: 86px;
+  height: 86px;
+  border-radius: 13px;
+}
+
+.is-native-app .mobile-cart .item-name {
+  font-size: 15px;
+}
+
+.is-native-app .mobile-cart .item-specs {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 4px 7px;
+  background: #f1f5f9;
+  border-radius: 7px;
+}
+
+.is-native-app .mobile-cart .van-submit-bar {
+  bottom: var(--native-tabbar-height);
+  border-top: 1px solid #e5eaf1;
+}
+
+.is-native-app .mobile-cart .van-submit-bar__button {
+  min-width: 118px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  border: 0;
+}
+
+.is-native-app .mobile-profile {
+  min-height: calc(100dvh - var(--native-tabbar-height));
+  padding-bottom: 26px;
+}
+
+.is-native-app .mobile-profile .profile-card::after {
+  display: none;
+}
+
+.is-native-app .mobile-profile .profile-card {
+  margin: 0 0 12px;
+  padding: 14px;
+  overflow: visible;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(147, 197, 253, .22);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(2, 8, 23, .22);
 }
 
 .mobile-shell .mobile-main > *,
@@ -159,7 +325,7 @@ body:has(.mobile-shell) {
 
 .mobile-shell .mobile-tabbar {
   height: 58px;
-  padding: 4px 8px max(4px, env(safe-area-inset-bottom));
+  padding: 4px 8px max(4px, var(--app-safe-bottom));
   background: rgba(255, 255, 255, .97);
   border-top: 1px solid #e5eaf1;
   box-shadow: 0 -10px 30px rgba(15, 23, 42, .07);
@@ -271,7 +437,7 @@ body .mobile-shell .action-bar {
   left: 50% !important;
   width: min(100vw, var(--eshop-mobile-frame-width)) !important;
   box-sizing: border-box;
-  padding-bottom: max(0px, env(safe-area-inset-bottom));
+  padding-bottom: max(0px, var(--app-safe-bottom));
   box-shadow: 0 -12px 30px rgba(15, 23, 42, .08);
   transform: translateX(-50%) !important;
 }
@@ -387,6 +553,11 @@ body .mobile-shell .mobile-detail .sku-option:not(.active, .disabled) {
     width: 100%;
     transform: none;
   }
+}
+
+html.is-native-app {
+  --app-safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --app-safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
 }
 
 @media (max-width: 540px) {

@@ -1,12 +1,13 @@
 <script setup>
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { showConfirmDialog, showToast } from 'vant'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { cancelOrder, confirmOrder, getOrders } from '../../api/order'
 import { getReviewedOrderItemIds } from '../../api/review'
 import { formatDateTime, formatMoney, orderStatusInfo } from '../../utils/shop'
 
 const router = useRouter()
+const route = useRoute()
 const orders = ref([])
 const current = ref(1)
 const size = 10
@@ -19,8 +20,13 @@ const errorMessage = ref('')
 const failedPage = ref(null)
 const reviewedItemIds = ref(new Set())
 const reviewLookupLoading = ref(false)
+const failedOrderImages = ref(new Set())
 let requestSequence = 0
 let reviewRequestSequence = 0
+
+const markOrderImageFailed = (orderId) => {
+  failedOrderImages.value.add(orderId)
+}
 
 const statusOptions = [
   { value: '', label: '全部' },
@@ -175,6 +181,10 @@ const onRefresh = async () => {
 }
 
 onMounted(() => {
+  const requestedStatus = typeof route.query.status === 'string' ? route.query.status : ''
+  if (statusOptions.some((item) => item.value === requestedStatus)) {
+    statusFilter.value = requestedStatus
+  }
   loadOrders({ reset: true, page: 1 })
 })
 
@@ -192,7 +202,7 @@ onActivated(() => {
       :active="statusFilter"
       @click-tab="(tab) => changeStatus(tab.name)"
       sticky
-      offset-top="46px"
+      offset-top="var(--mobile-sticky-offset)"
       color="#1d4ed8"
     >
       <van-tab
@@ -241,8 +251,13 @@ onActivated(() => {
           </template>
           <template #thumb>
             <div class="thumb">
-              <img v-if="order.items?.[0]?.productImage" :src="order.items[0].productImage" :alt="order.items[0].productName" />
-              <span v-else>E-Shop</span>
+              <img
+                v-if="order.items?.[0]?.productImage && !failedOrderImages.has(order.id)"
+                :src="order.items[0].productImage"
+                :alt="order.items[0].productName"
+                @error="markOrderImageFailed(order.id)"
+              />
+              <img v-else src="/product-placeholder.svg" alt="商品暂无图片" />
             </div>
           </template>
           <template #tags>
@@ -326,4 +341,31 @@ onActivated(() => {
 .more-items { margin: 4px 0 0; color: #969799; font-size: 12px; }
 .order-card :deep(.van-card__footer) { padding-top: 10px; }
 .order-card :deep(.van-button) { height: 30px; }
+
+:global(.is-native-app) .mobile-orders {
+  min-height: calc(100dvh - var(--native-tabbar-height));
+  padding-bottom: 22px;
+  background: #07111f;
+}
+
+:global(.is-native-app) .mobile-orders :deep(.van-tabs__wrap) {
+  height: 50px;
+  border-bottom: 1px solid rgba(96, 165, 250, .14);
+  box-shadow: 0 8px 20px rgba(2, 8, 23, .18);
+}
+
+:global(.is-native-app) .order-card :deep(.van-card__title) {
+  color: #f8fafc !important;
+  line-height: 1.4;
+}
+
+:global(.is-native-app) .order-card :deep(.van-card__desc),
+:global(.is-native-app) .order-card :deep(.van-card__num) {
+  color: #a8b8ce !important;
+}
+
+:global(.is-native-app) .order-card .thumb {
+  background: linear-gradient(145deg, #14233b, #1e3150) !important;
+  border: 1px solid rgba(147, 197, 253, .16);
+}
 </style>

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { Capacitor } from '@capacitor/core'
 import { pinia } from '../pinia'
 import { useAuthStore } from '../stores/auth'
 
@@ -304,6 +305,12 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  // The Android package is a consumer-only client. Keep every navigation
+  // inside the mobile route tree so a link cannot escape into PC/admin views.
+  if (Capacitor.isNativePlatform() && !to.path.startsWith('/m')) {
+    return { name: 'mobile-products', replace: true }
+  }
+
   const auth = useAuthStore(pinia)
   if (auth.token && !auth.initialized) {
     await auth.initialize()

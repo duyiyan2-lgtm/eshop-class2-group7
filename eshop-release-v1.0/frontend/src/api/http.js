@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { normalizeMediaPayload } from '../utils/media'
 
 const TOKEN_KEY = 'eshop_token'
 const USER_KEY = 'eshop_user'
@@ -43,7 +44,7 @@ http.interceptors.response.use(
     if (body?.code !== 0) {
       return Promise.reject(new Error(body?.message || '请求失败'))
     }
-    return body.data
+    return normalizeMediaPayload(body.data)
   },
   (error) => {
     const requestUrl = error.config?.url || ''
