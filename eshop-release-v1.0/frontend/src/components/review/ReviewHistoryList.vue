@@ -168,8 +168,8 @@ void loadReviews(1)
   height: 88px;
   place-items: center;
   overflow: hidden;
-  color: #93c5fd;
-  background: #eff6ff;
+  color: #f5a09a;
+  background: #fff1f0;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 800;
@@ -271,10 +271,10 @@ void loadReviews(1)
   display: inline-block;
   margin-top: 8px;
   padding: 8px 15px;
-  color: #2563eb;
+  color: #e1251b;
   font: inherit;
   background: #fff;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #ffd7c2;
   border-radius: 8px;
   cursor: pointer;
 }

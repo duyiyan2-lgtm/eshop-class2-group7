@@ -170,21 +170,15 @@ onMounted(loadCart)
 
 <template>
   <section class="mobile-cart">
-    <header class="native-cart-header android-only">
+    <header class="cart-topbar">
       <div>
-        <span>SHOPPING BAG</span>
-        <strong>购物车 <small>({{ items.length }})</small></strong>
+        <strong>购物车</strong>
+        <small>{{ items.length ? `${items.length} 件商品` : '空空如也' }}</small>
       </div>
-      <button type="button" @click="manageMode = !manageMode">
+      <button v-if="items.length" type="button" @click="manageMode = !manageMode">
         {{ manageMode ? '完成' : '管理' }}
       </button>
     </header>
-
-    <nav class="native-cart-tools android-only" aria-label="购物车工具">
-      <button type="button" @click="showToast('优惠活动将在结算时自动计算')"><van-icon name="coupon-o" /> 优惠活动</button>
-      <button type="button" @click="showToast('库存与价格已为你实时更新')"><van-icon name="discount" /> 价格提醒</button>
-      <button type="button" @click="router.push({ name: 'mobile-addresses' })"><van-icon name="location-o" /> 收货地址</button>
-    </nav>
 
     <van-notice-bar
       v-if="errorMessage"
@@ -255,7 +249,7 @@ onMounted(loadCart)
                 </div>
                 <div class="item-info">
                   <div class="item-name">{{ item.productName }}</div>
-                  <div class="item-specs">{{ specsText(item.specsJson) || '默认规格' }}</div>
+                  <div class="item-specs">{{ item.configurationSummary || specsText(item.specsJson) || '默认规格' }}</div>
                   <div v-if="!item.available" class="item-warn">
                     <van-tag type="danger" size="mini">
                       {{ item.stock < item.quantity ? `库存仅剩 ${item.stock} 件` : '商品已失效' }}
@@ -319,39 +313,35 @@ onMounted(loadCart)
 .mobile-cart {
   min-height: 100%;
   padding-bottom: 60px;
-  background: #f7f8fa;
+  background: #f5f5f5;
 }
 
-.native-cart-header {
-  align-items: flex-end;
+.cart-topbar {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: calc(8px + var(--app-safe-top)) 18px 10px;
-  color: #f8fafc;
-  background: linear-gradient(145deg, #0a1729, #10254a);
+  padding: calc(10px + var(--app-safe-top, 0px)) 16px 12px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.native-cart-header > div { display: grid; gap: 2px; }
-.native-cart-header span { color: #2563eb; font-size: 9px; font-weight: 900; letter-spacing: .14em; }
-.native-cart-header strong { font-size: 25px; line-height: 1.2; }
-.native-cart-header small { color: #94a3b8; font-size: 14px; }
-.native-cart-header button { padding: 8px 13px; color: #bfdbfe; font: inherit; font-size: 13px; font-weight: 700; background: rgba(37, 99, 235, .14); border: 1px solid rgba(96, 165, 250, .3); border-radius: 999px; }
-
-.native-cart-tools {
-  gap: 8px;
-  padding: 2px 12px 12px;
-  overflow-x: auto;
-  background: #10254a;
-  scrollbar-width: none;
+.cart-topbar > div { display: flex; align-items: baseline; gap: 8px; }
+.cart-topbar strong { font-size: 20px; color: #1a1a1a; }
+.cart-topbar small { color: #999; font-size: 12px; }
+.cart-topbar button {
+  padding: 4px 2px;
+  color: #333;
+  font: inherit;
+  font-size: 14px;
+  background: transparent;
+  border: 0;
 }
-
-.native-cart-tools button { display: flex; flex: 0 0 auto; align-items: center; gap: 5px; padding: 8px 12px; color: #cbd5e1; font: inherit; font-size: 12px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(147, 197, 253, .18); border-radius: 11px; }
-.native-cart-tools :deep(.van-icon) { color: #2563eb; font-size: 16px; }
 
 .notice-action {
   margin-left: 8px;
   padding: 0;
   border: 0;
-  color: #2563eb;
+  color: #e1251b;
   background: transparent;
 }
 
@@ -375,7 +365,7 @@ onMounted(loadCart)
   border-radius: 18px 18px 0 0;
 }
 
-.cart-store-heading > :deep(.van-icon) { color: #2563eb; font-size: 18px; }
+.cart-store-heading > :deep(.van-icon) { color: #ff5000; font-size: 18px; }
 .cart-store-heading strong { font-size: 14px; }
 .cart-store-heading span { margin-left: auto; color: #94a3b8; font-size: 10px; }
 
@@ -383,10 +373,18 @@ onMounted(loadCart)
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
   padding: 14px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 0;
+}
+
+.cart-item + .cart-item {
+  border-top: 1px solid #f5f5f5;
+}
+
+.cart-item:last-child {
+  border-radius: 0 0 12px 12px;
 }
 
 .cart-item.invalid {
@@ -461,16 +459,27 @@ onMounted(loadCart)
 }
 
 .item-price {
-  color: #dc2626;
-  font-size: 16px;
-  font-weight: 700;
+  color: #ff5000;
+  font-size: 17px;
+  font-weight: 800;
 }
 
 .del-btn {
-  padding: 4px;
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
   color: #999;
   font-size: 18px;
   border: none;
+  pointer-events: none;
+}
+
+.del-btn.manage-visible {
+  width: 32px;
+  padding: 4px;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .cart-addr-bar {
@@ -503,16 +512,12 @@ onMounted(loadCart)
 
 :global(.is-native-app) .mobile-cart {
   min-height: calc(100dvh - var(--native-tabbar-height));
-  background: #07111f;
+  background: #f5f5f5;
 }
 
 :global(.is-native-app) .mobile-cart :deep(.van-empty) {
   min-height: calc(100dvh - var(--native-tabbar-height) - 148px - var(--app-safe-top));
   justify-content: center;
   padding: 22px 0 60px;
-}
-
-:global(.is-native-app) .mobile-cart :deep(.van-empty__description) {
-  color: #cbd5e1;
 }
 </style>

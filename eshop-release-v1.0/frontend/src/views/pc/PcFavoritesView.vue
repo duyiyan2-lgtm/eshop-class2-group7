@@ -86,7 +86,6 @@ onMounted(loadFavorites)
   <section class="favorites-page">
     <header class="page-heading">
       <div>
-        <span>MY FAVORITES</span>
         <h1>我的收藏</h1>
         <p>保存喜欢的商品，方便随时回来查看。</p>
       </div>
@@ -195,7 +194,7 @@ onMounted(loadFavorites)
 }
 
 .page-heading span {
-  color: #2563eb;
+  color: #e1251b;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: .14em;
@@ -240,11 +239,11 @@ onMounted(loadFavorites)
   aspect-ratio: 1.25;
   padding: 0;
   overflow: hidden;
-  color: #93c5fd;
+  color: #f5a09a;
   font-size: 24px;
   font-weight: 800;
   place-items: center;
-  background: linear-gradient(145deg, #eff6ff, #f8fafc);
+  background: linear-gradient(145deg, #fff1f0, #f8fafc);
   border: 0;
   cursor: pointer;
 }

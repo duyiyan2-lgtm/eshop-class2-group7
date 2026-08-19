@@ -101,7 +101,7 @@ onMounted(loadFavorites)
       </van-notice-bar>
 
       <div v-if="loading" class="state-card">
-        <van-loading color="#2563eb">正在加载收藏商品</van-loading>
+        <van-loading color="#e1251b">正在加载收藏商品</van-loading>
       </div>
 
       <van-empty
@@ -179,7 +179,7 @@ onMounted(loadFavorites)
 .notice-action {
   margin-left: 8px;
   padding: 0;
-  color: #2563eb;
+  color: #e1251b;
   background: transparent;
   border: 0;
 }
@@ -211,10 +211,10 @@ onMounted(loadFavorites)
   width: 96px;
   height: 96px;
   overflow: hidden;
-  color: #93c5fd;
+  color: #f5a09a;
   font-weight: 800;
   place-items: center;
-  background: linear-gradient(145deg, #eff6ff, #f8fafc);
+  background: linear-gradient(145deg, #fff1f0, #f8fafc);
   border-radius: 10px;
 }
 

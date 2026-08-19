@@ -14,6 +14,9 @@ public record CartItemResponse(
         Integer quantity,
         Boolean selected,
         Boolean available,
+        BigDecimal optionAmount,
+        String configurationHash,
+        String configurationSummary,
         BigDecimal subtotal
 ) {
 }

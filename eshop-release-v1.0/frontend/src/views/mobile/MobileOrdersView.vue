@@ -198,12 +198,15 @@ onActivated(() => {
 
 <template>
   <section class="mobile-orders">
+    <header class="orders-topbar">
+      <strong>我的订单</strong>
+    </header>
     <van-tabs
       :active="statusFilter"
       @click-tab="(tab) => changeStatus(tab.name)"
       sticky
-      offset-top="var(--mobile-sticky-offset)"
-      color="#1d4ed8"
+      offset-top="0"
+      color="#ff5000"
     >
       <van-tab
         v-for="option in statusOptions"
@@ -313,7 +316,13 @@ onActivated(() => {
 </template>
 
 <style scoped>
-.mobile-orders { padding-bottom: 20px; background: #f7f8fa; min-height: 100%; }
+.mobile-orders { padding: 0 0 20px; background: #f5f5f5; min-height: 100%; }
+.orders-topbar {
+  padding: calc(10px + var(--app-safe-top, 0px)) 16px 10px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+.orders-topbar strong { font-size: 18px; color: #1a1a1a; }
 .orders-summary { padding: 10px 16px 0; color: #969799; font-size: 12px; }
 .orders-list { padding: 12px 12px 20px; }
 .order-card { margin-bottom: 12px; background: #fff; border-radius: 12px; overflow: hidden; }
@@ -329,8 +338,8 @@ onActivated(() => {
   height: 64px;
   place-items: center;
   overflow: hidden;
-  color: #93c5fd;
-  background: #eff6ff;
+  color: #f5a09a;
+  background: #fff1f0;
   border-radius: 8px;
   font-size: 10px;
   font-weight: 800;
@@ -345,27 +354,6 @@ onActivated(() => {
 :global(.is-native-app) .mobile-orders {
   min-height: calc(100dvh - var(--native-tabbar-height));
   padding-bottom: 22px;
-  background: #07111f;
-}
-
-:global(.is-native-app) .mobile-orders :deep(.van-tabs__wrap) {
-  height: 50px;
-  border-bottom: 1px solid rgba(96, 165, 250, .14);
-  box-shadow: 0 8px 20px rgba(2, 8, 23, .18);
-}
-
-:global(.is-native-app) .order-card :deep(.van-card__title) {
-  color: #f8fafc !important;
-  line-height: 1.4;
-}
-
-:global(.is-native-app) .order-card :deep(.van-card__desc),
-:global(.is-native-app) .order-card :deep(.van-card__num) {
-  color: #a8b8ce !important;
-}
-
-:global(.is-native-app) .order-card .thumb {
-  background: linear-gradient(145deg, #14233b, #1e3150) !important;
-  border: 1px solid rgba(147, 197, 253, .16);
+  background: #f5f5f5;
 }
 </style>

@@ -250,7 +250,7 @@ watch(
 .heading-mark {
   width: 5px;
   height: 22px;
-  background: #2563eb;
+  background: #e1251b;
   border-radius: 999px;
 }
 
@@ -382,10 +382,10 @@ header small,
 .review-state button,
 .review-pagination button {
   padding: 7px 14px;
-  color: #2563eb;
+  color: #e1251b;
   font: inherit;
   background: #fff;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #ffd7c2;
   border-radius: 8px;
   cursor: pointer;
 }

@@ -1,0 +1,13 @@
+Official license chosen on the model page: Creative Commons Attribution (CC BY 4.0)
+Sketchfab license label: CC Attribution
+License legalcode: https://creativecommons.org/licenses/by/4.0/legalcode
+License deed: https://creativecommons.org/licenses/by/4.0/
+Canonical SPDX: CC-BY-4.0
+Legalcode copy source used for license.txt:
+https://raw.githubusercontent.com/creativecommons/creativecommons.org/master/docroot/legalcode/by_4.0.txt
+Sketchfab API license object (2026-08-18):
+  label=CC Attribution
+  fullName=Creative Commons Attribution
+  slug=by
+  url=http://creativecommons.org/licenses/by/4.0/
+  requirements=Author must be credited. Commercial use is allowed.

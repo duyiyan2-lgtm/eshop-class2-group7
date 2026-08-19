@@ -156,6 +156,7 @@ public class CatalogService {
                 product.getMainImage(),
                 product.getDetail(),
                 product.getStatus(),
+                product.getProductKind() == null ? "STANDARD" : product.getProductKind(),
                 skus.stream().map(this::toSkuResponse).toList(),
                 product.getCreatedAt(),
                 product.getUpdatedAt());
@@ -477,6 +478,9 @@ public class CatalogService {
         product.setSubtitle(request.subtitle());
         product.setMainImage(request.mainImage());
         product.setDetail(request.detail());
+        if (product.getProductKind() == null || product.getProductKind().isBlank()) {
+            product.setProductKind("STANDARD");
+        }
         if (request.status() != null) {
             product.setStatus(request.status());
         } else if (product.getId() == null) {
@@ -512,6 +516,7 @@ public class CatalogService {
                 product.getSubtitle(),
                 product.getMainImage(),
                 product.getStatus(),
+                product.getProductKind() == null ? "STANDARD" : product.getProductKind(),
                 minPrice,
                 totalStock,
                 product.getCreatedAt());

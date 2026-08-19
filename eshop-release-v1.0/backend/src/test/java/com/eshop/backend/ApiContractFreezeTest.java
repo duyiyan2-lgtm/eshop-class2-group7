@@ -142,10 +142,10 @@ class ApiContractFreezeTest {
         expected.put(SkuRequest.class, List.of("skuCode", "specsJson", "price", "stock", "status"));
         expected.put(StatusRequest.class, List.of("status"));
         expected.put(StockUpdateRequest.class, List.of("stock"));
-        expected.put(AddCartItemRequest.class, List.of("skuId", "quantity"));
+        expected.put(AddCartItemRequest.class, List.of("skuId", "quantity", "optionValueIds"));
         expected.put(UpdateCartItemRequest.class, List.of("quantity", "selected"));
         expected.put(CreateOrderRequest.class, List.of("addressId", "remark"));
-        expected.put(BuyNowOrderRequest.class, List.of("addressId", "skuId", "quantity", "remark"));
+        expected.put(BuyNowOrderRequest.class, List.of("addressId", "skuId", "quantity", "optionValueIds", "remark"));
         expected.put(UserStatusRequest.class, List.of("status"));
 
         expected.forEach((type, fields) -> {

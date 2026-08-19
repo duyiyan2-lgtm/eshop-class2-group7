@@ -115,7 +115,6 @@ onMounted(loadHistory)
   <section class="history-page">
     <header class="page-heading">
       <div>
-        <span>BROWSE HISTORY</span>
         <h1>浏览历史</h1>
         <p>记录你最近看过的在售商品，方便快速回访。</p>
       </div>
@@ -212,7 +211,7 @@ onMounted(loadHistory)
 <style scoped>
 .history-page { width: min(1180px, 100%); margin: 0 auto; padding: 12px 0 48px; }
 .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
-.page-heading span { color: #93c5fd; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.page-heading span { color: #f5a09a; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .page-heading h1 { margin: 8px 0; color: #0f172a; font-size: 30px; }
 .page-heading p { margin: 0; color: #64748b; }
 .heading-actions { display: flex; gap: 10px; }
@@ -221,7 +220,7 @@ onMounted(loadHistory)
 .product-card { overflow: hidden; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 10px 28px rgba(15, 23, 42, .05); }
 .product-image { display: grid; width: 100%; height: 180px; place-items: center; padding: 0; border: 0; background: #f8fafc; cursor: pointer; }
 .product-image img { width: 100%; height: 100%; object-fit: contain; }
-.product-image span { color: #93c5fd; font-weight: 800; }
+.product-image span { color: #f5a09a; font-weight: 800; }
 .product-body { display: grid; gap: 10px; padding: 16px; }
 .product-body h2 { margin: 0; color: #0f172a; font-size: 16px; cursor: pointer; }
 .product-body p { margin: 0; color: #64748b; font-size: 13px; min-height: 36px; }

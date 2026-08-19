@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-label="E-Shop 汽车示意占位图">
+  <title>E-Shop 汽车示意占位图 · 课程演示</title>
+  <rect width="640" height="360" fill="transparent"/>
+  <ellipse cx="320" cy="292" rx="190" ry="12" fill="#8aa0b4" opacity=".35"/>
+  <path d="M142 232c18-38 78-70 140-76l38-28h90l36 28c62 6 116 36 134 76l-10 16H152z" fill="#6d8296" opacity=".55"/>
+  <path d="M264 156h78l24 26H248z" fill="#9bb0c2" opacity=".45"/>
+  <circle cx="208" cy="248" r="20" fill="#4d5f70" opacity=".55"/>
+  <circle cx="436" cy="248" r="20" fill="#4d5f70" opacity=".55"/>
+</svg>

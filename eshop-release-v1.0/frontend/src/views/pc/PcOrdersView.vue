@@ -101,7 +101,6 @@ onMounted(loadOrders)
   <div class="orders-page">
     <header class="page-heading">
       <div>
-        <p>MY ORDERS</p>
         <h1>我的订单</h1>
         <span>查看订单进度并完成支付、取消或确认收货</span>
       </div>
@@ -149,8 +148,8 @@ onMounted(loadOrders)
                 <span v-else>E-Shop</span>
               </div>
               <div>
-                <RouterLink :to="`/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
-                <p>{{ specsText(item.skuSpecs) || '默认规格' }} · × {{ item.quantity }}</p>
+                <RouterLink :to="item.configurationSummary ? `/pc/vehicles/${item.productId}/configurator` : `/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
+                <p>{{ item.configurationSummary || specsText(item.skuSpecs) || '默认规格' }} · × {{ item.quantity }}</p>
               </div>
             </div>
             <p v-if="order.items.length > 3" class="more-items">
@@ -232,12 +231,12 @@ onMounted(loadOrders)
 <style scoped>
 .orders-page { width: min(1200px, 100%); margin: 0 auto; padding: 16px 0 56px; }
 .page-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 24px; }
-.page-heading p { margin: 0 0 6px; color: #2563eb; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.page-heading p { margin: 0 0 6px; color: #e1251b; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .page-heading h1 { margin: 0; color: #0f172a; font-size: 32px; }
 .page-heading span { display: block; margin-top: 8px; color: #64748b; }
 .status-tabs { display: flex; gap: 8px; margin-bottom: 20px; padding: 8px; overflow-x: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; }
 .status-tabs button { padding: 10px 18px; color: #64748b; background: transparent; border: 0; border-radius: 9px; cursor: pointer; font: inherit; white-space: nowrap; }
-.status-tabs button.active { color: #fff; background: #2563eb; font-weight: 700; }
+.status-tabs button.active { color: #fff; background: #ff6700; font-weight: 700; }
 .orders-alert { margin-bottom: 18px; }
 .orders-list { min-height: 300px; }
 .order-card { margin-bottom: 16px; overflow: hidden; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 10px 32px rgba(15, 23, 42, .05); }
@@ -246,7 +245,7 @@ onMounted(loadOrders)
 .order-card > header b { color: #334155; font-weight: 600; }
 .order-body { display: grid; grid-template-columns: minmax(380px, 1fr) 155px 135px 130px; gap: 22px; align-items: center; padding: 22px; }
 .order-product { display: flex; align-items: center; gap: 13px; padding: 8px 0; }
-.product-image { display: grid; flex: 0 0 58px; width: 58px; height: 58px; place-items: center; overflow: hidden; color: #93c5fd; background: #eff6ff; border-radius: 9px; font-size: 10px; font-weight: 800; }
+.product-image { display: grid; flex: 0 0 58px; width: 58px; height: 58px; place-items: center; overflow: hidden; color: #f5a09a; background: #fff1f0; border-radius: 9px; font-size: 10px; font-weight: 800; }
 .product-image img { width: 100%; height: 100%; object-fit: contain; }
 .order-product a { color: #0f172a; font-size: 14px; font-weight: 700; }
 .order-product p, .receiver p, .order-total p { margin: 6px 0 0; color: #94a3b8; font-size: 12px; }

@@ -129,7 +129,7 @@ onMounted(refreshProfile)
           <div class="profile-username">账号：{{ auth.user?.username || 'unknown' }}</div>
           <div class="profile-phone">{{ auth.user?.phone || '完善联系电话，收货更顺利' }}</div>
         </div>
-        <van-loading v-if="loading" color="#2563eb" size="22" />
+        <van-loading v-if="loading" color="#e1251b" size="22" />
       </div>
 
       <div class="member-summary">
@@ -204,44 +204,57 @@ onMounted(refreshProfile)
   box-sizing: border-box;
   min-height: 100%;
   padding: 0 12px 24px;
-  background: #07111f;
+  background: #f5f5f5;
 }
 
 .profile-hero {
-  margin: 0 -12px 14px;
-  padding: calc(8px + var(--app-safe-top)) 14px 16px;
-  color: #f8fafc;
-  background:
-    radial-gradient(circle at 92% 6%, rgba(96, 165, 250, .2), transparent 32%),
-    linear-gradient(145deg, #0a1729, #10254a 58%, #1e1b4b);
-  border-radius: 0 0 26px 26px;
-  box-shadow: 0 16px 38px rgba(2, 8, 23, .3);
+  margin: 0 -12px 12px;
+  padding: calc(10px + var(--app-safe-top, 0px)) 14px 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #ff5000 0%, #ff9000 100%);
 }
 
-.profile-quick-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 6px; }
-.profile-quick-actions button { display: grid; min-width: 48px; justify-items: center; gap: 2px; padding: 5px; color: #cbd5e1; font: inherit; background: rgba(255, 255, 255, .045); border: 1px solid rgba(148, 163, 184, .12); border-radius: 12px; }
-.profile-quick-actions :deep(.van-icon) { font-size: 21px; }
-.profile-quick-actions small { font-size: 9px; }
+.profile-quick-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.profile-quick-actions button {
+  display: grid;
+  min-width: 46px;
+  justify-items: center;
+  gap: 2px;
+  padding: 4px;
+  color: #fff;
+  font: inherit;
+  background: rgba(255, 255, 255, .12);
+  border: 0;
+  border-radius: 10px;
+}
+
+.profile-quick-actions :deep(.van-icon) { font-size: 20px; }
+.profile-quick-actions small { font-size: 10px; }
 
 .notice-action {
   margin-left: 8px;
   padding: 0;
   border: 0;
-  color: #2563eb;
+  color: #e1251b;
   background: transparent;
 }
 
 .profile-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 14px;
-  padding: 4px 4px 10px;
-  color: #f8fafc;
-  background: rgba(255, 255, 255, .08);
-  border: 1px solid rgba(147, 197, 253, .22);
-  border-radius: 18px;
-  box-shadow: 0 12px 28px rgba(2, 8, 23, .22);
+  gap: 14px;
+  margin-bottom: 12px;
+  padding: 4px 0 8px;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .profile-avatar {
@@ -249,26 +262,21 @@ onMounted(refreshProfile)
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
-  font-size: 26px;
+  width: 58px;
+  height: 58px;
+  font-size: 24px;
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(145deg, #3b82f6, #7c3aed);
-  border: 2px solid rgba(219, 234, 254, .55);
-  box-shadow: 0 10px 25px rgba(37, 99, 235, .28);
+  color: #e1251b;
+  background: #fff;
   border-radius: 50%;
 }
 
-.profile-info {
-  flex: 1;
-  min-width: 0;
-}
+.profile-info { flex: 1; min-width: 0; }
 
 .profile-name {
   overflow: hidden;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -277,55 +285,94 @@ onMounted(refreshProfile)
 .profile-phone {
   margin-top: 4px;
   overflow: hidden;
-  font-size: 13px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #a8b8ce;
+  color: rgba(255, 255, 255, .82);
 }
 
 .member-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 14px 8px;
-  background: rgba(255, 255, 255, .94);
-  border: 1px solid rgba(219, 234, 254, .32);
-  border-radius: 18px;
-  box-shadow: 0 10px 25px rgba(37, 99, 235, .08);
+  padding: 12px 6px;
+  background: #fff;
+  border-radius: 12px;
 }
 
 .member-summary > div { display: grid; gap: 4px; padding: 0 8px; text-align: center; }
-.member-summary > div + div { border-left: 1px solid #e5eaf1; }
-.member-summary span { color: #64748b; font-size: 10px; }
-.member-summary strong { color: #1e3a8a; font-size: 12px; }
+.member-summary > div + div { border-left: 1px solid #f0f0f0; }
+.member-summary span { color: #999; font-size: 11px; }
+.member-summary strong { color: #e1251b; font-size: 13px; }
 
-.profile-panel { margin-bottom: 12px; padding: 17px 14px; background: #f8fafc; border: 1px solid rgba(147, 197, 253, .2); border-radius: 20px; box-shadow: 0 12px 30px rgba(2, 8, 23, .22); }
-.profile-panel > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.profile-panel > header strong { color: #0f172a; font-size: 17px; }
-.profile-panel > header button { padding: 4px; color: #94a3b8; font: inherit; font-size: 11px; background: transparent; border: 0; }
-.profile-panel > header small { color: #94a3b8; font-size: 10px; }
+.profile-panel {
+  margin-bottom: 12px;
+  padding: 16px 14px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.profile-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.profile-panel > header strong { color: #1a1a1a; font-size: 16px; }
+.profile-panel > header button {
+  padding: 0;
+  color: #999;
+  font: inherit;
+  font-size: 12px;
+  background: transparent;
+  border: 0;
+}
+.profile-panel > header small { color: #999; font-size: 12px; }
 
 .order-shortcuts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.order-shortcuts button { display: grid; justify-items: center; gap: 7px; padding: 5px 0; color: #334155; font: inherit; background: transparent; border: 0; }
-.order-shortcuts :deep(.van-icon) { color: #2563eb; font-size: 27px; }
-.order-shortcuts span { font-size: 11px; font-weight: 600; }
-
-.service-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 8px; }
-.service-grid button { display: grid; justify-items: center; gap: 7px; padding: 0; color: #475569; font: inherit; background: transparent; border: 0; }
-.service-grid button > span { display: grid; width: 43px; height: 43px; place-items: center; color: #2563eb; background: #eff6ff; border-radius: 15px; font-size: 21px; }
-.service-grid button:nth-child(2n) > span { color: #7c3aed; background: #f5f3ff; }
-.service-grid small { font-size: 11px; font-weight: 600; }
-
-.profile-logout {
-  padding: 6px 16px 0;
+.order-shortcuts button {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  color: #333;
+  font: inherit;
+  background: transparent;
+  border: 0;
 }
+.order-shortcuts :deep(.van-icon) { color: #e1251b; font-size: 26px; }
+.order-shortcuts span { font-size: 12px; }
+
+.service-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 8px; }
+.service-grid button {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 0;
+  color: #555;
+  font: inherit;
+  background: transparent;
+  border: 0;
+}
+.service-grid button > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: #e1251b;
+  background: #fff5f4;
+  border-radius: 12px;
+  font-size: 20px;
+}
+.service-grid small { font-size: 12px; }
+
+.profile-logout { padding: 8px 4px 0; }
 
 .profile-logout :deep(.van-button) {
-  color: #fda4af;
-  background: rgba(136, 19, 55, .12);
-  border-color: rgba(251, 113, 133, .5);
+  color: #666;
+  background: #fff;
+  border-color: #eee;
 }
 
-.form-body {
-  padding: 8px 12px 4px;
-}
+.form-body { padding: 8px 12px 4px; }
 </style>

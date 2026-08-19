@@ -23,6 +23,8 @@ import com.eshop.backend.order.dto.OrderResponse;
 import com.eshop.backend.order.dto.OrderStatusLogResponse;
 import com.eshop.backend.order.dto.PaymentResponse;
 import com.eshop.backend.security.LoginUser;
+import com.eshop.backend.vehicle.VehicleConfigurationService;
+import com.eshop.backend.vehicle.dto.VehicleQuoteResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +57,7 @@ public class OrderService {
     private final CartService cartService;
     private final AddressService addressService;
     private final OrderTimeoutProperties orderTimeoutProperties;
+    private final VehicleConfigurationService configurationService;
 
     @Transactional
     public OrderResponse createOrder(LoginUser user, CreateOrderRequest request) {
@@ -86,7 +89,8 @@ public class OrderService {
             if (skuMapper.decrementStock(sku.getId(), cartItem.getQuantity()) != 1) {
                 throw new BusinessException(ErrorCode.OUT_OF_STOCK);
             }
-            BigDecimal subtotal = sku.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            PricedLine line = priceLine(product, sku, cartItem.getConfigurationJson());
+            BigDecimal subtotal = line.unitPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             total = total.add(subtotal);
 
             OrderItem item = new OrderItem();
@@ -94,8 +98,11 @@ public class OrderService {
             item.setSkuId(sku.getId());
             item.setProductName(product.getName());
             item.setSkuSpecs(sku.getSpecsJson());
+            item.setConfigurationJson(line.configurationJson());
+            item.setConfigurationSummary(line.configurationSummary());
+            item.setOptionAmount(line.optionAmount());
             item.setProductImage(product.getMainImage());
-            item.setPrice(sku.getPrice());
+            item.setPrice(line.unitPrice());
             item.setQuantity(cartItem.getQuantity());
             item.setSubtotal(subtotal);
             orderItems.add(item);
@@ -138,7 +145,8 @@ public class OrderService {
             throw new BusinessException(ErrorCode.OUT_OF_STOCK);
         }
 
-        BigDecimal subtotal = sku.getPrice().multiply(BigDecimal.valueOf(request.quantity()));
+        PricedLine line = priceLine(product, sku, request.optionValueIds());
+        BigDecimal subtotal = line.unitPrice().multiply(BigDecimal.valueOf(request.quantity()));
         ShopOrder order = new ShopOrder();
         order.setOrderNo(generateNumber("E"));
         order.setUserId(user.getUserId());
@@ -158,8 +166,11 @@ public class OrderService {
         item.setSkuId(sku.getId());
         item.setProductName(product.getName());
         item.setSkuSpecs(sku.getSpecsJson());
+        item.setConfigurationJson(line.configurationJson());
+        item.setConfigurationSummary(line.configurationSummary());
+        item.setOptionAmount(line.optionAmount());
         item.setProductImage(product.getMainImage());
-        item.setPrice(sku.getPrice());
+        item.setPrice(line.unitPrice());
         item.setQuantity(request.quantity());
         item.setSubtotal(subtotal);
         orderItemMapper.insert(item);
@@ -430,6 +441,9 @@ public class OrderService {
                         item.getSkuId(),
                         item.getProductName(),
                         item.getSkuSpecs(),
+                        item.getConfigurationJson(),
+                        item.getConfigurationSummary(),
+                        item.getOptionAmount(),
                         item.getProductImage(),
                         item.getPrice(),
                         item.getQuantity(),
@@ -464,5 +478,36 @@ public class OrderService {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
         return prefix + timestamp + suffix;
+    }
+
+    private PricedLine priceLine(Product product, ProductSku sku, String configurationJson) {
+        if (!configurationService.isVehicle(product)) {
+            return new PricedLine(sku.getPrice(), BigDecimal.ZERO, configurationJson, null);
+        }
+        return priceLine(product, sku, configurationService.optionIdsFromSnapshot(configurationJson));
+    }
+
+    private PricedLine priceLine(Product product, ProductSku sku, List<Long> optionValueIds) {
+        if (!configurationService.isVehicle(product)
+                && (optionValueIds == null || optionValueIds.isEmpty())) {
+            return new PricedLine(sku.getPrice(), BigDecimal.ZERO, null, null);
+        }
+        VehicleQuoteResponse quote = configurationService.quote(product.getId(), sku.getId(), optionValueIds);
+        if (!quote.purchasable()) {
+            throw new BusinessException(ErrorCode.OUT_OF_STOCK);
+        }
+        return new PricedLine(
+                quote.unitPrice(),
+                quote.optionAmount(),
+                quote.configurationJson(),
+                quote.configurationSummary());
+    }
+
+    private record PricedLine(
+            BigDecimal unitPrice,
+            BigDecimal optionAmount,
+            String configurationJson,
+            String configurationSummary
+    ) {
     }
 }

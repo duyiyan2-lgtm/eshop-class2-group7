@@ -276,7 +276,7 @@ watch(() => route.params.id, loadDetail, { immediate: true })
           v-for="item in (order.items || [])"
           :key="item.id"
           :title="item.productName"
-          :label="specsText(item.skuSpecs) || '默认规格'"
+          :label="item.configurationSummary || specsText(item.skuSpecs) || '默认规格'"
           :clickable="Boolean(item.productId)"
           :is-link="Boolean(item.productId)"
           class="item-cell"
@@ -328,7 +328,7 @@ watch(() => route.params.id, loadDetail, { immediate: true })
           color="#b45309"
           background="#fef3c7"
         />
-        <van-steps v-if="logs.length" direction="vertical" :active="logs.length - 1" active-color="#1d4ed8">
+        <van-steps v-if="logs.length" direction="vertical" :active="logs.length - 1" active-color="#e1251b">
           <van-step v-for="log in logs" :key="log.id">
             <h3>{{ orderStatusInfo(log.toStatus).label }}</h3>
             <p>{{ log.remark }}</p>
@@ -451,14 +451,14 @@ watch(() => route.params.id, loadDetail, { immediate: true })
   margin: 12px 12px 16px;
   padding: 24px 22px;
   color: #fff;
-  background: linear-gradient(120deg, #0f172a, #1e3a8a);
+  background: linear-gradient(120deg, #0f172a, #7f1d1d);
   border-radius: 14px;
   box-shadow: 0 12px 32px rgba(15, 23, 42, .18);
 }
-.status-card p { margin: 0 0 6px; color: #93c5fd; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.status-card p { margin: 0 0 6px; color: #f5a09a; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .status-card h1 { margin: 0 0 8px; font-size: 22px; }
 .status-card span { color: #cbd5e1; font-size: 12px; }
-.status-card.status-PAID { background: linear-gradient(120deg, #1e3a8a, #2563eb); }
+.status-card.status-PAID { background: linear-gradient(120deg, #7f1d1d, #e1251b); }
 .status-card.status-SHIPPED { background: linear-gradient(120deg, #075985, #0891b2); }
 .status-card.status-COMPLETED { background: linear-gradient(120deg, #14532d, #16a34a); }
 .status-card.status-CANCELED { background: linear-gradient(120deg, #525252, #737373); }
@@ -474,8 +474,8 @@ watch(() => route.params.id, loadDetail, { immediate: true })
   height: 56px;
   place-items: center;
   overflow: hidden;
-  color: #93c5fd;
-  background: #eff6ff;
+  color: #f5a09a;
+  background: #fff1f0;
   border-radius: 8px;
   font-size: 10px;
   font-weight: 800;

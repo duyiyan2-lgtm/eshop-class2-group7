@@ -135,11 +135,11 @@ watch(() => route.params.id, loadOrder, { immediate: true })
 
 <style scoped>
 .payment-page { width: min(760px, 100%); min-height: 500px; margin: 0 auto; padding: 38px 0 70px; }
-.payment-card { padding: 46px 54px; text-align: center; background: #fff; border: 1px solid #dbeafe; border-radius: 24px; box-shadow: 0 22px 60px rgba(30, 64, 175, .12); }
+.payment-card { padding: 46px 54px; text-align: center; background: #fff; border: 1px solid #ffe8d6; border-radius: 24px; box-shadow: 0 22px 60px rgba(200, 22, 29, .12); }
 .payment-card.success { border-color: #bbf7d0; box-shadow: 0 22px 60px rgba(22, 163, 74, .10); }
-.payment-icon { display: grid; width: 68px; height: 68px; margin: 0 auto 18px; place-items: center; color: #fff; background: linear-gradient(135deg, #1d4ed8, #60a5fa); border-radius: 50%; font-size: 31px; font-weight: 800; }
+.payment-icon { display: grid; width: 68px; height: 68px; margin: 0 auto 18px; place-items: center; color: #fff; background: linear-gradient(135deg, #c8161d, #ff8f1f); border-radius: 50%; font-size: 31px; font-weight: 800; }
 .success .payment-icon { background: linear-gradient(135deg, #15803d, #4ade80); }
-.payment-card > p { margin: 0 0 7px; color: #2563eb; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.payment-card > p { margin: 0 0 7px; color: #e1251b; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .success > p { color: #15803d; }
 .payment-card h1 { margin: 0; color: #0f172a; font-size: 30px; }
 .order-number { display: block; margin: 12px 0 26px; color: #64748b; font-size: 13px; }

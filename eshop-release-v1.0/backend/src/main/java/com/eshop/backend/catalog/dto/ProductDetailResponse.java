@@ -12,6 +12,7 @@ public record ProductDetailResponse(
         String mainImage,
         String detail,
         String status,
+        String productKind,
         List<SkuResponse> skus,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

@@ -16,6 +16,10 @@ public class CartItem {
     private Long skuId;
     private Integer quantity;
     private Boolean selected;
+    private String configurationHash;
+    private String configurationJson;
+    private String configurationSummary;
+    private java.math.BigDecimal optionAmount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

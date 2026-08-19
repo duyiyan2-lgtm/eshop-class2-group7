@@ -42,7 +42,7 @@ export async function initializeNativeRuntime(router) {
     }
 
     await Promise.allSettled([
-      SystemBars.setStyle({ style: SystemBarsStyle.Dark }),
+      SystemBars.setStyle({ style: SystemBarsStyle.Light }),
     ])
 
     try {

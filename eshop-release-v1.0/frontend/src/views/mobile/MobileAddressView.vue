@@ -380,9 +380,9 @@ onMounted(loadAddresses)
   gap: 12px;
   margin: 12px;
   padding: 14px 15px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #ffd7c2;
   border-radius: 12px;
-  background: #eff6ff;
+  background: #fff1f0;
 }
 
 .checkout-return-card > div {
@@ -390,14 +390,14 @@ onMounted(loadAddresses)
   gap: 4px;
 }
 
-.checkout-return-card strong { color: #1e3a8a; font-size: 14px; }
+.checkout-return-card strong { color: #7f1d1d; font-size: 14px; }
 .checkout-return-card span { color: #64748b; font-size: 12px; line-height: 1.45; }
 
 .notice-action {
   margin-left: 8px;
   padding: 0;
   border: 0;
-  color: #2563eb;
+  color: #e1251b;
   background: transparent;
 }
 
@@ -420,8 +420,8 @@ onMounted(loadAddresses)
 }
 
 .address-card.is-default {
-  border-color: #2563eb;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+  border-color: #e1251b;
+  box-shadow: 0 2px 8px rgba(225, 37, 27, 0.1);
 }
 
 .address-header {
@@ -440,7 +440,7 @@ onMounted(loadAddresses)
   color: #fff;
   font-size: 16px;
   font-weight: 700;
-  background: linear-gradient(135deg, #2563eb, #60a5fa);
+  background: linear-gradient(135deg, #e1251b, #ff8f1f);
   border-radius: 50%;
 }
 

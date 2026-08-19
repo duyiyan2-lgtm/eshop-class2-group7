@@ -31,6 +31,12 @@ const routes = [
         component: () => import('../views/pc/PcProductDetailView.vue'),
       },
       {
+        path: 'vehicles',
+        name: 'pc-vehicles',
+        component: () => import('../views/pc/PcVehicleListView.vue'),
+        meta: { title: '课程演示车型' },
+      },
+      {
         path: 'cart',
         name: 'pc-cart',
         component: () => import('../views/pc/PcCartView.vue'),
@@ -93,6 +99,18 @@ const routes = [
     ],
   },
   {
+    path: '/pc/vehicles/:id/configurator',
+    name: 'pc-vehicle-configurator',
+    component: () => import('../views/pc/PcVehicleConfiguratorView.vue'),
+    meta: { title: '车辆选配', fullscreen: true },
+  },
+  {
+    path: '/m/vehicles/:id/configurator',
+    name: 'mobile-vehicle-configurator',
+    component: () => import('../views/pc/PcVehicleConfiguratorView.vue'),
+    meta: { title: '车辆选配', fullscreen: true },
+  },
+  {
     path: '/m/login',
     name: 'mobile-login',
     component: () => import('../views/mobile/MobileLoginView.vue'),
@@ -116,6 +134,12 @@ const routes = [
           title: '商品详情',
           moduleOwner: '商品模块',
         },
+      },
+      {
+        path: 'vehicles',
+        name: 'mobile-vehicles',
+        component: () => import('../views/pc/PcVehicleListView.vue'),
+        meta: { title: '课程演示车型' },
       },
       {
         path: 'cart',

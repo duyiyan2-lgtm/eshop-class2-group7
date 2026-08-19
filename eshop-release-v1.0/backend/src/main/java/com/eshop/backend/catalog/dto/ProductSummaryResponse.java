@@ -10,6 +10,7 @@ public record ProductSummaryResponse(
         String subtitle,
         String mainImage,
         String status,
+        String productKind,
         BigDecimal minPrice,
         int totalStock,
         LocalDateTime createdAt

@@ -19,6 +19,7 @@ public class Product {
     private String mainImage;
     private String detail;
     private String status;
+    private String productKind;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

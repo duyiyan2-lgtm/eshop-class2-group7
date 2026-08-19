@@ -47,6 +47,9 @@ http.interceptors.response.use(
     return normalizeMediaPayload(body.data)
   },
   (error) => {
+    if (error.code === 'ERR_CANCELED' || error.name === 'CanceledError' || error.name === 'AbortError') {
+      return Promise.reject(error)
+    }
     const requestUrl = error.config?.url || ''
     const isAuthenticationRequest = requestUrl.includes('/auth/login')
       || requestUrl.includes('/auth/logout')

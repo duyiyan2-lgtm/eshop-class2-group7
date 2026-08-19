@@ -47,6 +47,7 @@ CREATE TABLE product (
     main_image VARCHAR(500),
     detail CLOB,
     status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
+    product_kind VARCHAR(20) NOT NULL DEFAULT 'STANDARD',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -69,9 +70,54 @@ CREATE TABLE cart_item (
     sku_id BIGINT NOT NULL,
     quantity INT NOT NULL,
     selected BOOLEAN NOT NULL DEFAULT TRUE,
+    configuration_hash VARCHAR(80) NOT NULL DEFAULT 'NONE',
+    configuration_json CLOB,
+    configuration_summary VARCHAR(500),
+    option_amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uk_cart_user_sku UNIQUE (user_id, sku_id)
+    CONSTRAINT uk_cart_user_sku_config UNIQUE (user_id, sku_id, configuration_hash)
+);
+
+CREATE TABLE vehicle_option_group (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    code VARCHAR(40) NOT NULL,
+    name VARCHAR(80) NOT NULL,
+    selection_type VARCHAR(20) NOT NULL DEFAULT 'SINGLE',
+    required BOOLEAN NOT NULL DEFAULT FALSE,
+    sort_order INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'ENABLED',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_vehicle_option_group_product_code UNIQUE (product_id, code)
+);
+
+CREATE TABLE vehicle_option_value (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    group_id BIGINT NOT NULL,
+    code VARCHAR(40) NOT NULL,
+    name VARCHAR(80) NOT NULL,
+    price_delta DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+    preview_image VARCHAR(500),
+    color_hex VARCHAR(16),
+    sort_order INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'ENABLED',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_vehicle_option_value_group_code UNIQUE (group_id, code)
+);
+
+CREATE TABLE vehicle_sku_option_rule (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sku_id BIGINT NOT NULL,
+    option_value_id BIGINT NOT NULL,
+    available BOOLEAN NOT NULL DEFAULT TRUE,
+    included BOOLEAN NOT NULL DEFAULT FALSE,
+    price_override DECIMAL(12, 2),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_vehicle_sku_option UNIQUE (sku_id, option_value_id)
 );
 
 CREATE TABLE user_address (
@@ -114,6 +160,9 @@ CREATE TABLE order_item (
     sku_id BIGINT NOT NULL,
     product_name VARCHAR(120) NOT NULL,
     sku_specs VARCHAR(1000) NOT NULL,
+    configuration_json CLOB,
+    configuration_summary VARCHAR(500),
+    option_amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     product_image VARCHAR(500),
     price DECIMAL(12, 2) NOT NULL,
     quantity INT NOT NULL,

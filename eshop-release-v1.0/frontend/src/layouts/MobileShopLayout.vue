@@ -14,12 +14,11 @@ const cartCount = ref(0)
 let cartRequestSequence = 0
 
 const pageTitle = computed(() => (
-  route.name === 'mobile-products' ? 'E-Shop 手机商城' : route.meta.title || 'E-Shop'
+  route.name === 'mobile-products' ? 'E-Shop' : route.meta.title || 'E-Shop'
 ))
 const showTabbar = computed(() => Boolean(route.meta.mobileTabbar))
-const nativeTopLevelPage = computed(() => (
-  (nativeState.isNative || import.meta.env.VITE_APP_PLATFORM === 'android')
-  && ['mobile-products', 'mobile-cart', 'mobile-profile'].includes(String(route.name || ''))
+const hideNavBar = computed(() => (
+  ['mobile-products', 'mobile-cart', 'mobile-profile', 'mobile-orders'].includes(String(route.name || ''))
 ))
 const cartBadge = computed(() => {
   if (cartCount.value <= 0) return ''
@@ -94,7 +93,7 @@ watch(
   <div class="mobile-shell">
     <div v-if="nativeState.isNative" class="native-status-scrim" aria-hidden="true" />
     <van-nav-bar
-      v-if="!nativeTopLevelPage"
+      v-if="!hideNavBar"
       :title="pageTitle"
       :left-arrow="!showTabbar"
       fixed

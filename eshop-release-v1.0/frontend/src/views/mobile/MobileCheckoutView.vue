@@ -216,7 +216,7 @@ watch(() => route.fullPath, loadCheckout, { immediate: true })
             <template #right-icon>
               <van-icon
                 :name="selectedAddressId === address.id ? 'checked' : 'circle'"
-                :color="selectedAddressId === address.id ? '#1d4ed8' : '#c8c9cc'"
+                :color="selectedAddressId === address.id ? '#e1251b' : '#c8c9cc'"
                 size="20"
               />
             </template>
@@ -244,7 +244,7 @@ watch(() => route.fullPath, loadCheckout, { immediate: true })
           v-for="item in validSelectedItems"
           :key="item.id"
           :title="item.productName"
-          :desc="specsText(item.specsJson) || '默认规格'"
+          :desc="item.configurationSummary || specsText(item.specsJson) || '默认规格'"
           :price="Number(item.price)"
           :num="item.quantity"
           class="checkout-card"
@@ -332,7 +332,7 @@ watch(() => route.fullPath, loadCheckout, { immediate: true })
         :button-text="submitButtonText"
         :disabled="!canSubmit"
         :loading="submitting"
-        button-color="#1d4ed8"
+        button-color="#ff5000"
         @submit="onSubmit"
       />
     </template>
@@ -452,8 +452,8 @@ watch(() => route.fullPath, loadCheckout, { immediate: true })
   width: 64px;
   height: 64px;
   overflow: hidden;
-  color: #93c5fd;
-  background: #eff6ff;
+  color: #f5a09a;
+  background: #fff1f0;
   border-radius: 8px;
   font-size: 10px;
   font-weight: 800;

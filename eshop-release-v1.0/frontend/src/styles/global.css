@@ -1,6 +1,15 @@
 :root { color: #1f2937; background: #f8fafc; font-family: Inter, "Microsoft YaHei", system-ui, sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
+
+html.vehicle-immersive-lock,
+html.vehicle-immersive-lock body,
+html.vehicle-immersive-lock #app {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+}
 a { color: inherit; text-decoration: none; }
 
 /* Element Plus 反馈服务由脚本直接创建，需全局加载并统一视觉。 */
@@ -128,25 +137,25 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 8px 18px rgba(220, 38, 38, .2);
 }
 
-.auth-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: linear-gradient(135deg, #eff6ff, #f8fafc); }
-.mobile-auth-page { padding: 16px; background: #f7f8fa; }
-.auth-form { width: min(100%, 400px); display: grid; gap: 16px; padding: 32px; background: #fff; border-radius: 16px; box-shadow: 0 18px 50px rgba(30, 64, 175, .12); }
-.auth-form h1 { margin: 0; font-size: 25px; color: #1d4ed8; }
+.auth-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: linear-gradient(180deg, #fff1f0 0%, #f5f5f5 42%); }
+.mobile-auth-page { padding: 16px; background: #f5f5f5; }
+.auth-form { width: min(100%, 400px); display: grid; gap: 16px; padding: 32px 28px; background: #fff; border-radius: 16px; box-shadow: 0 12px 40px rgba(225, 37, 27, .08); }
+.auth-form h1 { margin: 0; font-size: 24px; color: #e1251b; }
 .auth-subtitle, .auth-message { margin: -8px 0 0; color: #64748b; font-size: 14px; }
 .auth-message { color: #dc2626; }
 .auth-message.is-success { color: #15803d; }
 .auth-form label { display: grid; gap: 8px; font-size: 14px; font-weight: 600; }
-.auth-form input { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 11px 12px; font: inherit; outline-color: #2563eb; }
-.auth-form button { border: 0; border-radius: 8px; padding: 11px 14px; background: #2563eb; color: #fff; cursor: pointer; font: inherit; font-weight: 600; }
+.auth-form input { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 11px 12px; font: inherit; outline-color: #e1251b; }
+.auth-form button { border: 0; border-radius: 8px; padding: 11px 14px; background: #e1251b; color: #fff; cursor: pointer; font: inherit; font-weight: 600; }
 .auth-form button:disabled { opacity: .6; cursor: not-allowed; }
-.auth-form .auth-link { padding: 0; background: transparent; color: #2563eb; font-weight: 400; }
+.auth-form .auth-link { padding: 0; background: transparent; color: #e1251b; font-weight: 400; }
 .auth-portal-link { padding-top: 4px; color: #64748b; font-size: 13px; text-align: center; }
-.auth-portal-link:hover { color: #2563eb; }
+.auth-portal-link:hover { color: #e1251b; }
 .registration-roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; border: 0; }
 .registration-roles legend { grid-column: 1 / -1; margin-bottom: 8px; padding: 0; font-size: 14px; font-weight: 600; }
 .auth-form .registration-role { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; cursor: pointer; }
-.auth-form .registration-role.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 1px #2563eb; }
-.auth-form .registration-role input { width: auto; margin: 3px 0 0; padding: 0; accent-color: #2563eb; }
+.auth-form .registration-role.selected { border-color: #e1251b; background: #fff1f0; box-shadow: 0 0 0 1px #e1251b; }
+.auth-form .registration-role input { width: auto; margin: 3px 0 0; padding: 0; accent-color: #e1251b; }
 .registration-role span { display: grid; gap: 4px; }
 .registration-role small { color: #64748b; font-size: 12px; font-weight: 400; line-height: 1.45; }
 .registration-single-role { display: grid; gap: 4px; padding: 12px; border: 1px solid #bfdbfe; border-radius: 10px; background: #eff6ff; color: #1e3a8a; font-size: 14px; }
@@ -154,22 +163,22 @@ a { color: inherit; text-decoration: none; }
 
 .pc-shell { min-height: 100vh; }
 .pc-header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 32px; height: 64px; background: rgba(255, 255, 255, .94); border-bottom: 1px solid #e2e8f0; backdrop-filter: blur(12px); }
-.brand { color: #1d4ed8; font-size: 23px; font-weight: 800; }
+.brand { color: #e1251b; font-size: 23px; font-weight: 800; }
 .pc-header nav { display: flex; gap: 20px; color: #475569; }
 .pc-header nav a { position: relative; padding: 22px 0 19px; }
-.pc-header nav a.router-link-active { color: #1d4ed8; font-weight: 700; }
-.pc-header nav a.router-link-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; background: #2563eb; border-radius: 3px 3px 0 0; content: ""; }
+.pc-header nav a.router-link-active { color: #e1251b; font-weight: 700; }
+.pc-header nav a.router-link-active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; background: #e1251b; border-radius: 3px 3px 0 0; content: ""; }
 .nav-disabled { color: #94a3b8; }
 .pc-user-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-.workspace-switch-link { color: #2563eb; font-weight: 700; }
+.workspace-switch-link { color: #e1251b; font-weight: 700; }
 .pc-main { padding: 20px; }
 
 .mobile-shell { min-height: 100vh; background: #f7f8fa; }
 .mobile-main { min-height: calc(100vh - 96px); padding: 12px; }
-.mobile-login-link { color: #2563eb; font-size: 14px; }
+.mobile-login-link { color: #e1251b; font-size: 14px; }
 .mobile-nav-actions { display: flex; align-items: center; gap: 9px; }
 .mobile-nav-actions .workspace-switch-link { font-size: 13px; }
-.mobile-tabbar { --van-tabbar-item-active-color: #2563eb; }
+.mobile-tabbar { --van-tabbar-item-active-color: #ff5000; }
 
 .admin-shell { min-height: 100vh; }
 .admin-aside { min-height: 100vh; background: #071426; box-shadow: 8px 0 30px rgba(15, 23, 42, .08); }
@@ -190,7 +199,7 @@ a { color: inherit; text-decoration: none; }
 .terminal-welcome h1 { margin: 0 0 12px; font-size: 30px; }
 .terminal-welcome p:not(.eyebrow) { color: #64748b; line-height: 1.8; }
 .mobile-welcome { margin: 0; padding: 20px; border-radius: 12px; }
-.eyebrow { margin: 0 0 8px; color: #2563eb; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.eyebrow { margin: 0 0 8px; color: #e1251b; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .page-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .page-title h1 { margin: 0; font-size: 24px; }
 .pagination { display: flex; justify-content: flex-end; margin-top: 20px; }

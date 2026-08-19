@@ -16,6 +16,7 @@ import {
   orderStatusInfo,
   specsText,
 } from '../../utils/shop'
+import { lineSpecText, productBrowsePath } from '../../utils/vehicle'
 
 const route = useRoute()
 const router = useRouter()
@@ -319,8 +320,8 @@ watch(() => route.params.id, loadDetail, { immediate: true })
                 <span v-else>E-Shop</span>
               </div>
               <div class="product-info">
-                <RouterLink :to="`/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
-                <p>{{ specsText(item.skuSpecs) || '默认规格' }}</p>
+                <RouterLink :to="productBrowsePath(item)">{{ item.productName }}</RouterLink>
+                <p>{{ lineSpecText(item, specsText(item.skuSpecs)) }}</p>
               </div>
               <span>{{ formatMoney(item.price) }} × {{ item.quantity }}</span>
               <strong>{{ formatMoney(item.subtotal) }}</strong>
@@ -449,8 +450,8 @@ watch(() => route.params.id, loadDetail, { immediate: true })
 <style scoped>
 .detail-page { width: min(1180px, 100%); min-height: 500px; margin: 0 auto; padding: 12px 0 60px; }
 .breadcrumb { margin-bottom: 20px; }
-.status-card { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 30px 34px; color: #fff; background: linear-gradient(120deg, #0f172a, #1e3a8a); border-radius: 20px; box-shadow: 0 18px 45px rgba(15, 23, 42, .18); }
-.status-card p { margin: 0 0 7px; color: #93c5fd; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.status-card { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 30px 34px; color: #fff; background: linear-gradient(120deg, #0f172a, #7f1d1d); border-radius: 20px; box-shadow: 0 18px 45px rgba(15, 23, 42, .18); }
+.status-card p { margin: 0 0 7px; color: #f5a09a; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .status-card h1 { margin: 0 0 9px; font-size: 30px; }
 .status-card span { color: #cbd5e1; font-size: 13px; }
 .status-actions { display: flex; gap: 10px; }
@@ -458,7 +459,7 @@ watch(() => route.params.id, loadDetail, { immediate: true })
 .detail-card { margin-bottom: 18px; padding: 28px; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 10px 32px rgba(15, 23, 42, .05); }
 .detail-card h2 { margin: 0 0 22px; color: #0f172a; font-size: 20px; }
 .order-item { display: grid; grid-template-columns: 72px minmax(0, 1fr) 135px 100px 78px; gap: 15px; align-items: center; padding: 14px 0; border-bottom: 1px solid #eef2f7; }
-.product-image { display: grid; width: 68px; height: 68px; place-items: center; overflow: hidden; color: #93c5fd; background: #eff6ff; border-radius: 10px; font-size: 11px; font-weight: 800; }
+.product-image { display: grid; width: 68px; height: 68px; place-items: center; overflow: hidden; color: #f5a09a; background: #fff1f0; border-radius: 10px; font-size: 11px; font-weight: 800; }
 .product-image img { width: 100%; height: 100%; object-fit: contain; }
 .product-info a { color: #0f172a; font-weight: 700; }
 .product-info p { margin: 7px 0 0; color: #64748b; font-size: 12px; }

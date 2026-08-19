@@ -94,6 +94,10 @@ const loadProduct = async () => {
     const data = await getProduct(id)
     if (requestId !== requestSequence) return
     product.value = data
+    if (data.productKind === 'VEHICLE') {
+      await router.replace({ name: 'mobile-vehicle-configurator', params: { id: data.id } })
+      return
+    }
     const skus = data.skus || []
     const firstAvailable = skus.find((sku) => sku.stock > 0) || skus[0]
     selectedSkuId.value = firstAvailable ? firstAvailable.id : null
@@ -285,7 +289,7 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
 
     <template v-else-if="product">
       <div v-if="galleryImages.length" class="gallery">
-        <van-swipe :autoplay="4000" indicator-color="#1d4ed8">
+        <van-swipe :autoplay="4000" indicator-color="#ff5000">
           <van-swipe-item
             v-for="(image, index) in galleryImages"
             :key="image"
@@ -310,7 +314,7 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
           <van-icon v-else :name="favorited ? 'like' : 'like-o'" size="22" />
           <span>{{ favorited ? '已收藏' : '收藏' }}</span>
         </button>
-        <p>点击图片可放大查看</p>
+        <p>点击查看大图</p>
       </div>
       <div v-else class="gallery placeholder">
         <button
@@ -436,7 +440,7 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
     </template>
 
     <div v-else class="state-block">
-      <van-loading color="#1d4ed8" size="32" />
+      <van-loading color="#e1251b" size="32" />
       <p>商品加载中…</p>
     </div>
   </section>
@@ -445,8 +449,8 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
 <style scoped>
 .mobile-detail {
   min-height: 100%;
-  padding: 12px 12px 96px;
-  background: #f7f8fa;
+  padding: 0 0 96px;
+  background: #f5f5f5;
 }
 
 .state-block {
@@ -465,7 +469,7 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
   display: grid;
   overflow: hidden;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .gallery :deep(.van-swipe) {
@@ -474,7 +478,7 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
 
 .gallery :deep(.van-swipe-item) {
   display: grid;
-  background: linear-gradient(145deg, #eff6ff, #f8fafc);
+  background: linear-gradient(145deg, #fff1f0, #f8fafc);
   place-items: center;
 }
 
@@ -533,23 +537,25 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
 }
 
 .card {
-  margin-top: 12px;
-  padding: 16px;
+  margin: 8px 0 0;
+  padding: 14px 16px;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, .04);
+  border-radius: 0;
 }
 
 .price-panel {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin: -14px -16px 12px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #fff1f0, #fff7ed);
 }
 
 .price-panel strong {
-  color: #dc2626;
-  font-size: 26px;
+  color: #ff5000;
+  font-size: 28px;
+  font-weight: 800;
 }
 
 .price-panel small,
@@ -599,10 +605,10 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
 }
 
 .sku-option.active {
-  color: #1d4ed8;
-  background: #eff6ff;
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 1px #1d4ed8;
+  color: #ff5000;
+  background: #fff4eb;
+  border-color: #ff5000;
+  box-shadow: 0 0 0 1px #ff5000;
 }
 
 .sku-option.disabled {
@@ -633,7 +639,7 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
 }
 
 .selected-specs b {
-  color: #1e3a8a;
+  color: #7f1d1d;
 }
 
 .quantity-row {
@@ -671,8 +677,7 @@ watch(() => auth.token, () => { void loadCartCount() }, { immediate: true })
   gap: 8px;
   padding: 8px 12px calc(8px + var(--app-safe-bottom));
   background: #fff;
-  border-top: 1px solid #e2e8f0;
-  box-shadow: 0 -4px 18px rgba(15, 23, 42, .06);
+  border-top: 1px solid #eee;
 }
 
 .cart-button {

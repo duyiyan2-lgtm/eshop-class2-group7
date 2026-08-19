@@ -51,6 +51,12 @@ public enum ErrorCode {
     SELF_ROLE_CHANGE_NOT_ALLOWED(40931, "不能修改当前登录账号的角色"),
     ADMIN_ACCOUNT_PROTECTED(40932, "平台管理员账号受保护，不能在账号管理中修改"),
     MIXED_SELLER_CART(40933, "所选商品属于不同商家，请分开结算"),
+    VEHICLE_PRODUCT_REQUIRED(40940, "当前商品不是可选配的车辆商品"),
+    VEHICLE_SKU_INVALID(40941, "车辆版本不属于当前车型或已停用"),
+    VEHICLE_OPTION_NOT_FOUND(40419, "车辆选装选项不存在或已停用"),
+    VEHICLE_OPTION_NOT_COMPATIBLE(40942, "该选装与当前版本不兼容"),
+    VEHICLE_OPTION_GROUP_INVALID(40943, "同一选装分组的选择数量不正确"),
+    VEHICLE_OPTION_REQUIRED(40944, "还有必选配置未选择"),
     INTERNAL_ERROR(50000, "系统异常，请稍后重试"),
     FILE_SAVE_FAILED(50001, "文件保存失败");
 

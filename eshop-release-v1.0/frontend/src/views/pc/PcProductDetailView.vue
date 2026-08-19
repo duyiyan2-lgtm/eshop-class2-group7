@@ -8,6 +8,7 @@ import { recordBrowseHistory } from '../../api/browseHistory'
 import { addFavorite, getFavoriteStatus, removeFavorite } from '../../api/favorite'
 import ProductReviewList from '../../components/review/ProductReviewList.vue'
 import { useAuthStore } from '../../stores/auth'
+import { notifyCartUpdated } from '../../utils/cartBadge'
 
 const route = useRoute()
 const router = useRouter()
@@ -62,6 +63,10 @@ const loadProduct = async () => {
     const data = await getProduct(id)
     if (requestId !== requestSequence) return
     product.value = data
+    if (data.productKind === 'VEHICLE') {
+      await router.replace({ name: 'pc-vehicle-configurator', params: { id: data.id } })
+      return
+    }
     const firstAvailable = data.skus.find((sku) => sku.stock > 0) || data.skus[0]
     selectedSkuId.value = firstAvailable?.id
     quantity.value = 1
@@ -134,15 +139,18 @@ const selectSku = (sku) => {
   quantity.value = 1
 }
 
+const requireLogin = async (message) => {
+  if (auth.isLoggedIn) return false
+  ElMessage.info(message)
+  await router.push({
+    name: 'pc-login',
+    query: { redirect: route.fullPath },
+  })
+  return true
+}
+
 const addToCart = async () => {
-  if (!auth.isLoggedIn) {
-    ElMessage.info('请先登录后再加入购物车')
-    await router.push({
-      name: 'pc-login',
-      query: { redirect: route.fullPath },
-    })
-    return
-  }
+  if (await requireLogin('请先登录后再加入购物车')) return
   if (!canAddToCart.value) {
     ElMessage.warning('当前规格暂时无货')
     return
@@ -160,11 +168,19 @@ const addToCart = async () => {
       showClose: true,
       grouping: true,
     })
+    notifyCartUpdated()
+    return true
   } catch (error) {
     ElMessage.error(error.message || '加入购物车失败')
+    return false
   } finally {
     adding.value = false
   }
+}
+
+const buyNow = async () => {
+  const added = await addToCart()
+  if (added) await router.push({ name: 'pc-checkout' })
 }
 
 watch(() => route.params.id, loadProduct, { immediate: true })
@@ -266,13 +282,22 @@ watch(() => route.params.id, loadProduct, { immediate: true })
               :disabled="!canAddToCart"
             />
             <el-button
-              type="primary"
+              type="warning"
               size="large"
               :loading="adding"
               :disabled="!canAddToCart"
               @click="addToCart"
             >
               {{ canAddToCart ? '加入购物车' : '暂时无货' }}
+            </el-button>
+            <el-button
+              type="danger"
+              size="large"
+              :loading="adding"
+              :disabled="!canAddToCart"
+              @click="buyNow"
+            >
+              立即购买
             </el-button>
           </div>
 
@@ -311,13 +336,12 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 .detail-card {
   display: grid;
   grid-template-columns: minmax(360px, .9fr) minmax(480px, 1.1fr);
-  gap: 52px;
+  gap: 40px;
   min-height: 520px;
-  padding: 38px;
+  padding: 28px;
   background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 22px;
-  box-shadow: 0 18px 50px rgba(15, 23, 42, .08);
+  border: 1px solid #eee;
+  border-radius: 12px;
 }
 
 .gallery {
@@ -331,8 +355,8 @@ watch(() => route.params.id, loadProduct, { immediate: true })
   place-items: center;
   overflow: hidden;
   background:
-    radial-gradient(circle at 80% 15%, rgba(191, 219, 254, .7), transparent 32%),
-    linear-gradient(145deg, #eff6ff, #f8fafc);
+    radial-gradient(circle at 80% 15%, rgba(255, 205, 180, .7), transparent 32%),
+    linear-gradient(145deg, #fff5f3, #fffaf7);
   border-radius: 18px;
 }
 
@@ -343,7 +367,7 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 }
 
 .image-placeholder {
-  color: #93c5fd;
+  color: #f5a09a;
   font-size: 34px;
   font-weight: 800;
 }
@@ -367,11 +391,11 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 }
 
 .product-heading h1 {
-  margin: 13px 0 10px;
-  color: #0f172a;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: -.035em;
-  line-height: 1.25;
+  margin: 10px 0 8px;
+  color: #1a1a1a;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .product-heading p {
@@ -384,20 +408,21 @@ watch(() => route.params.id, loadProduct, { immediate: true })
   display: flex;
   align-items: baseline;
   gap: 14px;
-  margin: 25px 0;
-  padding: 18px 20px;
-  background: linear-gradient(90deg, #fff1f2, #fff7ed);
-  border-radius: 12px;
+  margin: 18px 0;
+  padding: 14px 16px;
+  background: #fff8f2;
+  border-radius: 2px;
 }
 
 .price-panel > span {
-  color: #64748b;
+  color: #888;
   font-size: 13px;
 }
 
 .price-panel strong {
-  color: #dc2626;
+  color: #ff6700;
   font-size: 32px;
+  font-weight: 600;
 }
 
 .price-panel small {
@@ -437,10 +462,10 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 
 .sku-option:hover,
 .sku-option.active {
-  color: #1d4ed8;
-  background: #eff6ff;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 1px #2563eb;
+  color: #ff6700;
+  background: #fff8f2;
+  border-color: #ff6700;
+  box-shadow: 0 0 0 1px #ff6700;
 }
 
 .sku-option.disabled {
@@ -486,6 +511,18 @@ watch(() => route.params.id, loadProduct, { immediate: true })
   min-width: 150px;
 }
 
+.purchase-row .el-button--warning {
+  color: #fff;
+  background: #ff8f1f;
+  border-color: #ff8f1f;
+}
+
+.purchase-row .el-button--danger {
+  color: #fff;
+  background: #ff6700;
+  border-color: #ff6700;
+}
+
 .service-row {
   display: flex;
   gap: 18px;
@@ -511,7 +548,7 @@ watch(() => route.params.id, loadProduct, { immediate: true })
 .description-heading span {
   width: 4px;
   height: 22px;
-  background: #2563eb;
+  background: #ff6700;
   border-radius: 99px;
 }
 

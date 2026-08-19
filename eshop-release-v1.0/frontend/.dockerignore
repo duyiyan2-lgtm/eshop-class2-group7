@@ -3,3 +3,4 @@ dist/
 .vite/
 .git/
 npm-debug.log*
+android/

@@ -1,0 +1,1030 @@
+/*
+ * Consumer shop theme
+ * PC  -> Xiaomi Mall (mi.com/shop/category/list)
+ * H5  -> Taobao
+ * Admin / seller keep portal-theme.
+ */
+html:has(.pc-shell),
+html:has(.pc-auth-page) {
+  --shop-red: #ff6700;
+  --shop-red-deep: #e65c00;
+  --shop-orange: #ff6700;
+  --shop-orange-hot: #ff8f1f;
+  --shop-price: #ff6700;
+  --shop-bg: #f5f5f5;
+  --shop-card: #ffffff;
+  --shop-text: #1a1a1a;
+  --shop-text-2: #424242;
+  --shop-muted: #8c8c8c;
+  --shop-line: #e0e0e0;
+  --shop-topbar: #333333;
+  --shop-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+  --eshop-bg: #f5f5f5;
+  --eshop-bg-deep: #f0f0f0;
+  --eshop-surface: #ffffff;
+  --eshop-surface-solid: #ffffff;
+  --eshop-surface-soft: #fafafa;
+  --eshop-border: #e0e0e0;
+  --eshop-border-hover: #ff6700;
+  --eshop-text: #1a1a1a;
+  --eshop-text-soft: #424242;
+  --eshop-muted: #8c8c8c;
+  --eshop-primary: #ff6700;
+  --eshop-primary-strong: #e65c00;
+  --eshop-success: #83c44e;
+  --eshop-warning: #ff8f1f;
+  --eshop-danger: #ff6700;
+  --eshop-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+  --el-color-primary: #ff6700;
+  --el-color-primary-light-3: #ff8b3d;
+  --el-color-primary-light-5: #ffb078;
+  --el-color-primary-light-7: #ffd0ad;
+  --el-color-primary-light-8: #ffe0c9;
+  --el-color-primary-light-9: #fff4eb;
+  --el-color-primary-dark-2: #e65c00;
+  --el-bg-color: #ffffff;
+  --el-bg-color-page: #f5f5f5;
+  --el-bg-color-overlay: #ffffff;
+  --el-fill-color: #f5f5f5;
+  --el-fill-color-light: #fafafa;
+  --el-fill-color-lighter: #fcfcfc;
+  --el-fill-color-extra-light: #fefefe;
+  --el-fill-color-blank: #ffffff;
+  --el-border-color: #e0e0e0;
+  --el-border-color-light: #ececec;
+  --el-border-color-lighter: #f0f0f0;
+  --el-border-color-extra-light: #f5f5f5;
+  --el-text-color-primary: #1a1a1a;
+  --el-text-color-regular: #424242;
+  --el-text-color-secondary: #757575;
+  --el-text-color-placeholder: #b0b0b0;
+  --el-mask-color: rgba(0, 0, 0, .45);
+  --el-mask-color-extra-light: rgba(0, 0, 0, .28);
+}
+
+html:has(.mobile-shell),
+html:has(.mobile-auth-page),
+html:has(.portal-page) {
+  --shop-red: #ff5000;
+  --shop-red-deep: #e64500;
+  --shop-orange: #ff9000;
+  --shop-orange-hot: #ffb000;
+  --shop-price: #ff5000;
+  --shop-bg: #f4f4f4;
+  --shop-card: #ffffff;
+  --shop-text: #111111;
+  --shop-text-2: #333333;
+  --shop-muted: #999999;
+  --shop-line: #eeeeee;
+  --shop-topbar: #f1f1f1;
+  --shop-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+  --eshop-bg: #f4f4f4;
+  --eshop-bg-deep: #f0f0f0;
+  --eshop-surface: #ffffff;
+  --eshop-surface-solid: #ffffff;
+  --eshop-surface-soft: #fafafa;
+  --eshop-border: #eeeeee;
+  --eshop-border-hover: #ff5000;
+  --eshop-text: #111111;
+  --eshop-text-soft: #333333;
+  --eshop-muted: #999999;
+  --eshop-primary: #ff5000;
+  --eshop-primary-strong: #e64500;
+  --eshop-success: #07c160;
+  --eshop-warning: #ff9000;
+  --eshop-danger: #ff5000;
+  --eshop-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+  --el-color-primary: #ff5000;
+  --el-color-primary-light-3: #ff7a3d;
+  --el-color-primary-light-5: #ffa078;
+  --el-color-primary-light-7: #ffc5ad;
+  --el-color-primary-light-8: #ffd9c9;
+  --el-color-primary-light-9: #fff4eb;
+  --el-color-primary-dark-2: #e64500;
+  --el-bg-color: #ffffff;
+  --el-bg-color-page: #f5f5f5;
+  --el-bg-color-overlay: #ffffff;
+  --el-fill-color: #f5f5f5;
+  --el-fill-color-light: #fafafa;
+  --el-fill-color-lighter: #fcfcfc;
+  --el-fill-color-extra-light: #fefefe;
+  --el-fill-color-blank: #ffffff;
+  --el-border-color: #e5e5e5;
+  --el-border-color-light: #ececec;
+  --el-border-color-lighter: #f0f0f0;
+  --el-border-color-extra-light: #f5f5f5;
+  --el-text-color-primary: #1a1a1a;
+  --el-text-color-regular: #333333;
+  --el-text-color-secondary: #666666;
+  --el-text-color-placeholder: #999999;
+  --el-mask-color: rgba(0, 0, 0, .45);
+  --el-mask-color-extra-light: rgba(0, 0, 0, .28);
+  --van-primary-color: #ff5000;
+  --van-success-color: #07c160;
+  --van-warning-color: #ff9000;
+  --van-danger-color: #ff5000;
+  --van-text-color: #111111;
+  --van-text-color-2: #333333;
+  --van-text-color-3: #999999;
+  --van-active-color: #fff4eb;
+  --van-border-color: #eee;
+  --van-background: #f4f4f4;
+  --van-background-2: #ffffff;
+  --van-background-3: #fafafa;
+  --eshop-mobile-bg: #f4f4f4;
+  --eshop-mobile-card: #ffffff;
+  --eshop-mobile-text: #111111;
+  --eshop-mobile-muted: #999999;
+  --eshop-mobile-primary: #ff5000;
+  --eshop-mobile-danger: #ff5000;
+}
+
+html:has(.pc-shell) body,
+html:has(.mobile-shell) body,
+html:has(.pc-auth-page) body,
+html:has(.mobile-auth-page) body,
+html:has(.portal-page) body {
+  color: var(--shop-text-2);
+  background: var(--shop-bg);
+  color-scheme: light;
+}
+
+html:has(.pc-shell) body::-webkit-scrollbar-thumb,
+html:has(.pc-shell) .pc-header nav::-webkit-scrollbar-thumb,
+html:has(.pc-shell) .pc-catbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 103, 0, .35);
+}
+
+/* ---------- PC chrome: Xiaomi Mall ---------- */
+html:has(.pc-shell) .pc-shell {
+  min-height: 100vh;
+  color: var(--shop-text-2);
+  background: var(--shop-bg);
+}
+
+html:has(.pc-shell) .pc-topbar {
+  height: 40px;
+  color: #b0b0b0;
+  background: #333;
+  border-bottom: 0;
+  font-size: 12px;
+}
+
+html:has(.pc-shell) .pc-topbar-inner,
+html:has(.pc-shell) .pc-header-inner,
+html:has(.pc-shell) .pc-catbar-inner,
+html:has(.pc-shell) .pc-footer-inner {
+  width: min(1226px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+html:has(.pc-shell) .pc-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: 16px;
+}
+
+html:has(.pc-shell) .pc-topbar a,
+html:has(.pc-shell) .pc-topbar button,
+html:has(.pc-shell) .pc-topbar span {
+  color: #b0b0b0;
+}
+
+html:has(.pc-shell) .pc-topbar a:hover,
+html:has(.pc-shell) .pc-topbar button:hover {
+  color: #fff;
+}
+
+html:has(.pc-shell) .pc-top-links,
+html:has(.pc-shell) .pc-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+html:has(.pc-shell) .pc-topbar button {
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+html:has(.pc-shell) body .pc-header {
+  position: relative;
+  top: auto;
+  z-index: 20;
+  display: block;
+  height: auto;
+  min-height: 100px;
+  padding: 0;
+  color: var(--shop-text);
+  background: #fff;
+  border-bottom: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+html:has(.pc-shell) .pc-header-inner {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) minmax(330px, 390px);
+  align-items: center;
+  gap: 22px;
+  min-height: 100px;
+}
+
+html:has(.pc-shell) body .pc-header .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+html:has(.pc-shell) body .pc-header .brand > span {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  color: #fff;
+  background: #ff6700;
+  border-radius: 14px;
+  box-shadow: none;
+  font-size: 23px;
+  font-weight: 800;
+  transition: transform .2s ease, border-radius .2s ease;
+}
+
+html:has(.pc-shell) body .pc-header .brand:hover > span {
+  border-radius: 18px 9px 18px 9px;
+  transform: rotate(-4deg);
+}
+
+html:has(.pc-shell) body .pc-header .brand small {
+  display: block;
+  margin: 2px 0 0;
+  color: #b0b0b0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+}
+
+html:has(.pc-shell) .pc-primary-nav {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+html:has(.pc-shell) .pc-primary-nav a,
+html:has(.pc-shell) .pc-primary-nav button {
+  flex: 0 0 auto;
+  padding: 38px 10px;
+  color: #333;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  transition: color .15s ease;
+}
+
+html:has(.pc-shell) .pc-primary-nav a:hover,
+html:has(.pc-shell) .pc-primary-nav button:hover,
+html:has(.pc-shell) .pc-primary-nav button.active,
+html:has(.pc-shell) .pc-primary-nav a.router-link-active {
+  color: #ff6700;
+}
+
+html:has(.pc-shell) .pc-primary-nav a.router-link-active::after {
+  display: none;
+}
+
+html:has(.pc-shell) .pc-header-tools {
+  display: grid;
+  grid-template-columns: minmax(210px, 1fr) 108px;
+  align-items: center;
+  gap: 10px;
+}
+
+html:has(.pc-shell) .pc-search {
+  display: flex;
+  width: 100%;
+  height: 48px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0;
+  transition: border-color .15s ease;
+}
+
+html:has(.pc-shell) .pc-search:focus-within {
+  border-color: #ff6700;
+  background: #fff;
+}
+
+html:has(.pc-shell) .pc-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 18px;
+  color: #333;
+  background: transparent;
+  border: 0;
+  outline: none;
+  font: inherit;
+}
+
+html:has(.pc-shell) .pc-search button {
+  display: grid;
+  flex: 0 0 50px;
+  height: 100%;
+  place-items: center;
+  color: #616161;
+  background: #fff;
+  border: 0;
+  border-left: 1px solid #e0e0e0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+html:has(.pc-shell) .pc-search button:hover {
+  color: #fff;
+  background: #f25807;
+  border-left-color: #f25807;
+}
+
+html:has(.pc-shell) .pc-cart-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 12px;
+  color: #424242;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 2px;
+  box-shadow: none;
+  font-weight: 500;
+}
+
+html:has(.pc-shell) .pc-cart-entry:hover {
+  color: #ff6700;
+  border-color: #ff6700;
+}
+
+html:has(.pc-shell) .pc-cart-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  color: #fff;
+  background: #ff6700;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}
+
+html:has(.pc-shell) body .pc-main {
+  min-height: calc(100vh - 280px);
+  padding: 0 0 64px;
+  background: #f5f5f5 !important;
+}
+
+html:has(.pc-shell) .pc-service-strip {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+html:has(.pc-shell) .pc-service-inner {
+  display: grid;
+  width: min(1226px, calc(100% - 32px));
+  min-height: 80px;
+  margin: 0 auto;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+html:has(.pc-shell) .pc-service-inner button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #616161;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+}
+
+html:has(.pc-shell) .pc-service-inner button + button::before {
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 0;
+  width: 1px;
+  background: #e0e0e0;
+  content: '';
+}
+
+html:has(.pc-shell) .pc-service-inner button:hover { color: #ff6700; }
+html:has(.pc-shell) .pc-service-inner button span { font-size: 22px; }
+
+html:has(.pc-shell) .pc-footer {
+  padding: 40px 0 28px;
+  color: #b0b0b0;
+  background: #2d2d2d;
+  border-top: 0;
+  font-size: 13px;
+}
+
+html:has(.pc-shell) .pc-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+html:has(.pc-shell) .pc-footer h3 {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+html:has(.pc-shell) .pc-footer a {
+  display: block;
+  margin: 8px 0;
+  color: #b0b0b0;
+}
+
+html:has(.pc-shell) .pc-footer a:hover { color: #ff6700; }
+
+html:has(.pc-shell) .pc-footer-copy {
+  padding-top: 18px;
+  border-top: 1px solid #424242;
+  color: #757575;
+  text-align: center;
+}
+
+/* ---------- Shop cards / text (beat portal-theme) ---------- */
+html:has(.pc-shell) body .pc-main :is(
+  .filter-panel,
+  .detail-card,
+  .description-card,
+  .cart-card,
+  .checkout-section,
+  .address-card,
+  .add-card,
+  .order-card,
+  .payment-card,
+  .payment-receipt,
+  .profile-card,
+  .favorites-content,
+  .history-content,
+  .product-reviews,
+  .history-item,
+  .hot-ranking,
+  .ranking-card,
+  .mi-sidebar
+) {
+  color: var(--shop-text-2) !important;
+  background: var(--shop-card) !important;
+  border-color: var(--shop-line) !important;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+html:has(.pc-shell) body .pc-main :is(.product-card, .address-card, .add-card, .ranking-card):hover {
+  border-color: transparent !important;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, .1);
+}
+
+html:has(.pc-shell) body .pc-main :is(
+  .cart-item,
+  .address-option,
+  .checkout-products article,
+  .order-card > header,
+  .order-item,
+  .review-item,
+  .review-state,
+  .status-item,
+  .selected-specs span,
+  .time-summary div
+) {
+  background: #fafafa !important;
+  border-color: var(--shop-line) !important;
+}
+
+html:has(.pc-shell) body .pc-main :is(
+  .category-chip,
+  .sku-option,
+  .status-tabs button,
+  .review-pagination button,
+  .history-pagination button,
+  .hot-ranking header button
+) {
+  color: #333 !important;
+  background: #fff !important;
+  border-color: #ddd !important;
+}
+
+html:has(.pc-shell) body .pc-main :is(
+  .category-chip.active,
+  .sku-option.active,
+  .status-tabs button.active
+) {
+  color: var(--shop-red) !important;
+  background: #fff1f0 !important;
+  border-color: var(--shop-red) !important;
+  box-shadow: 0 0 0 1px rgba(225, 37, 27, .15);
+}
+
+html:has(.pc-shell) body .pc-main :is(
+  h1, h2, h3, h4,
+  .product-name,
+  .item-name,
+  .address-name,
+  .product-cell b,
+  .product-info strong,
+  .review-meta strong,
+  .review-heading a,
+  .review-content,
+  .section-heading h2,
+  .table-toolbar h2,
+  .profile-heading h2
+) {
+  color: var(--shop-text) !important;
+}
+
+html:has(.pc-shell) body .pc-main :is(
+  .page-heading p,
+  .product-content p,
+  .product-body p,
+  .product-info p,
+  .item-specs,
+  .address-detail,
+  .full-address,
+  .form-tip,
+  .review-specs,
+  .review-state,
+  .history-state,
+  .detail-text,
+  .service-row
+) {
+  color: var(--shop-muted) !important;
+}
+
+html:has(.pc-shell) body .pc-main :is(
+  .price,
+  .subtotal,
+  .item-price,
+  .unit-price,
+  .product-meta strong,
+  .price-row strong,
+  .payment-amount strong,
+  .amount-row strong,
+  .price-panel strong,
+  .mi-card strong
+) {
+  color: var(--shop-price) !important;
+}
+
+html:has(.pc-shell) body .pc-main :is(
+  .page-heading > span,
+  .page-heading > p,
+  .eyebrow,
+  .section-heading > p
+) {
+  color: var(--shop-red) !important;
+}
+
+html:has(.pc-shell) body .pc-main :is(
+  .account-hero,
+  .review-hero,
+  .status-card
+) {
+  border: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+}
+
+html:has(.pc-shell) body .pc-main :is(.account-hero, .review-hero, .status-card) :is(h1, h2, h3) {
+  color: #fff !important;
+}
+
+html:has(.pc-shell) body .el-input__wrapper,
+html:has(.pc-shell) body .el-select__wrapper,
+html:has(.pc-shell) body .el-textarea__inner,
+html:has(.pc-shell) body .el-input-number,
+html:has(.pc-shell) body .el-date-editor {
+  background: #fff;
+  box-shadow: 0 0 0 1px #ddd inset;
+}
+
+html:has(.pc-shell) body .el-input__wrapper.is-focus,
+html:has(.pc-shell) body .el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--shop-red) inset;
+}
+
+html:has(.pc-shell) body .el-button:not(.el-button--primary):not(.el-button--danger):not(.is-link) {
+  color: #333;
+  background: #fff;
+  border-color: #ddd;
+}
+
+html:has(.pc-shell) body .el-button--primary {
+  border-color: #ff6700;
+  background: #ff6700;
+  box-shadow: none;
+}
+
+html:has(.pc-shell) body .el-table {
+  --el-table-bg-color: #fff;
+  --el-table-tr-bg-color: #fff;
+  --el-table-header-bg-color: #fafafa;
+  --el-table-row-hover-bg-color: #fff7f6;
+  --el-table-border-color: #eee;
+  --el-table-text-color: #333;
+  --el-table-header-text-color: #666;
+  background: #fff;
+}
+
+html:has(.pc-shell) body .el-dialog,
+html:has(.pc-shell) body .el-drawer,
+html:has(.pc-shell) body .el-message-box,
+html:has(.pc-shell) body .el-popper.is-light {
+  color: #333;
+  background: #fff;
+  border-color: #eee;
+}
+
+html:has(.pc-shell) body .el-dialog__title,
+html:has(.pc-shell) body .el-drawer__title,
+html:has(.pc-shell) body .el-message-box__title {
+  color: #1a1a1a;
+}
+
+html:has(.pc-shell) body .el-pagination.is-background .btn-next,
+html:has(.pc-shell) body .el-pagination.is-background .btn-prev,
+html:has(.pc-shell) body .el-pagination.is-background .el-pager li {
+  color: #333;
+  background: #fff;
+}
+
+html:has(.pc-shell) body .el-pagination.is-background .el-pager li.is-active {
+  color: #fff;
+  background: var(--shop-red);
+}
+
+/* ---------- Mobile H5 ---------- */
+html:has(.mobile-shell) body:has(.mobile-shell) {
+  background: #f5f5f5;
+}
+
+html:has(.mobile-shell) .mobile-shell {
+  --van-nav-bar-background: #ff5000;
+  --van-nav-bar-title-text-color: #fff;
+  --van-nav-bar-icon-color: #fff;
+  --van-tabbar-background: #fff;
+  --van-tabbar-item-text-color: #777;
+  --van-tabbar-item-active-color: #ff5000;
+  --van-tabbar-item-active-background: #fff;
+  color: var(--shop-text-2);
+  background: #f5f5f5;
+  box-shadow: 0 0 36px rgba(0, 0, 0, .08);
+}
+
+html:has(.mobile-shell) body .mobile-shell .van-nav-bar {
+  background: linear-gradient(90deg, #ff5000, #ff9000);
+  border-bottom: 0;
+  box-shadow: 0 8px 18px rgba(255, 80, 0, .18);
+  backdrop-filter: none;
+}
+
+html:has(.mobile-shell) .mobile-shell .van-nav-bar__title {
+  color: #fff;
+}
+
+html:has(.mobile-shell) .mobile-shell .van-nav-bar__title::before {
+  background: #ffd29a;
+  box-shadow: 0 0 10px rgba(255, 210, 154, .7);
+}
+
+html:has(.mobile-shell) .mobile-shell .van-nav-bar .van-icon { color: #fff; }
+
+html:has(.mobile-shell) .mobile-shell .mobile-nav-actions .workspace-switch-link,
+html:has(.mobile-shell) .mobile-shell .mobile-login-link,
+html:has(.mobile-shell) .mobile-shell .mobile-nav-actions .van-button {
+  color: #fff;
+  background: rgba(255, 255, 255, .16);
+  border-color: rgba(255, 255, 255, .28);
+}
+
+html:has(.mobile-shell) body .mobile-main {
+  background: #f5f5f5 !important;
+}
+
+html:has(.mobile-shell) body .mobile-main :is(
+  .card,
+  .cart-item,
+  .cart-addr-bar,
+  .address-card,
+  .history-card,
+  .favorite-card,
+  .checkout-card,
+  .payment-card,
+  .payment-receipt,
+  .order-card,
+  .state-card,
+  .product-card,
+  .product-reviews,
+  .history-item,
+  .hot-ranking,
+  .ranking-card,
+  .block,
+  .profile-panel,
+  .member-summary
+) {
+  color: var(--shop-text-2);
+  background: #fff !important;
+  border-color: #eee !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .04);
+}
+
+html:has(.mobile-shell) body .mobile-main :is(
+  .gallery,
+  .search-bar,
+  .action-bar,
+  .skeleton,
+  .address-active,
+  .selected-specs span,
+  .sku-option,
+  .item-img,
+  .thumb,
+  .product-image,
+  .image-placeholder
+) {
+  background: #fff !important;
+  border-color: #eee !important;
+}
+
+html:has(.mobile-shell) body .mobile-main .market-top {
+  background: linear-gradient(180deg, #ff5000, #ff9000) !important;
+}
+
+html:has(.mobile-shell) .mobile-shell .search-bar .van-search__content {
+  background: #fff !important;
+  border-color: transparent;
+}
+
+html:has(.mobile-shell) body .mobile-main .category-chip {
+  color: #333;
+  background: #fff !important;
+  border-color: #e5e5e5 !important;
+}
+
+html:has(.mobile-shell) body .mobile-main .category-chip.active,
+html:has(.mobile-shell) body .mobile-main .sku-option.active {
+  color: var(--shop-red) !important;
+  background: #fff1f0 !important;
+  border-color: var(--shop-red) !important;
+}
+
+html:has(.mobile-shell) body .mobile-main :is(
+  h1, h2, h3, h4, .product-name, .item-name, .recommend-heading strong, .result-heading strong
+) {
+  color: var(--shop-text) !important;
+}
+
+html:has(.mobile-shell) body .mobile-main :is(
+  .price, .subtotal, .item-price, .product-meta strong, .price-panel strong, .amount-row strong
+) {
+  color: var(--shop-price) !important;
+}
+
+html:has(.mobile-shell) body .mobile-main .market-hero {
+  background: linear-gradient(135deg, #c8161d 0%, #e1251b 50%, #ff6a00 100%) !important;
+}
+
+html:has(.mobile-shell) body .mobile-main .profile-hero {
+  background: linear-gradient(135deg, #ff5000, #ff9000) !important;
+  border: 0;
+  box-shadow: none;
+}
+
+html:has(.mobile-shell) body .mobile-main .profile-card {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html:has(.mobile-shell) .mobile-shell .mobile-tabbar {
+  background: rgba(255, 255, 255, .98);
+  border-top: 1px solid #eee;
+  box-shadow: 0 -8px 20px rgba(0, 0, 0, .04);
+}
+
+html:has(.mobile-shell) .mobile-shell .mobile-tabbar .van-tabbar-item--active {
+  color: var(--shop-red);
+}
+
+html:has(.mobile-shell) .mobile-shell .mobile-tabbar .van-tabbar-item--active .van-tabbar-item__icon {
+  filter: drop-shadow(0 4px 8px rgba(225, 37, 27, .28));
+}
+
+html:has(.mobile-shell) body .mobile-shell :is(
+  .van-cell, .van-cell-group, .van-card, .van-submit-bar, .van-search, .van-field__control
+) {
+  color: #333;
+  background: transparent;
+}
+
+html:has(.mobile-shell) body .mobile-shell .van-cell__title,
+html:has(.mobile-shell) body .mobile-shell .van-card__title,
+html:has(.mobile-shell) body .mobile-shell .van-field__label {
+  color: #1a1a1a;
+}
+
+html:has(.mobile-shell) body .mobile-shell .van-search__content,
+html:has(.mobile-shell) body .mobile-shell .van-field__body,
+html:has(.mobile-shell) body .mobile-shell .van-stepper__input,
+html:has(.mobile-shell) body .mobile-shell .van-stepper__minus,
+html:has(.mobile-shell) body .mobile-shell .van-stepper__plus {
+  background: #fff;
+}
+
+html:has(.mobile-shell) body .mobile-shell .van-button--default {
+  color: #333;
+  background: #fff;
+  border-color: #ddd;
+}
+
+html:has(.mobile-shell) body .mobile-shell .van-button--primary {
+  background: var(--shop-red);
+  border-color: var(--shop-red);
+}
+
+html:has(.mobile-shell) body .mobile-shell .van-submit-bar {
+  background: #fff;
+  border-top: 1px solid #eee;
+  box-shadow: 0 -8px 20px rgba(0, 0, 0, .06);
+}
+
+html:has(.mobile-shell) body .mobile-shell .van-submit-bar__button {
+  background: linear-gradient(90deg, #ff9000, #ff5000);
+  border: 0;
+}
+
+html:has(.mobile-shell) .is-native-app .mobile-shell,
+html:has(.mobile-shell) .is-native-app .mobile-shell .mobile-main,
+html:has(.mobile-shell) html.is-native-app body,
+html:has(.mobile-shell) body:has(.is-native-app) {
+  background: #f5f5f5;
+}
+
+html:has(.mobile-shell) .is-native-app .mobile-products .market-top {
+  background: linear-gradient(180deg, #ff5000, #ff9000) !important;
+}
+
+html:has(.mobile-shell) .is-native-app .native-status-scrim {
+  background: #ff5000;
+}
+
+/* ---------- Shop auth ---------- */
+html:has(.pc-auth-page) body .auth-page,
+html:has(.mobile-auth-page) body .auth-page {
+  color: #333;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 106, 0, .16), transparent 30%),
+    radial-gradient(circle at 88% 0, rgba(225, 37, 27, .18), transparent 28%),
+    #f7f2ef;
+}
+
+html:has(.pc-auth-page) body .auth-form,
+html:has(.mobile-auth-page) body .auth-form {
+  color: #333;
+  background: #fff;
+  border: 1px solid #f0e4e2;
+  box-shadow: 0 24px 60px rgba(200, 22, 29, .12);
+}
+
+html:has(.pc-auth-page) body .auth-form::before,
+html:has(.mobile-auth-page) body .auth-form::before {
+  background: linear-gradient(90deg, #c8161d, #ff6a00);
+}
+
+html:has(.pc-auth-page) body .auth-form h1,
+html:has(.mobile-auth-page) body .auth-form h1 {
+  color: #c8161d;
+}
+
+html:has(.pc-auth-page) body .auth-form input,
+html:has(.mobile-auth-page) body .auth-form input {
+  color: #1a1a1a;
+  background: #fff;
+  border-color: #ddd;
+}
+
+html:has(.pc-auth-page) body .auth-form > button[type="submit"],
+html:has(.mobile-auth-page) body .auth-form > button[type="submit"] {
+  background: linear-gradient(100deg, #e1251b, #ff6a00);
+  box-shadow: 0 12px 24px rgba(225, 37, 27, .22);
+}
+
+html:has(.pc-auth-page) body .auth-form .auth-link,
+html:has(.mobile-auth-page) body .auth-form .auth-link,
+html:has(.pc-auth-page) body .auth-portal-link:hover,
+html:has(.mobile-auth-page) body .auth-portal-link:hover {
+  color: var(--shop-red);
+}
+
+html:has(.pc-auth-page) body .auth-form .registration-role.selected,
+html:has(.mobile-auth-page) body .auth-form .registration-role.selected {
+  background: #fff1f0;
+  border-color: var(--shop-red);
+}
+
+/* ---------- Portal as mall directory ---------- */
+html:has(.portal-page) .portal-page {
+  color: #333;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 106, 0, .14), transparent 28%),
+    linear-gradient(180deg, #fff7f4 0%, #f5f5f5 36%, #f5f5f5 100%);
+}
+
+@media (max-width: 1100px) {
+  html:has(.pc-shell) .pc-header-inner {
+    grid-template-columns: 132px minmax(0, 1fr) minmax(300px, 340px);
+    gap: 10px;
+  }
+  html:has(.pc-shell) body .pc-header .brand small { display: none; }
+  html:has(.pc-shell) .pc-primary-nav :is(a, button) { padding-right: 8px; padding-left: 8px; font-size: 14px; }
+  html:has(.pc-shell) .pc-primary-nav button:nth-of-type(n + 5) { display: none; }
+}
+
+@media (max-width: 768px) {
+  html:has(.pc-shell) .pc-header-inner {
+    grid-template-columns: 130px minmax(0, 1fr);
+    gap: 10px;
+    min-height: 84px;
+  }
+  html:has(.pc-shell) .pc-primary-nav { display: none; }
+  html:has(.pc-shell) .pc-header-tools { grid-template-columns: minmax(160px, 1fr) 50px; }
+  html:has(.pc-shell) .pc-cart-entry span { display: none; }
+  html:has(.pc-shell) .pc-service-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 10px 0; }
+  html:has(.pc-shell) .pc-service-inner button { min-height: 46px; }
+  html:has(.pc-shell) .pc-service-inner button + button::before { display: none; }
+  html:has(.pc-shell) .pc-service-inner button:last-child { display: none; }
+  html:has(.pc-shell) .pc-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html:has(.pc-shell) .pc-top-links { display: none; }
+}
+
+
+html:has(.pc-shell) body .el-message,
+html:has(.pc-auth-page) body .el-message {
+  color: #333;
+  background: #fff;
+  border-color: #eee;
+}
+
+html:has(.pc-shell) body .el-message .el-message__content,
+html:has(.pc-auth-page) body .el-message .el-message__content {
+  color: #1a1a1a;
+}
+
+html:has(.pc-shell) body .el-message-box__btns,
+html:has(.pc-auth-page) body .el-message-box__btns {
+  background: #fafafa;
+  border-color: #eee;
+}
+
+html:has(.pc-shell) body .pc-main .cart-summary {
+  background: #fff !important;
+  border-top: 1px solid #f0f0f0;
+}
+
+html:has(.mobile-shell) body .mobile-main .action-bar {
+  background: #fff !important;
+  border-top: 1px solid #eee;
+  box-shadow: 0 -8px 20px rgba(0, 0, 0, .06);
+}
+
+html:has(.mobile-shell) body .mobile-main .add-button {
+  background: #ff8f1f !important;
+  border-color: #ff8f1f !important;
+}
+
+html:has(.mobile-shell) body .mobile-main .buy-button {
+  background: #ff5000 !important;
+  border-color: #ff5000 !important;
+}

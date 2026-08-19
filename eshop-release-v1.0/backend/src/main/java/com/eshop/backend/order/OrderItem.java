@@ -18,6 +18,9 @@ public class OrderItem {
     private Long skuId;
     private String productName;
     private String skuSpecs;
+    private String configurationJson;
+    private String configurationSummary;
+    private BigDecimal optionAmount;
     private String productImage;
     private BigDecimal price;
     private Integer quantity;

@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { getCart, removeCartItem, updateCartItem } from '../../api/cart'
 import { formatMoney, specsText, sumMoney } from '../../utils/shop'
+import { lineSpecText, productBrowsePath } from '../../utils/vehicle'
 
 const router = useRouter()
 const items = ref([])
@@ -113,9 +114,8 @@ onMounted(loadCart)
   <div class="cart-page">
     <header class="page-heading">
       <div>
-        <p>SHOPPING CART</p>
         <h1>我的购物车</h1>
-        <span>调整数量并勾选本次要结算的商品</span>
+        <span>勾选商品后去结算，也可继续逛逛</span>
       </div>
       <el-button @click="router.push({ name: 'pc-products' })">继续购物</el-button>
     </header>
@@ -162,13 +162,13 @@ onMounted(loadCart)
             @change="changeSelected(item, $event)"
           />
           <div class="product-cell">
-            <button class="product-image" type="button" @click="router.push(`/pc/products/${item.productId}`)">
+            <button class="product-image" type="button" @click="router.push(productBrowsePath(item))">
               <img v-if="item.productImage" :src="item.productImage" :alt="item.productName" />
               <span v-else>E-Shop</span>
             </button>
             <div>
-              <RouterLink :to="`/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
-              <p>{{ specsText(item.specsJson) || '默认规格' }}</p>
+              <RouterLink :to="productBrowsePath(item)">{{ item.productName }}</RouterLink>
+              <p>{{ lineSpecText(item, specsText(item.specsJson)) }}</p>
               <el-tag v-if="!item.available" type="danger" size="small">
                 {{ item.stock < item.quantity ? `库存仅剩 ${item.stock} 件` : '商品已失效' }}
               </el-tag>
@@ -224,28 +224,27 @@ onMounted(loadCart)
 
 <style scoped>
 .cart-page { width: min(1220px, 100%); margin: 0 auto; padding: 16px 0 56px; }
-.page-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 24px; }
-.page-heading p { margin: 0 0 6px; color: #2563eb; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
-.page-heading h1 { margin: 0; color: #0f172a; font-size: 32px; }
-.page-heading span { display: block; margin-top: 8px; color: #64748b; }
+.page-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 18px; }
+.page-heading h1 { margin: 0; color: #1a1a1a; font-size: 26px; }
+.page-heading span { display: block; margin-top: 6px; color: #888; }
 .cart-alert { margin-bottom: 18px; }
-.cart-card { min-height: 330px; overflow: hidden; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 14px 40px rgba(15, 23, 42, .06); }
+.cart-card { min-height: 330px; overflow: hidden; background: #fff; border: 1px solid #eee; border-radius: 10px; }
 .cart-columns, .cart-item { display: grid; grid-template-columns: 74px minmax(340px, 1fr) 110px 145px 120px 70px; gap: 16px; align-items: center; padding: 16px 24px; }
 .cart-columns { color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
 .cart-item { min-height: 132px; border-bottom: 1px solid #eef2f7; }
 .cart-item.invalid { background: #fffafa; }
 .product-cell { display: flex; align-items: center; min-width: 0; gap: 16px; }
-.product-image { display: grid; flex: 0 0 94px; width: 94px; height: 94px; place-items: center; overflow: hidden; padding: 0; color: #93c5fd; background: #eff6ff; border: 0; border-radius: 12px; cursor: pointer; font-weight: 800; }
+.product-image { display: grid; flex: 0 0 94px; width: 94px; height: 94px; place-items: center; overflow: hidden; padding: 0; color: #f5a09a; background: #fff1f0; border: 0; border-radius: 12px; cursor: pointer; font-weight: 800; }
 .product-image img { width: 100%; height: 100%; object-fit: contain; }
 .product-cell a { display: block; overflow: hidden; color: #0f172a; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.product-cell a:hover { color: #2563eb; }
+.product-cell a:hover { color: #ff6700; }
 .product-cell p { margin: 8px 0; color: #64748b; font-size: 13px; }
 .unit-price { color: #334155; }
 .subtotal { color: #dc2626; }
 .invalid-notice { margin: 18px 24px 0; width: auto; }
 .cart-summary { display: flex; align-items: center; justify-content: flex-end; gap: 28px; min-height: 88px; padding: 18px 24px; background: #f8fafc; }
 .cart-summary > span { margin-right: auto; color: #64748b; }
-.cart-summary b { color: #2563eb; }
+.cart-summary b { color: #ff6700; }
 .cart-summary > div { display: flex; align-items: baseline; gap: 12px; color: #64748b; }
 .cart-summary strong { color: #dc2626; font-size: 28px; }
 .cart-summary .el-button { min-width: 140px; }

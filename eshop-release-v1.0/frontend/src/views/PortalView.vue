@@ -268,11 +268,11 @@ onUnmounted(() => {
 .portal-page {
   min-height: 100vh;
   padding: 0 5vw 36px;
-  color: #e2e8f0;
+  color: #333;
   background:
-    radial-gradient(circle at 15% 18%, rgba(37, 99, 235, .25), transparent 32%),
+    radial-gradient(circle at 15% 18%, rgba(225, 37, 27, .25), transparent 32%),
     radial-gradient(circle at 85% 8%, rgba(14, 165, 233, .15), transparent 28%),
-    #07111f;
+    #f5f5f5;
 }
 
 .portal-header {
@@ -284,29 +284,29 @@ onUnmounted(() => {
 }
 
 .portal-brand {
-  color: #fff;
+  color: #1a1a1a;
   font-size: 24px;
   font-weight: 900;
   letter-spacing: -.03em;
 }
 
-.portal-brand span { color: #60a5fa; }
+.portal-brand span { color: #e1251b; }
 
 .portal-account {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #94a3b8;
+  color: #666;
   font-size: 13px;
 }
 
 .portal-account > div { display: grid; text-align: right; }
-.portal-account strong { color: #f8fafc; font-size: 14px; }
+.portal-account strong { color: #1a1a1a; font-size: 14px; }
 .portal-account em {
   padding: 6px 10px;
-  color: #bfdbfe;
-  background: rgba(37, 99, 235, .2);
-  border: 1px solid rgba(96, 165, 250, .25);
+  color: #c8161d;
+  background: #fff1f0;
+  border: 1px solid rgba(255, 143, 31, .25);
   border-radius: 999px;
   font-style: normal;
 }
@@ -314,7 +314,7 @@ onUnmounted(() => {
 .portal-account button,
 .portal-account a {
   padding: 8px 12px;
-  color: #e2e8f0;
+  color: #333;
   background: transparent;
   border: 1px solid rgba(148, 163, 184, .35);
   border-radius: 9px;
@@ -334,7 +334,7 @@ onUnmounted(() => {
 .hero-copy p,
 .workspace-card > p {
   margin: 0 0 10px;
-  color: #60a5fa;
+  color: #ff8f1f;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: .16em;
@@ -343,7 +343,7 @@ onUnmounted(() => {
 .hero-copy h1 {
   max-width: 920px;
   margin: 0 0 18px;
-  color: #fff;
+  color: #1a1a1a;
   font-size: clamp(38px, 4.5vw, 58px);
   line-height: 1.08;
   letter-spacing: -.045em;
@@ -352,7 +352,7 @@ onUnmounted(() => {
 .hero-copy > span {
   display: block;
   max-width: 720px;
-  color: #94a3b8;
+  color: #666;
   font-size: 17px;
   line-height: 1.8;
 }
@@ -361,7 +361,7 @@ onUnmounted(() => {
   display: grid;
   gap: 5px;
   padding: 20px;
-  background: rgba(15, 23, 42, .72);
+  background: #ffffff;
   border: 1px solid rgba(148, 163, 184, .2);
   border-radius: 16px;
   backdrop-filter: blur(12px);
@@ -369,7 +369,7 @@ onUnmounted(() => {
 
 .hero-status small,
 .hero-status span { color: #94a3b8; }
-.hero-status strong { color: #fff; font-size: 24px; }
+.hero-status strong { color: #1a1a1a; font-size: 24px; }
 .hero-status span { font-size: 12px; }
 
 .workspace-grid {
@@ -387,15 +387,15 @@ onUnmounted(() => {
   flex-direction: column;
   padding: 26px;
   overflow: hidden;
-  background: rgba(15, 23, 42, .78);
+  background: #ffffff;
   border: 1px solid rgba(148, 163, 184, .18);
   border-radius: 20px;
-  box-shadow: 0 18px 60px rgba(0, 0, 0, .2);
+  box-shadow: 0 14px 36px rgba(200, 22, 29, .08);
   transition: transform .2s ease, border-color .2s ease;
 }
 
 .workspace-card:hover {
-  border-color: rgba(96, 165, 250, .5);
+  border-color: rgba(255, 143, 31, .5);
   transform: translateY(-4px);
 }
 
@@ -411,14 +411,14 @@ onUnmounted(() => {
 .workspace-card h2 {
   max-width: 210px;
   margin: 8px 0 14px;
-  color: #f8fafc;
+  color: #1a1a1a;
   font-size: 23px;
   line-height: 1.25;
 }
 
 .workspace-card > span {
   min-height: 72px;
-  color: #94a3b8;
+  color: #666;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -428,16 +428,16 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   margin: 20px 0;
-  color: #cbd5e1;
+  color: #666;
   font-size: 12px;
 }
 
 .workspace-access i {
   width: 7px;
   height: 7px;
-  background: #60a5fa;
+  background: #ff8f1f;
   border-radius: 50%;
-  box-shadow: 0 0 0 5px rgba(96, 165, 250, .12);
+  box-shadow: 0 0 0 5px rgba(255, 143, 31, .12);
 }
 
 .workspace-card button {
@@ -448,7 +448,7 @@ onUnmounted(() => {
   margin-top: auto;
   padding: 12px 14px;
   color: #fff;
-  background: #2563eb;
+  background: #e1251b;
   border: 0;
   border-radius: 10px;
   cursor: pointer;
@@ -460,7 +460,7 @@ onUnmounted(() => {
 .workspace-card button b { font-size: 18px; }
 .workspace-card.is-green button { background: #059669; }
 .workspace-card.is-orange button { background: #d97706; }
-.workspace-card.is-purple button { background: #7c3aed; }
+.workspace-card.is-purple button { background: #ff6a00; }
 .workspace-card.is-green .workspace-access i { background: #34d399; }
 .workspace-card.is-orange .workspace-access i { background: #fbbf24; }
 .workspace-card.is-purple .workspace-access i { background: #a78bfa; }
@@ -481,7 +481,7 @@ footer {
   inset: 0;
   display: grid;
   padding: 24px;
-  background: rgba(2, 6, 23, .76);
+  background: rgba(0, 0, 0, .45);
   backdrop-filter: blur(10px);
   place-items: center;
 }
@@ -491,13 +491,13 @@ footer {
   width: min(100%, 520px);
   padding: 34px;
   overflow: hidden;
-  color: #e2e8f0;
+  color: #333;
   background:
-    radial-gradient(circle at 100% 0, rgba(124, 58, 237, .2), transparent 42%),
-    linear-gradient(145deg, #101c30, #0b1424);
+    radial-gradient(circle at 100% 0, rgba(255, 106, 0, .2), transparent 42%),
+    #ffffff;
   border: 1px solid rgba(167, 139, 250, .28);
   border-radius: 24px;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .18);
 }
 
 .switch-dialog-card::before {
@@ -506,7 +506,7 @@ footer {
   right: 0;
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, #2563eb, #7c3aed, #ec4899);
+  background: linear-gradient(90deg, #e1251b, #ff6a00, #ec4899);
   content: "";
 }
 
@@ -528,7 +528,7 @@ footer {
   place-items: center;
 }
 
-.dialog-close:hover { color: #fff; background: rgba(148, 163, 184, .16); }
+.dialog-close:hover { color: #1a1a1a; background: rgba(148, 163, 184, .16); }
 
 .dialog-icon {
   display: grid;
@@ -536,7 +536,7 @@ footer {
   height: 54px;
   margin-bottom: 20px;
   color: #fff;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #e1251b, #ff6a00);
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(99, 102, 241, .32);
   font-size: 26px;
@@ -553,7 +553,7 @@ footer {
 
 .switch-dialog-card h2 {
   margin: 0 0 12px;
-  color: #fff;
+  color: #1a1a1a;
   font-size: 28px;
   letter-spacing: -.025em;
 }
@@ -578,17 +578,17 @@ footer {
   gap: 5px;
   min-height: 98px;
   padding: 15px;
-  background: rgba(15, 23, 42, .62);
+  background: #fff7f4;
   border: 1px solid rgba(148, 163, 184, .16);
   border-radius: 14px;
 }
 
 .identity-flow > b { color: #64748b; font-size: 20px; }
 .identity-flow small { color: #64748b; }
-.identity-flow strong { color: #f8fafc; font-size: 17px; }
+.identity-flow strong { color: #1a1a1a; font-size: 17px; }
 .identity-flow span { color: #94a3b8; font-size: 12px; line-height: 1.45; }
 .identity-flow .target-identity {
-  background: rgba(124, 58, 237, .1);
+  background: rgba(255, 106, 0, .1);
   border-color: rgba(167, 139, 250, .3);
 }
 
@@ -597,9 +597,9 @@ footer {
   align-items: flex-start;
   gap: 9px;
   padding: 12px 14px;
-  color: #a5b4fc;
-  background: rgba(37, 99, 235, .09);
-  border: 1px solid rgba(96, 165, 250, .17);
+  color: #9a3412;
+  background: rgba(225, 37, 27, .09);
+  border: 1px solid rgba(255, 143, 31, .17);
   border-radius: 12px;
   font-size: 12px;
   line-height: 1.6;
@@ -610,8 +610,8 @@ footer {
   flex: 0 0 auto;
   width: 18px;
   height: 18px;
-  color: #dbeafe;
-  border: 1px solid #60a5fa;
+  color: #c8161d;
+  border: 1px solid #e1251b;
   border-radius: 50%;
   font-size: 11px;
   font-style: normal;
@@ -635,7 +635,7 @@ footer {
 }
 
 .cancel-button {
-  color: #cbd5e1;
+  color: #666;
   background: transparent;
   border: 1px solid rgba(148, 163, 184, .3);
 }
@@ -645,7 +645,7 @@ footer {
   align-items: center;
   justify-content: space-between;
   color: #fff;
-  background: linear-gradient(100deg, #2563eb, #7c3aed);
+  background: linear-gradient(100deg, #e1251b, #ff6a00);
   border: 0;
   box-shadow: 0 12px 26px rgba(99, 102, 241, .25);
 }

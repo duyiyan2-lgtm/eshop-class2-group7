@@ -14,6 +14,7 @@ public record BuyNowOrderRequest(
         @Min(value = 1, message = "商品数量至少为1")
         @Max(value = 99, message = "单个SKU最多购买99件")
         Integer quantity,
+        java.util.List<Long> optionValueIds,
         @Size(max = 255, message = "订单备注不能超过255个字符")
         String remark
 ) {

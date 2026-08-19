@@ -25,14 +25,14 @@ import ReviewHistoryList from '../../components/review/ReviewHistoryList.vue'
   margin-bottom: 12px;
   padding: 22px 20px;
   color: #fff;
-  background: linear-gradient(135deg, #1e3a8a, #7c3aed);
+  background: linear-gradient(135deg, #7f1d1d, #ff6a00);
   border-radius: 14px;
-  box-shadow: 0 12px 28px rgba(37, 99, 235, .18);
+  box-shadow: 0 12px 28px rgba(225, 37, 27, .18);
 }
 
 .review-hero p {
   margin: 0 0 6px;
-  color: #bfdbfe;
+  color: #ffd7c2;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .14em;
@@ -44,7 +44,7 @@ import ReviewHistoryList from '../../components/review/ReviewHistoryList.vue'
 }
 
 .review-hero span {
-  color: #dbeafe;
+  color: #ffe8d6;
   font-size: 13px;
 }
 </style>

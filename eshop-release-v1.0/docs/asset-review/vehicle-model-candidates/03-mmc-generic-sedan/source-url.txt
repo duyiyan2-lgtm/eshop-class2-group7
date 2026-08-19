@@ -1,0 +1,5 @@
+https://sketchfab.com/3d-models/generic-sedan-car-58c33766470d46e7b2aed542650494e5
+Sketchfab UID: 58c33766470d46e7b2aed542650494e5
+Author profile: https://sketchfab.com/mmcworks
+Public API (metadata only, not a model download): https://api.sketchfab.com/v3/models/58c33766470d46e7b2aed542650494e5
+Reviewed: 2026-08-18

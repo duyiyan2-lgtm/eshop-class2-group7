@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getHotProducts } from '../../api/catalog'
 import { formatMoney } from '../../utils/shop'
+import { isVehicleProduct } from '../../utils/vehicle'
 
 const props = defineProps({
   mobile: {
@@ -39,7 +40,15 @@ const load = async () => {
   }
 }
 
-const openProduct = (id) => {
+const openProduct = (product) => {
+  const id = product.productId || product.id
+  if (isVehicleProduct(product)) {
+    router.push({
+      name: props.mobile ? 'mobile-vehicle-configurator' : 'pc-vehicle-configurator',
+      params: { id },
+    })
+    return
+  }
   router.push({
     name: props.mobile ? 'mobile-product-detail' : 'pc-product-detail',
     params: { id },
@@ -53,8 +62,8 @@ onMounted(load)
   <section v-if="loading || errorMessage || products.length" class="hot-ranking" :class="{ mobile }">
     <header>
       <div>
-        <span>TOP SELLING</span>
-        <h2>近 {{ days }} 天热销榜</h2>
+        <span>热销</span>
+        <h2>近 {{ days }} 天热销商品</h2>
       </div>
       <button v-if="errorMessage" type="button" @click="load">重新加载</button>
       <small v-else>按有效订单销量排序</small>
@@ -70,7 +79,7 @@ onMounted(load)
         :key="product.productId"
         type="button"
         class="ranking-card"
-        @click="openProduct(product.productId)"
+        @click="openProduct(product)"
       >
         <b :class="{ champion: index === 0 }">{{ index + 1 }}</b>
         <span class="product-image">
@@ -97,12 +106,12 @@ onMounted(load)
 
 <style scoped>
 .hot-ranking {
-  margin: 24px 0;
-  padding: 22px;
-  background: linear-gradient(135deg, #fff7ed, #fff 55%);
-  border: 1px solid #fed7aa;
-  border-radius: 18px;
-  box-shadow: 0 10px 26px rgba(154, 52, 18, .06);
+  margin: 0 0 14px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .hot-ranking header {
@@ -114,16 +123,17 @@ onMounted(load)
 }
 
 .hot-ranking header span {
-  color: #ea580c;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .12em;
+  color: #ff6700;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .hot-ranking h2 {
   margin: 3px 0 0;
-  color: #431407;
-  font-size: 21px;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .hot-ranking header small {

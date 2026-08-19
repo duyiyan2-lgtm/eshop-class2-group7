@@ -1,0 +1,7 @@
+Display name: MMC Works
+Sketchfab username: mmcworks
+Profile: https://sketchfab.com/mmcworks
+Account type at review time: basic
+Author describes the work as "A generic design sedan vehicle made in Blender 3D".
+Sketchfab tags include ford, vw, kia. Those tags are a design-inspiration risk flag, not a claimed OEM license.
+No Xiaomi / SU7 / Tesla / Porsche marks were observed on the official preview.

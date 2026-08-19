@@ -10,6 +10,7 @@ public record AddCartItemRequest(
         @NotNull(message = "商品数量不能为空")
         @Min(value = 1, message = "商品数量至少为1")
         @Max(value = 99, message = "单个SKU最多购买99件")
-        Integer quantity
+        Integer quantity,
+        java.util.List<Long> optionValueIds
 ) {
 }

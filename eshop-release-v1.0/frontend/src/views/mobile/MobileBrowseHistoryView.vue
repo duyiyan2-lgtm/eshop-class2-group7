@@ -140,7 +140,7 @@ onMounted(loadHistory)
       </van-notice-bar>
 
       <div v-if="loading" class="state-card">
-        <van-loading color="#2563eb">正在加载浏览历史</van-loading>
+        <van-loading color="#e1251b">正在加载浏览历史</van-loading>
       </div>
 
       <van-empty
@@ -225,7 +225,7 @@ onMounted(loadHistory)
 .notice-action {
   margin-left: 8px;
   padding: 0;
-  color: #2563eb;
+  color: #e1251b;
   background: transparent;
   border: 0;
 }
@@ -258,8 +258,8 @@ onMounted(loadHistory)
   height: 88px;
   place-items: center;
   overflow: hidden;
-  color: #93c5fd;
-  background: #eff6ff;
+  color: #f5a09a;
+  background: #fff1f0;
   border-radius: 12px;
   font-size: 11px;
   font-weight: 800;

@@ -2,10 +2,10 @@
   "appId": "top.zhuyiyuan9.eshop",
   "appName": "E-Shop 手机商城",
   "webDir": "dist",
-  "backgroundColor": "#07111f",
+  "backgroundColor": "#f4f4f4",
   "loggingBehavior": "none",
   "android": {
-    "backgroundColor": "#07111f",
+    "backgroundColor": "#f4f4f4",
     "allowMixedContent": false,
     "captureInput": true,
     "loggingBehavior": "none"
@@ -22,7 +22,7 @@
     "SplashScreen": {
       "launchShowDuration": 1500,
       "launchAutoHide": false,
-      "backgroundColor": "#07111fff",
+      "backgroundColor": "#ff5000ff",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },

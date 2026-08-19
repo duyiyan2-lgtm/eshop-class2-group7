@@ -152,7 +152,7 @@ onMounted(loadProfile)
 
 .eyebrow {
   margin: 0 0 4px;
-  color: #2563eb;
+  color: #e1251b;
   font-size: 13px;
   font-weight: 700;
 }

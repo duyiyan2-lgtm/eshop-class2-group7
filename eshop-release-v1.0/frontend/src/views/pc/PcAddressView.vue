@@ -159,7 +159,6 @@ onMounted(loadAddresses)
   <div class="address-page">
     <header class="page-heading">
       <div>
-        <p>DELIVERY ADDRESS</p>
         <h1>收货地址</h1>
         <span>管理下单时使用的联系人和配送地址</span>
       </div>
@@ -262,16 +261,16 @@ onMounted(loadAddresses)
 <style scoped>
 .address-page { width: min(1180px, 100%); margin: 0 auto; padding: 16px 0 56px; }
 .page-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 24px; }
-.page-heading p { margin: 0 0 6px; color: #2563eb; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.page-heading p { margin: 0 0 6px; color: #e1251b; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .page-heading h1 { margin: 0; color: #0f172a; font-size: 32px; }
 .page-heading span { display: block; margin-top: 8px; color: #64748b; }
 .heading-actions { display: flex; gap: 10px; }
 .address-alert { margin-bottom: 18px; }
 .address-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; min-height: 250px; }
 .address-card, .add-card { min-height: 220px; padding: 26px; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 12px 35px rgba(15, 23, 42, .05); }
-.address-card.default { border-color: #60a5fa; box-shadow: 0 12px 35px rgba(37, 99, 235, .10); }
+.address-card.default { border-color: #ff8f1f; box-shadow: 0 12px 35px rgba(225, 37, 27, .10); }
 .address-top { display: flex; align-items: center; gap: 14px; }
-.address-top .avatar { display: grid; width: 44px; height: 44px; place-items: center; color: #fff; background: linear-gradient(135deg, #1d4ed8, #60a5fa); border-radius: 50%; font-weight: 800; }
+.address-top .avatar { display: grid; width: 44px; height: 44px; place-items: center; color: #fff; background: linear-gradient(135deg, #c8161d, #ff8f1f); border-radius: 50%; font-weight: 800; }
 .address-top h2 { margin: 0; color: #0f172a; font-size: 18px; }
 .address-top p { margin: 5px 0 0; color: #64748b; }
 .address-top .el-tag { margin-left: auto; }
@@ -279,7 +278,7 @@ onMounted(loadAddresses)
 .address-card footer { display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid #eef2f7; }
 .address-card footer > span { color: #94a3b8; font-size: 13px; }
 .add-card { display: grid; place-content: center; gap: 10px; color: #64748b; border-style: dashed; cursor: pointer; font: inherit; }
-.add-card:hover { color: #2563eb; background: #f8fbff; border-color: #60a5fa; }
+.add-card:hover { color: #e1251b; background: #f8fbff; border-color: #ff8f1f; }
 .add-card b { font-size: 32px; font-weight: 400; text-align: center; }
 .two-columns, .three-columns { display: grid; gap: 14px; }
 .two-columns { grid-template-columns: repeat(2, 1fr); }

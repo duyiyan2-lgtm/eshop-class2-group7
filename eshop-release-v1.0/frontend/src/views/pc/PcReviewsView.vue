@@ -43,7 +43,7 @@ header {
 
 header p {
   margin: 0 0 6px;
-  color: #2563eb;
+  color: #e1251b;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: .12em;

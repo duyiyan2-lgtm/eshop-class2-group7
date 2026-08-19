@@ -6,6 +6,7 @@ import { getAddresses } from '../../api/address'
 import { getCart } from '../../api/cart'
 import { createOrder } from '../../api/order'
 import { formatMoney, specsText, sumMoney } from '../../utils/shop'
+import { lineSpecText, productBrowsePath } from '../../utils/vehicle'
 
 const router = useRouter()
 const addresses = ref([])
@@ -81,7 +82,6 @@ onMounted(loadCheckout)
   <div v-loading="loading" class="checkout-page">
     <header class="checkout-heading">
       <div>
-        <p>CONFIRM ORDER</p>
         <h1>确认订单</h1>
       </div>
       <ol>
@@ -159,8 +159,8 @@ onMounted(loadCheckout)
             <span v-else>E-Shop</span>
           </div>
           <div class="product-info">
-            <RouterLink :to="`/pc/products/${item.productId}`">{{ item.productName }}</RouterLink>
-            <p>{{ specsText(item.specsJson) || '默认规格' }}</p>
+            <RouterLink :to="productBrowsePath(item)">{{ item.productName }}</RouterLink>
+            <p>{{ lineSpecText(item, specsText(item.specsJson)) }}</p>
           </div>
           <span>{{ formatMoney(item.price) }} × {{ item.quantity }}</span>
           <strong>{{ formatMoney(item.subtotal) }}</strong>
@@ -222,27 +222,27 @@ onMounted(loadCheckout)
 <style scoped>
 .checkout-page { width: min(1120px, 100%); min-height: 500px; margin: 0 auto; padding: 16px 0 56px; }
 .checkout-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 24px; }
-.checkout-heading p { margin: 0 0 6px; color: #2563eb; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.checkout-heading p { margin: 0 0 6px; color: #e1251b; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .checkout-heading h1 { margin: 0; color: #0f172a; font-size: 32px; }
 .checkout-heading ol { display: flex; gap: 26px; margin: 0; padding: 0; color: #94a3b8; font-size: 13px; list-style: none; }
 .checkout-heading li.done { color: #64748b; }
-.checkout-heading li.active { color: #2563eb; font-weight: 700; }
+.checkout-heading li.active { color: #ff6700; font-weight: 700; }
 .checkout-alert { margin-bottom: 18px; }
 .checkout-section { margin-bottom: 18px; padding: 28px 32px; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 10px 32px rgba(15, 23, 42, .05); }
 .section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 .section-heading > div { display: flex; align-items: center; gap: 12px; }
-.section-heading span { display: grid; width: 32px; height: 32px; place-items: center; color: #2563eb; background: #eff6ff; border-radius: 9px; font-size: 12px; font-weight: 800; }
+.section-heading span { display: grid; width: 32px; height: 32px; place-items: center; color: #ff6700; background: #fff8f2; border-radius: 2px; font-size: 12px; font-weight: 800; }
 .section-heading h2 { margin: 0; color: #0f172a; font-size: 20px; }
 .address-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .address-option { position: relative; padding: 18px; color: #334155; text-align: left; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer; font: inherit; }
-.address-option.active { background: #f8fbff; border-color: #2563eb; box-shadow: 0 0 0 1px #2563eb; }
+.address-option.active { background: #fff8f2; border-color: #ff6700; box-shadow: 0 0 0 1px #ff6700; }
 .address-option > div { display: flex; align-items: center; gap: 12px; }
 .address-option > div span { color: #64748b; }
 .address-option p { margin: 14px 28px 0 0; color: #64748b; font-size: 13px; line-height: 1.6; }
-.address-option > b { position: absolute; right: 12px; bottom: 10px; color: #2563eb; }
+.address-option > b { position: absolute; right: 12px; bottom: 10px; color: #e1251b; }
 .checkout-products article { display: grid; grid-template-columns: 78px minmax(0, 1fr) 150px 110px; gap: 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid #eef2f7; }
 .checkout-products article:last-child { border-bottom: 0; }
-.product-image { display: grid; width: 72px; height: 72px; place-items: center; overflow: hidden; color: #93c5fd; background: #eff6ff; border-radius: 10px; font-size: 12px; font-weight: 800; }
+.product-image { display: grid; width: 72px; height: 72px; place-items: center; overflow: hidden; color: #f5a09a; background: #fff1f0; border-radius: 10px; font-size: 12px; font-weight: 800; }
 .product-image img { width: 100%; height: 100%; object-fit: contain; }
 .product-info a { color: #0f172a; font-weight: 700; }
 .product-info p { margin: 7px 0 0; color: #64748b; font-size: 13px; }

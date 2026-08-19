@@ -92,7 +92,7 @@ watch(() => route.params.id, loadOrder, { immediate: true })
           v-if="isPending"
           left-icon="info-o"
           text="这是课程项目的模拟支付，不会产生真实扣款。待支付订单会在 30 分钟后自动取消。"
-          color="#1d4ed8"
+          color="#e1251b"
           background="#eff6ff"
         />
         <van-notice-bar
@@ -157,9 +157,9 @@ watch(() => route.params.id, loadOrder, { immediate: true })
   padding: 32px 22px 24px;
   text-align: center;
   background: #fff;
-  border: 1px solid #dbeafe;
+  border: 1px solid #ffe8d6;
   border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(30, 64, 175, .10);
+  box-shadow: 0 12px 32px rgba(200, 22, 29, .10);
 }
 .payment-card.success { border-color: #bbf7d0; box-shadow: 0 12px 32px rgba(22, 163, 74, .08); }
 .payment-icon {
@@ -169,13 +169,13 @@ watch(() => route.params.id, loadOrder, { immediate: true })
   margin: 0 auto 14px;
   place-items: center;
   color: #fff;
-  background: linear-gradient(135deg, #1d4ed8, #60a5fa);
+  background: linear-gradient(135deg, #c8161d, #ff8f1f);
   border-radius: 50%;
   font-size: 28px;
   font-weight: 800;
 }
 .success .payment-icon { background: linear-gradient(135deg, #15803d, #4ade80); }
-.payment-card > p { margin: 0 0 6px; color: #2563eb; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
+.payment-card > p { margin: 0 0 6px; color: #e1251b; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .success > p { color: #15803d; }
 .payment-card h1 { margin: 0; color: #0f172a; font-size: 22px; }
 .order-number { display: block; margin: 10px 0 22px; color: #64748b; font-size: 12px; }
